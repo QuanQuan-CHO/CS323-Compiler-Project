@@ -1,0 +1,11 @@
+name: debugger-action
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Debug Session
+        uses: csexton/debugger-action@master

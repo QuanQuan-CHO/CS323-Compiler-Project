@@ -10,6 +10,8 @@ lex.yy.c: lex.l syntax.tab.*
 syntax.tab.*: syntax.y
 	$(BISON) -d syntax.y
 
+lexer: lex.yy.c  # For debugging lex.l
+	$(CC) lex.yy.c -lfl -o lexer
 .PHONY: clean
 clean:
 	rm -f lex.yy.c syntax.tab.c syntax.tab.h bin/splc

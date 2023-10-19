@@ -17,6 +17,7 @@ if      {return IF;}
 else    {return ELSE;}
 while   {return WHILE;}
 return  {return RETURN;}
+'([^']|\\{valid_hex_int})' {return CHAR;}
 ";"     {return SEMI;}
 ","     {return COMMA;}
 "=="    {return EQ;}
@@ -40,7 +41,6 @@ return  {return RETURN;}
 "{"     {return LC;}
 "}"     {return RC;}
 [_a-zA-Z][_0-9a-zA-Z]* {return ID;}
-'([^']|\\{valid_hex_int})' {return CHAR;}
 ({valid_decimal_int})\.[0-9]+ {return FLOAT;}
 {valid_decimal_int}|0{valid_hex_int} {return INT; /*not include minus number*/}
 "."     {return DOT;}

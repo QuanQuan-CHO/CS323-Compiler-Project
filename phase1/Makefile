@@ -3,12 +3,12 @@ FLEX=flex
 BISON=bison
 
 # Dependency Tree
-splc: syntax.tab.c lex.yy.c
+splc: syntax.tab.* lex.yy.c
 	$(CC) syntax.tab.c -lfl -ly -o bin/splc
-syntax.tab.c: syntax.y
-	$(BISON) -d syntax.y
-lex.yy.c: lex.l
+lex.yy.c: lex.l syntax.tab.*
 	$(FLEX) lex.l
+syntax.tab.*: syntax.y
+	$(BISON) -d syntax.y
 
 .PHONY: clean
 clean:

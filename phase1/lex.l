@@ -40,6 +40,7 @@ return  {return RETURN;}
 "]"     {return RB;}
 "{"     {return LC;}
 "}"     {return RC;}
+({valid_decimal_int})\.[0-9]+ {return FLOAT;}
 {valid_decimal_int}|0{valid_hex_int} {return INT; /*not include minus number*/}
 "."     {return DOT;}
 

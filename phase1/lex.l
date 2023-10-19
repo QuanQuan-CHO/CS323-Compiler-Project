@@ -9,8 +9,9 @@ valid_decimal_int 0|[1-9][0-9]*
 valid_hex_int [xX](0|[1-9a-f][0-9a-f]*)
 
 %%
-    /*handle comment*/
-    /*handle string*/
+    /*TODO: handle comment*/
+    /*TODO: handle string*/
+int|float|char {return TYPE;}
 struct  {return STRUCT;}
 if      {return IF;}
 else    {return ELSE;}

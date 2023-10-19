@@ -3,9 +3,12 @@
 %}
 
 %option yylineno
+%option debug
 
 letter [a-zA-Z]
-digit [0-9]
+
+valid_decimal_int 0|[1-9][0-9]*
+valid_hex_int [xX](0|[1-9a-f][0-9a-f]*)
 
 %%
     /*handle comment*/
@@ -37,7 +40,7 @@ return  {return RETURN;}
 "]"     {return RB;}
 "{"     {return LC;}
 "}"     {return RC;}
-0|[1-9][0-9]*|0[xX](0|[1-9][0-9a-f]*) {return INT; printf("%d %s\n",yylineno,yytext);/*not include minus number*/}
+{valid_decimal_int}|0{valid_hex_int} {return INT; /*not include minus number*/}
 "."     {return DOT;}
 
 %%

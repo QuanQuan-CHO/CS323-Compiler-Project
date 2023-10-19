@@ -6,7 +6,7 @@
  * (remark: '$' stands for empty terminal)
  */
 
-/* high-level definition */
+/* HIGH-LEVEL DEFINITION specifies the top-level syntax for a SPL program, including global variable declarations and function definitions.*/
 Program -> ExtDefList
 ExtDefList -> ExtDef ExtDefList
     | $
@@ -16,13 +16,14 @@ ExtDef -> Specifier ExtDecList SEMI
 ExtDecList -> VarDec
     | VarDec COMMA ExtDecList
 
-/* specifier */
+/* SPECIFIER is related to the type system, in SPL, we have primitive types (int, float and char) and structure type. */
 Specifier -> TYPE
     | StructSpecifier
 StructSpecifier -> STRUCT ID LC DefList RC
     | STRUCT ID
 
-/* declarator */
+/* DECLARATOR defines the variable and function declaration.
+ * Note that the array type is specified by the declarator. */
 VarDec -> ID
     | VarDec LB INT RB
 FunDec -> ID LP VarList RP
@@ -31,7 +32,8 @@ VarList -> ParamDec COMMA VarList
     | ParamDec
 ParamDec -> Specifier VarDec
 
-/* statement */
+/* STATEMENT specifies several program structures, such as branching structure or loop structure.
+ * They are mostly enclosed by curly braces, or end with a semicolon. */
 CompSt -> LC DefList StmtList RC
 StmtList -> Stmt StmtList
     | $
@@ -42,7 +44,7 @@ Stmt -> Exp SEMI
     | IF LP Exp RP Stmt ELSE Stmt
     | WHILE LP Exp RP Stmt
 
-/* local definition */
+/* LOCAL DEFINITION includes the declaration and assignment of local variables. */
 DefList -> Def DefList
     | $
 Def -> Specifier DecList SEMI
@@ -51,7 +53,8 @@ DecList -> Dec
 Dec -> VarDec
     | VarDec ASSIGN Exp
 
-/* Expression */
+/* EXPRESSION can be a single constant, or operations on variables.
+ * Note that these operators have their precedence and associativity, as shown in Table 2 in phase1-guide.pdf. */
 Exp -> Exp ASSIGN Exp
     | Exp AND Exp
     | Exp OR Exp
@@ -78,3 +81,11 @@ Exp -> Exp ASSIGN Exp
     | CHAR
 Args -> Exp COMMA Args
     | Exp
+
+/* You can optionally implement your compiler to support comments.
+ * There are two types of comment styles for SPL, single-line and multi-line comments:
+ * - A single-line comment starts with two slashes "//"
+ *   all symbols followed until a newline character will be dropped by the lexer.
+ * - A multi-line comment starts with "/*", and ends with the first "*/" after that.
+ *   Note that multi-line comments cannot be nested, i.e., you cannot put another multi-line comment within "/*" and "*/".
+ */

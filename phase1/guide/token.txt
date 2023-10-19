@@ -1,0 +1,64 @@
+/*
+ * Error type:
+ * 1. undefined tokens, eg., '@', '#' as non-literal token
+ * 2. illegal hex int, eg., 0x5gg
+ * 3. illegal hex char, eg., '\x9', '\xt0'
+ * You need to write regex for the first four tokens
+ * The remaining tokens correspond to the lexemes specified at the arrows' right side
+ * (except the TYPE which can be one of the int, float or char)
+ */
+
+INT     ->
+/* INT represents an unsigned-integer literal. You can assume that they are always in 32-bits range.
+ * We have two types of integer literals, decimal (base 10) and hexadecimal (base 16) forms:
+ * - An integer lexeme in decimal form is a consecutive sequence of digits 0-9, and it cannot start with "0", except 0 itself.
+ * - A hexadecimal integer lexeme always starts with "0x" or "0X", followed by a sequence of hex-digits (0-9, a-f), again, the digit
+ *   sequence cannot start with "0", except 0x0 itself.
+ */
+FLOAT   ->
+/* FLOAT represents an unsigned floating-point5 number in IEEE-754 standard.
+ * You can assume that they are always in valid single-precision format.
+ * We do not consider the scientific notation, which is represented by a number's base-10 mantissa and exponent.
+ * A valid floating-point number always contains a single dot character (i.e., "."),
+ * and there must be always digit sequence on the dot's both side.
+ */
+CHAR    -> /* single character (printable or hex-form) */
+/* CHAR represents a single character contained in a pair of single-quotes.
+ * We do not consider those characters represented by escape sequence,
+ * e.g. "\n" (the newline character) or "\t" (the horizontal tab character).
+ */
+ID      ->
+/* ID stands for identifier, which consists of 3 types of characters:
+ * the underscore (_), digits (0-9), and letters (A-Z and a-z).
+ * A valid identifier cannot start with digit.
+ * You can assume that the length of identifiers will not exceed 32.
+ */
+TYPE    -> int | float | char
+STRUCT  -> struct
+IF      -> if
+ELSE    -> else
+WHILE   -> while
+RETURN  -> return
+DOT     -> .
+SEMI    -> ;
+COMMA   -> ,
+ASSIGN  -> =
+LT      -> <
+LE      -> <=
+GT      -> >
+GE      -> >=
+NE      -> !=
+EQ      -> ==
+PLUS    -> +
+MINUS   -> -
+MUL     -> *
+DIV     -> /
+AND     -> &&
+OR      -> ||
+NOT     -> !
+LP      -> (
+RP      -> )
+LB      -> [
+RB      -> ]
+LC      -> {
+RC      -> }

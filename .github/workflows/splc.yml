@@ -1,0 +1,24 @@
+name: make splc
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'phase1/**'
+jobs:
+  make-splc:
+    name: make splc
+    runs-on: ubuntu-22.04
+    env:
+      TZ: Asia/Shanghai
+    steps:
+      - name: 1. git checkout...
+        uses: actions/checkout@v3
+
+      - name: 2. setup Flex & Bison
+        run: sudo apt install build-essential flex bison
+
+      - name: 3. make splc
+        working-directory: phase1
+        run: make splc

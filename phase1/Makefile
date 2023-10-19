@@ -5,12 +5,12 @@ BISON=bison
 # Dependency Tree
 splc: syntax.tab.* lex.yy.c
 	$(CC) syntax.tab.c -lfl -ly -o bin/splc
-lex.yy.c: lex.l syntax.tab.*
+lex.yy.c: lex.l
 	$(FLEX) lex.l
 syntax.tab.*: syntax.y
 	$(BISON) -d syntax.y
 
-lexer: lex.yy.c  # For debugging lex.l
+lexer: syntax.tab.* lex.yy.c  # For debugging lex.l
 	$(CC) lex.yy.c -lfl -o lexer
 
 .PHONY: clean

@@ -5,7 +5,8 @@
 %token STRUCT IF ELSE WHILE RETURN SEMI COMMA
 %token EQ LE GE NE ASSIGN NOT LT GT PLUS MINUS MUL DIV AND OR
 %token LP RP LB RB LC RC INT FLOAT CHAR ID TYPE DOT
-
+%left MUL DIV AND OR LT LE GT GE NE EQ PLUS MINUS ASSIGN NOT DOT 
+%right LB
 %%
 
 /* high-level definition */
@@ -84,6 +85,7 @@ Exp: Exp ASSIGN Exp
     | INT
     | FLOAT
     | CHAR
+
 Args: Exp COMMA Args
     | Exp
 

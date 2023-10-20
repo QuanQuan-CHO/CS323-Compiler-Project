@@ -8,7 +8,7 @@ splc: syntax.tab.* lex.yy.c
 lex.yy.c: lex.l
 	$(FLEX) lex.l
 syntax.tab.*: syntax.y
-	$(BISON) -d syntax.y
+	$(BISON) -d syntax.y -Wcounterexamples
 
 lexer: syntax.tab.* lex.yy.c  # For debugging lex.l
 	$(CC) lex.yy.c -ll -o lexer

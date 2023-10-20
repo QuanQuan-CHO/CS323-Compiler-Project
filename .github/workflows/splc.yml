@@ -19,7 +19,7 @@ jobs:
       - name: 2. install link library for Flex & Bison
         run: sudo apt install libfl-dev libbison-dev
 
-      - name: 2. make splc
+      - name: 3. make splc
         working-directory: phase1
         run: |
           mkdir bin

@@ -1,4 +1,7 @@
 %{
+    #define EXIT_OK 0
+    #define EXIT_FAIL 1
+
     #include "syntax.tab.h"
 %}
 

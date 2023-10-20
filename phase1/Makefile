@@ -4,7 +4,7 @@ BISON=bison
 
 # Dependency Tree
 splc: syntax.tab.* lex.yy.c
-	$(CC) syntax.tab.c -ll -ly -o bin/splc
+	$(CC) syntax.tab.c -ll -o bin/splc
 lex.yy.c: lex.l
 	$(FLEX) lex.l
 syntax.tab.*: syntax.y

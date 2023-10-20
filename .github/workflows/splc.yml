@@ -16,6 +16,9 @@ jobs:
       - name: 1. git checkout...
         uses: actions/checkout@v3
 
+      - name: 2. install link library for Flex & Bison
+        run: sudo apt install libfl-dev libbison-dev
+
       - name: 2. make splc
         working-directory: phase1
         run: |

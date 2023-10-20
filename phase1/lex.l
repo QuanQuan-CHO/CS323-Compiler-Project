@@ -11,7 +11,6 @@ valid_hex_int [xX](0|[1-9a-f][0-9a-f]*)
 %%
     /*TODO: handle comment*/
     /*TODO: handle string*/
-    /*TODO: handle CHAR*/
 int|float|char {return TYPE;}
 struct  {return STRUCT;}
 if      {return IF;}

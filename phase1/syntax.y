@@ -11,8 +11,8 @@
 /* high-level definition */
 /* global variable declarations and function definitions */
 Program: ExtDefList
-ExtDefList: ExtDef ExtDefList
-    |$
+ExtDefList: 
+    | ExtDef ExtDefList
 ExtDef: Specifier ExtDecList SEMI
     | Specifier SEMI
     | Specifier FunDec CompSt
@@ -39,8 +39,8 @@ ParamDec: Specifier VarDec
 /* statement */
 /* specifies several program structures */
 CompSt: LC DefList StmtList RC
-StmtList: Stmt StmtList
-    |$
+StmtList:
+    | Stmt StmtList
 Stmt: Exp SEMI
     | CompSt
     | RETURN Exp SEMI
@@ -50,8 +50,8 @@ Stmt: Exp SEMI
 
 /* local definition */
 /* declaration and assignment of local variables */
-DefList: Def DefList
-    |$
+DefList:
+    | Def DefList
 Def: Specifier DecList SEMI
 DecList: Dec
     | Dec COMMA DecList

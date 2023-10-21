@@ -1,7 +1,8 @@
 %{
     #define EXIT_OK 0
     #define EXIT_FAIL 1
-
+    #define YYSTYPE char *
+    #include "string.h"
     #include "syntax.tab.h"
 %}
 %{
@@ -30,7 +31,7 @@ if      {return IF;}
 else    {return ELSE;}
 while   {return WHILE;}
 return  {return RETURN;}
-'([^']|\\{valid_hex_int})' {return CHAR;}
+'([^']|\\{valid_hex_int})' {yylval = yytext;return CHAR;}
 ";"     {return SEMI;}
 ","     {return COMMA;}
 "=="    {return EQ;}
@@ -53,9 +54,10 @@ return  {return RETURN;}
 "]"     {return RB;}
 "{"     {return LC;}
 "}"     {return RC;}
-[_a-zA-Z][_0-9a-zA-Z]* {yylval=yytext; return ID;}
-({valid_decimal_int})\.[0-9]+ {return FLOAT;}
-{valid_decimal_int}|0{valid_hex_int} {return INT; /*not include minus number*/}
+[_a-zA-Z][_0-9a-zA-Z]* {yylval = yytext; return ID;}
+({valid_decimal_int})\.[0-9]+ {yylval = yytext;return FLOAT;}
+{valid_decimal_int}|0{valid_hex_int} {yylval = yytext;return INT; /*not include minus number*/}
 "."     {return DOT;}
 "\n" { yycolno = 1; }
+"//" { char c; while((c=input()) != '\n'); }
 %%

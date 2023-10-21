@@ -88,9 +88,9 @@ Exp: Exp ASSIGN Exp
     | Exp LB Exp RB
     | Exp DOT ID
     | ID {printf("ID: %s\n",$1);}
-    | INT
-    | FLOAT
-    | CHAR
+    | INT {printf("INT: %s\n",$1);}
+    | FLOAT {printf("FLOAT: %s\n",$1);}
+    | CHAR {printf("CHAR: %s\n",$1);}
 
 Args: Exp COMMA Args
     | Exp

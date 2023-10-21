@@ -22,7 +22,7 @@
 /* high-level definition */
 /* global variable declarations and function definitions */
 output: Program{
-char* name1=get_name_posi("ExtDefList",@1.first_line);
+char* name1=get_name_posi("Program",@1.first_line);
 char* str1=get_str2(name1,$1);
 printf("%s",str1);
 }

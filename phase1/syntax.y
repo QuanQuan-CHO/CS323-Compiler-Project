@@ -1,3 +1,5 @@
+%define parse.error verbose
+%locations
 %{
     #include "lex.yy.c"
     void yyerror(const char*);
@@ -5,13 +7,13 @@
 %token STRUCT IF ELSE WHILE RETURN SEMI COMMA
 %token EQ LE GE NE ASSIGN NOT LT GT PLUS MINUS MUL DIV AND OR
 %token LP RP LB RB LC RC INT FLOAT CHAR ID TYPE DOT
-%left MUL DIV AND OR LT LE GT GE NE EQ PLUS MINUS ASSIGN NOT DOT 
-%right LB
+%left MUL DIV AND OR LT LE GT GE NE EQ PLUS MINUS ASSIGN DOT
+%right LB NOT
 %%
 
 /* high-level definition */
 /* global variable declarations and function definitions */
-Program: ExtDefList
+Program: ExtDefList{printf("Program (%d)\n",@1.first_line);}
 ExtDefList: 
     | ExtDef ExtDefList
 ExtDef: Specifier ExtDecList SEMI
@@ -23,7 +25,7 @@ ExtDecList: VarDec
 /* specifier */
 /* primitive types (int, float and char) and structure type */
 Specifier: TYPE
-    | StructSpecifier
+    | StructSpecifier 
 StructSpecifier: STRUCT ID LC DefList RC
     | STRUCT ID
 
@@ -42,12 +44,16 @@ ParamDec: Specifier VarDec
 CompSt: LC DefList StmtList RC
 StmtList:
     | Stmt StmtList
+    | ifelseStmt StmtList
+    | ifstmt StmtList
 Stmt: Exp SEMI
     | CompSt
     | RETURN Exp SEMI
-    | IF LP Exp RP Stmt
-    | IF LP Exp RP Stmt ELSE Stmt
     | WHILE LP Exp RP Stmt
+
+ifelseStmt: ifstmt elsest
+ifstmt: IF LP Exp RP Stmt
+elsest: ELSE Stmt 
 
 /* local definition */
 /* declaration and assignment of local variables */
@@ -81,7 +87,7 @@ Exp: Exp ASSIGN Exp
     | ID LP RP
     | Exp LB Exp RB
     | Exp DOT ID
-    | ID
+    | ID {printf("ID: %s\n",$1);}
     | INT
     | FLOAT
     | CHAR
@@ -92,7 +98,7 @@ Args: Exp COMMA Args
 
 %%
 void yyerror(const char* s) {
-    fprintf(stderr, "%s\n", "Invalid");
+    fprintf(stderr, "%s\n", s);
 }
 int main(int argc, char **argv){
     char *file_path;

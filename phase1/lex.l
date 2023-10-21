@@ -4,6 +4,16 @@
 
     #include "syntax.tab.h"
 %}
+%{
+/* library inclusions */
+int yycolno = 1;
+#define YY_USER_ACTION \
+yylloc.first_line = yylineno; \
+yylloc.first_column = yycolno; \
+yylloc.last_line = yylineno; \
+yylloc.last_column = yycolno + yyleng; \
+yycolno += yyleng;
+%}
 
 %option yylineno
 %option debug
@@ -43,9 +53,9 @@ return  {return RETURN;}
 "]"     {return RB;}
 "{"     {return LC;}
 "}"     {return RC;}
-[_a-zA-Z][_0-9a-zA-Z]* {return ID;}
+[_a-zA-Z][_0-9a-zA-Z]* {yylval=yytext; return ID;}
 ({valid_decimal_int})\.[0-9]+ {return FLOAT;}
 {valid_decimal_int}|0{valid_hex_int} {return INT; /*not include minus number*/}
 "."     {return DOT;}
-
+"\n" { yycolno = 1; }
 %%

@@ -25,39 +25,39 @@ valid_hex_int [xX](0|[1-9a-f][0-9a-f]*)
 %%
     /*TODO: handle comment*/
     /*TODO: handle string*/
-int|float|char {return TYPE;}
-struct  {return STRUCT;}
-if      {return IF;}
-else    {return ELSE;}
-while   {return WHILE;}
-return  {return RETURN;}
-'([^']|\\{valid_hex_int})' {yylval = yytext;return CHAR;}
-";"     {return SEMI;}
-","     {return COMMA;}
-"=="    {return EQ;}
-"<="    {return LE;}
-">="    {return GE;}
-"!="    {return NE;}
-"="     {return ASSIGN;}
-"!"     {return NOT;}
-"<"     {return LT;}
-">"     {return GT;}
-"+"     {return PLUS;}
-"-"     {return MINUS;}
-"*"     {return MUL;}
-"/"     {return DIV;}
-"&&"    {return AND;}
-"||"    {return OR;}
-"("     {return LP;}
-")"     {return RP;}
-"["     {return LB;}
-"]"     {return RB;}
-"{"     {return LC;}
-"}"     {return RC;}
+int|float|char {yylval = yytext; return TYPE;}
+struct  {yylval = "STRUCT\n"; return STRUCT;}
+if      {yylval = "IF\n"; return IF;}
+else    {yylval = "ELSE\n"; return ELSE;}
+while   {yylval = "WHILE\n"; return WHILE;}
+return  {yylval = "RETURN\n"; return RETURN;}
+'([^']|\\{valid_hex_int})' {yylval = yytext; return CHAR;}
+";"     {yylval = "SEMI\n"; return SEMI;}
+","     {yylval = "COMMA\n"; return COMMA;}
+"=="    {yylval = "EQ\n"; return EQ;}
+"<="    {yylval = "LE\n"; return LE;}
+">="    {yylval = "GE\n"; return GE;}
+"!="    {yylval = "NE\n"; return NE;}
+"="     {yylval = "ASSIGN\n"; return ASSIGN;}
+"!"     {yylval = "NOT\n"; return NOT;}
+"<"     {yylval = "LT\n"; return LT;}
+">"     {yylval = "GT\n"; return GT;}
+"+"     {yylval = "PLUS\n"; return PLUS;}
+"-"     {yylval = "MINUS\n"; return MINUS;}
+"*"     {yylval = "MUL\n"; return MUL;}
+"/"     {yylval = "DIV\n"; return DIV;}
+"&&"    {yylval = "AND\n"; return AND;}
+"||"    {yylval = "OR\n"; return OR;}
+"("     {yylval = "LP\n"; return LP;}
+")"     {yylval = "RP\n"; return RP;}
+"["     {yylval = "LB\n"; return LB;}
+"]"     {yylval = "RB\n"; return RB;}
+"{"     {yylval = "LC\n"; return LC;}
+"}"     {yylval = "RC\n"; return RC;}
 [_a-zA-Z][_0-9a-zA-Z]* {yylval = yytext; return ID;}
 ({valid_decimal_int})\.[0-9]+ {yylval = yytext;return FLOAT;}
 {valid_decimal_int}|0{valid_hex_int} {yylval = yytext;return INT; /*not include minus number*/}
-"."     {return DOT;}
+"."     {yylval = "RC\n";return DOT;}
 "\n" { yycolno = 1; }
 "//" { char c; while((c=input()) != '\n'); }
 %%

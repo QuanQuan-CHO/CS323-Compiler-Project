@@ -2,6 +2,8 @@
 %locations
 %{
     #include "lex.yy.c"
+    #include "stdlib.h"
+    #include "stdio.h"
     void yyerror(const char*);
     char* get_str2(const char* name, const char* str1);
     char* get_str3(const char* name, const char* str1,const char* str2);
@@ -61,7 +63,11 @@ ExtDef: Specifier ExtDecList SEMI {
     char* str3=get_str2(name3,$3);
     $$=get_str3(str1,str2,str3); 
     }
-ExtDecList: VarDec
+ExtDecList: VarDec {
+    char* name1=get_name_posi("VarDec",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    $$=str1;
+}
     | VarDec COMMA ExtDecList { 
     char* name1=get_name_posi("VarDec",@1.first_line);
     char* str1=get_str2(name1,$1);
@@ -98,7 +104,10 @@ StructSpecifier: STRUCT ID LC DefList RC {
 
 /* declarator */
 /* variable and function declaration */
-VarDec: ID { printf("ID: %s\n", $1); }
+VarDec: ID { 
+    char* name1=get_name_val("ID",$1); 
+    $$=name1;
+    }
     | VarDec LB INT RB { 
     char* name1=get_name_posi("VarDec",@1.first_line);
     char* str1=get_str2(name1,$1);
@@ -144,7 +153,10 @@ CompSt: LC DefList StmtList RC {
     char* str3=get_str2(name3,$3);
     $$=get_str4($1,str2,str3,$4);  
     }
-StmtList:
+StmtList: 
+{
+    $$="";
+}
     | Stmt StmtList { 
     char* name1=get_name_posi("Stmt",@1.first_line);
     char* str1=get_str2(name1,$1);
@@ -188,7 +200,9 @@ Stmt: Exp SEMI {
     $$=get_str5($1,$2,str3,$4,str5);
     }
 
-ifelseStmt: ifstmt elsest
+ifelseStmt: ifstmt elsest {
+    $$=get_str2($1,$2);
+}
 ifstmt: IF LP Exp RP Stmt { 
     char* name3=get_name_posi("Exp",@3.first_line);
     char* str3=get_str2(name3,$3);
@@ -204,7 +218,10 @@ elsest: ELSE Stmt {
 
 /* local definition */
 /* declaration and assignment of local variables */
-DefList:
+DefList: 
+{
+    $$="";
+}
     | Def DefList {
     char* name1=get_name_posi("Def",@1.first_line);
     char* str1=get_str2(name1,$1);
@@ -365,11 +382,9 @@ Exp: Exp ASSIGN Exp {
 Args: Exp COMMA Args {
      char* name1=get_name_posi("Exp",@1.first_line);
      char* str1=get_str2(name1,$1);
-     free(name1);
      char* name3=get_name_posi("Args",@3.first_line);
      char* str3=get_str2(name3,$3);
-     free(name3);
-     $$=(char*)get_str3(name1,$2,name3);
+     $$=(char*)get_str3(str1,$2,str3);
     }
     | Exp {
         char* name1=get_name_posi("Exp",@1.first_line);
@@ -396,44 +411,71 @@ char* get_name_val(const char* arg, const char* val){
 
 char* get_str6(const char* name, const char* str1,const char* str2,const char* str3,const char* str4,const char* str5){
     char* result = (char*)malloc(strlen(name)+strlen(str1) + strlen(str2) + strlen(str3) + strlen(str4) + strlen(str5) + 1);
+    if(result){
     strcpy(result, name);  // Copy the first string
     strcat(result, str1);
     strcat(result, str2);  // Append the second string
     strcat(result, str3);  // Append the third string
     strcat(result, str4);
     strcat(result, str5);
+    }
+    else{
+        printf("get_str6 fail");
+    }
+
     return result;
 }
 
 char* get_str5(const char* name, const char* str1,const char* str2,const char* str3,const char* str4){
     char* result = (char*)malloc(strlen(name)+strlen(str1) + strlen(str2) + strlen(str3) + strlen(str4) + 1);
+    if(result){
     strcpy(result, name);  // Copy the first string
     strcat(result, str1);
     strcat(result, str2);  // Append the second string
     strcat(result, str3);  // Append the third string
     strcat(result, str4);
+    }
+    else{
+        printf("get_str5 fail");
+    }
+    
     return result;
 }
 
 char* get_str4(const char* name, const char* str1,const char* str2,const char* str3){
     char* result = (char*)malloc(strlen(name)+strlen(str1) + strlen(str2) + strlen(str3) + 1);
+    if(result){
     strcpy(result, name);  // Copy the first string
     strcat(result, str1);
     strcat(result, str2);  // Append the second string
     strcat(result, str3);  // Append the third string
+    }
+    else{
+        printf("get_str4 fail");
+    }
     return result;
 }
 char* get_str3(const char* name, const char* str1,const char* str2){
     char* result = (char*)malloc(strlen(name)+strlen(str1) + strlen(str2) + 1);
+    if(result){
     strcpy(result, name);  // Copy the first string
     strcat(result, str1);
     strcat(result, str2);  // Append the second string
+    }
+    else{
+        printf("get_str3 fail");
+    }
+   
     return result;
 }
 char* get_str2(const char* name, const char* str1){
     char* result = (char*)malloc(strlen(name)+strlen(str1) + 1);
+    if(result){  
     strcpy(result, name);  // Copy the first string
-    strcat(result, str1);
+    strcat(result, str1);}
+    else{
+        printf("get_str2 fail");
+        }
     return result;
 }
 void yyerror(const char* s) {

@@ -17,41 +17,47 @@ ExtDecList -> VarDec
     | VarDec COMMA ExtDecList
 
 /* SPECIFIER is related to the type system, in SPL, we have primitive types (int, float and char) and structure type. */
-Specifier -> TYPE
+Specifier -> TYPE  /* int */
     | StructSpecifier
-StructSpecifier -> STRUCT ID LC DefList RC
-    | STRUCT ID
+StructSpecifier ->
+    STRUCT ID LC DefList RC
+/* struct Observer {
+ *     int a;
+ *     char c;
+ * }
+ */
+    | STRUCT ID  /* struct Observer */
 
 /* DECLARATOR defines the variable and function declaration.
  * Note that the array type is specified by the declarator. */
 VarDec -> ID
-    | VarDec LB INT RB
-FunDec -> ID LP VarList RP
-    | ID LP RP
-VarList -> ParamDec COMMA VarList
-    | ParamDec
-ParamDec -> Specifier VarDec
+    | VarDec LB INT RB  /* arr[1][2] */
+FunDec -> ID LP VarList RP  /* swap(int a, int b) */
+    | ID LP RP  /* swap() */
+VarList -> ParamDec COMMA VarList  /* int a, int b */
+    | ParamDec  /* int a */
+ParamDec -> Specifier VarDec  /* int a */
 
 /* STATEMENT specifies several program structures, such as branching structure or loop structure.
  * They are mostly enclosed by curly braces, or end with a semicolon. */
-CompSt -> LC DefList StmtList RC
+CompSt -> LC DefList StmtList RC    /* {...} */
 StmtList -> Stmt StmtList
     | $
-Stmt -> Exp SEMI
-    | CompSt
-    | RETURN Exp SEMI
-    | IF LP Exp RP Stmt
-    | IF LP Exp RP Stmt ELSE Stmt
-    | WHILE LP Exp RP Stmt
+Stmt -> Exp SEMI    /* ...; */
+    | CompSt    /* {...} */
+    | RETURN Exp SEMI   /* return ...; */
+    | IF LP Exp RP Stmt     /* if(...){...} */
+    | IF LP Exp RP Stmt ELSE Stmt   /* if(...){...}else{...} */
+    | WHILE LP Exp RP Stmt  /* while(...){...} */
 
 /* LOCAL DEFINITION includes the declaration and assignment of local variables. */
-DefList -> Def DefList
+DefList -> Def DefList  /* int a,b=1; char c='e',d; */
     | $
-Def -> Specifier DecList SEMI
-DecList -> Dec
-    | Dec COMMA DecList
-Dec -> VarDec
-    | VarDec ASSIGN Exp
+Def -> Specifier DecList SEMI   /* int a,b=1 ; */
+DecList -> Dec  /* a */
+    | Dec COMMA DecList  /* a , b=1 */
+Dec -> VarDec   /* a */
+    | VarDec ASSIGN Exp  /* b = 1 */
 
 /* EXPRESSION can be a single constant, or operations on variables.
  * Note that these operators have their precedence and associativity, as shown in Table 2 in phase1-guide.pdf. */

@@ -4,16 +4,15 @@
     #define YYSTYPE char *
     #include "string.h"
     #include "syntax.tab.h"
-%}
-%{
-/* library inclusions */
-int yycolno = 1;
-#define YY_USER_ACTION \
-yylloc.first_line = yylineno; \
-yylloc.first_column = yycolno; \
-yylloc.last_line = yylineno; \
-yylloc.last_column = yycolno + yyleng; \
-yycolno += yyleng;
+
+    /* Rewrite the internal macro in Flex to update the location */
+    int yycolno = 1;
+    #define YY_USER_ACTION \
+    yylloc.first_line = yylineno; \
+    yylloc.first_column = yycolno; \
+    yylloc.last_line = yylineno; \
+    yylloc.last_column = yycolno + yyleng; \
+    yycolno += yyleng;
 %}
 
 %option yylineno

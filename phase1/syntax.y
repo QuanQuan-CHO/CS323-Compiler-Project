@@ -1,9 +1,8 @@
-%define parse.error verbose
-%locations
 %{
     #include "lex.yy.c"
-    #include "stdlib.h"
-    #include "stdio.h"
+    #include <stdlib.h>
+    #include <stdio.h>
+
     void yyerror(const char*);
     char* get_str2(const char* name, const char* str1);
     char* get_str3(const char* name, const char* str1,const char* str2);
@@ -14,6 +13,8 @@
     char* get_name_val(const char* arg, const char* val);
 
 %}
+%locations
+%define parse.error verbose
 %token STRUCT IF ELSE WHILE RETURN SEMI COMMA
 %token EQ LE GE NE ASSIGN NOT LT GT PLUS MINUS MUL DIV AND OR
 %token LP RP LB RB LC RC INT FLOAT CHAR ID TYPE DOT
@@ -395,17 +396,17 @@ Args: Exp COMMA Args {
 %%
 char* get_name_posi(const char* arg, int posi){
     char* name= (char *)malloc(50);
-     if (name){
-            sprintf(name, "%s (%d)\n",arg, posi);
-        }
+    if (name){
+        sprintf(name, "%s (%d)\n",arg, posi);
+    }
     return name;
 }
 
 char* get_name_val(const char* arg, const char* val){
     char* name= (char *)malloc(50);
-     if (name){
-            sprintf(name, "%s: %s\n",arg,val);
-        }
+    if (name){
+        sprintf(name, "%s: %s\n",arg,val);
+    }
     return name;
 }
 

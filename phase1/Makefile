@@ -4,6 +4,7 @@ BISON=bison
 
 # Dependency Tree
 splc: syntax.tab.* lex.yy.c
+	@mkdir bin
 	$(CC) syntax.tab.c -ll -o bin/splc
 lex.yy.c: lex.l
 	$(FLEX) lex.l
@@ -15,4 +16,4 @@ lexer: syntax.tab.* lex.yy.c  # For debugging lex.l
 
 .PHONY: clean
 clean:
-	rm -f lex.yy.c syntax.tab.c syntax.tab.h lexer bin/splc
+	@rm -f lex.yy.c syntax.tab.c syntax.tab.h lexer bin/splc

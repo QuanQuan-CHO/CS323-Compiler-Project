@@ -21,6 +21,4 @@ jobs:
 
       - name: 3. make splc
         working-directory: phase1
-        run: |
-          mkdir bin
-          make splc
+        run: make splc

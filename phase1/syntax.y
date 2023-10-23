@@ -18,8 +18,16 @@
 %token STRUCT IF ELSE WHILE RETURN SEMI COMMA
 %token EQ LE GE NE ASSIGN NOT LT GT PLUS MINUS MUL DIV AND OR
 %token LP RP LB RB LC RC INT FLOAT CHAR ID TYPE DOT
-%left MUL DIV AND OR LT LE GT GE NE EQ PLUS MINUS ASSIGN DOT
-%right LB NOT
+%left OR
+%left AND
+%left EQ NE
+%left LT GT LE GE
+%left PLUS MINUS
+%left MUL DIV
+%right NOT
+%left ASSIGN
+%left DOT
+%left LB RB
 %%
 
 /* high-level definition */

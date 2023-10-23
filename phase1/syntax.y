@@ -2,7 +2,7 @@
     #include "lex.yy.c"
     #include <stdlib.h>
     #include <stdio.h>
-
+    extern int yylineno;
     void yyerror(const char*);
     char* get_str2(const char* name, const char* str1);
     char* get_str3(const char* name, const char* str1,const char* str2);
@@ -479,9 +479,12 @@ char* get_str2(const char* name, const char* str1){
         }
     return result;
 }
+
 void yyerror(const char* s) {
-    fprintf(stderr, "%s\n", s);
+    fprintf(stdout,"Error type B at Line %d: unknown lexeme %s\n",
+               yylineno, yytext);
 }
+
 int main(int argc, char **argv){
     char *file_path;
     if(argc < 2){

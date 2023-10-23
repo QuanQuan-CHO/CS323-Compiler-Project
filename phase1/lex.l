@@ -24,6 +24,9 @@ valid_hex_int [xX](0|[1-9a-f][0-9a-f]*)
 %%
     /*TODO: handle comment*/
     /*TODO: handle string*/
+
+"//".* {}
+"/*"((("*"[^/])?)|[^*])*"*/"  {}
 int|float|char {yylval = strdup(yytext); return TYPE;}
 struct  {yylval = "STRUCT\n"; return STRUCT;}
 if      {yylval = "IF\n"; return IF;}
@@ -58,5 +61,4 @@ return  {yylval = "RETURN\n"; return RETURN;}
 {valid_decimal_int}|0{valid_hex_int} {yylval = strdup(yytext);return INT; /*not include minus number*/}
 "."     {yylval = "RC\n";return DOT;}
 "\n" { yycolno = 1; }
-"//" { char c; while((c=input()) != '\n'); }
 %%

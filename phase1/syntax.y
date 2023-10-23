@@ -35,13 +35,13 @@ char* name1=get_name_posi("ExtDefList",@1.first_line);
 char* str1=get_str2(name1,$1);
 $$=str1; 
 }
-ExtDefList: 
+ExtDefList: %empty {
+    $$="";
+}
     | ExtDef ExtDefList { 
     char* name1=get_name_posi("ExtDef",@1.first_line);
     char* str1=get_str2(name1,$1);
-    char* name2=get_name_posi("ExtDecList",@2.first_line);
-    char* str2=get_str2(name2,$2);
-    $$=get_str2(str1,str2); 
+    $$=get_str2(str1,$2); 
     }
 ExtDef: Specifier ExtDecList SEMI { 
     char* name1=get_name_posi("Specifier",@1.first_line);
@@ -60,7 +60,7 @@ ExtDef: Specifier ExtDecList SEMI {
     char* str1=get_str2(name1,$1);
     char* name2=get_name_posi("FunDec",@2.first_line);
     char* str2=get_str2(name2,$2);
-    char* name3=get_name_posi("DefList",@3.first_line);
+    char* name3=get_name_posi("CompSt",@3.first_line);
     char* str3=get_str2(name3,$3);
     $$=get_str3(str1,str2,str3); 
     }
@@ -128,7 +128,7 @@ FunDec: ID LP VarList RP {
 VarList: ParamDec COMMA VarList { 
     char* name1=get_name_posi("ParamDec",@1.first_line);
     char* str1=get_str2(name1,$1);
-    char* name3=get_name_posi("ParamDec",@3.first_line);
+    char* name3=get_name_posi("VarList",@3.first_line);
     char* str3=get_str2(name3,$3);
     $$=get_str3(str1,$2,str3);  
     }
@@ -140,43 +140,37 @@ VarList: ParamDec COMMA VarList {
 ParamDec: Specifier VarDec { 
     char* name1=get_name_posi("Specifier",@1.first_line);
     char* str1=get_str2(name1,$1);
-    char* name2=get_name_posi("Specifier",@2.first_line);
+    char* name2=get_name_posi("VarDec",@2.first_line);
     char* str2=get_str2(name2,$2);
     $$=get_str2(str1,str2);  
     }
 
 /* statement */
 /* specifies several program structures */
+/*Here is a change on DefList, may need to deal*/
+/*deflist is empty now!*/
 CompSt: LC DefList StmtList RC { 
-    char* name2=get_name_posi("DefList",@2.first_line);
-    char* str2=get_str2(name2,$2);
     char* name3=get_name_posi("StmtList",@3.first_line);
     char* str3=get_str2(name3,$3);
-    $$=get_str4($1,str2,str3,$4);  
+    $$=get_str4($1,$2,str3,$4);  
     }
-StmtList: 
+StmtList: %empty
 {
     $$="";
 }
     | Stmt StmtList { 
     char* name1=get_name_posi("Stmt",@1.first_line);
     char* str1=get_str2(name1,$1);
-    char* name2=get_name_posi("StmtList",@2.first_line);
-    char* str2=get_str2(name2,$2);
-    $$=get_str2(str1,str2); 
+    $$=get_str2(str1,$2); 
     }
     | ifelseStmt StmtList { 
     char* name1=get_name_posi("Stmt",@1.first_line);
     char* str1=get_str2(name1,$1);
-    char* name2=get_name_posi("StmtList",@2.first_line);
-    char* str2=get_str2(name2,$2);
-    $$=get_str2(str1,str2); }
+    $$=get_str2(str1,$2); }
     | ifstmt StmtList { 
     char* name1=get_name_posi("Stmt",@1.first_line);
     char* str1=get_str2(name1,$1);
-    char* name2=get_name_posi("StmtList",@2.first_line);
-    char* str2=get_str2(name2,$2);
-    $$=get_str2(str1,str2); }
+    $$=get_str2(str1,$2); }
 
 Stmt: Exp SEMI { 
     char* name1=get_name_posi("Exp",@1.first_line);
@@ -190,7 +184,7 @@ Stmt: Exp SEMI {
     }
     | RETURN Exp SEMI {
     char* name2=get_name_posi("Exp",@2.first_line);
-    char* str2=get_str2(name2,$3);
+    char* str2=get_str2(name2,$2);
     $$=get_str3($1,str2,$3);
     }
     | WHILE LP Exp RP Stmt {
@@ -219,16 +213,14 @@ elsest: ELSE Stmt {
 
 /* local definition */
 /* declaration and assignment of local variables */
-DefList: 
+DefList: %empty
 {
     $$="";
 }
     | Def DefList {
     char* name1=get_name_posi("Def",@1.first_line);
     char* str1=get_str2(name1,$1);
-    char* name2=get_name_posi("DefList",@2.first_line);
-    char* str2=get_str2(name2,$2);
-    $$=get_str2(str1,str2);
+    $$=get_str2(str1,$2);
     }
 Def: Specifier DecList SEMI {
     char* name1=get_name_posi("Specifier",@1.first_line);

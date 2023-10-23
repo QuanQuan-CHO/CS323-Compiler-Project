@@ -16,7 +16,7 @@
 %}
 
 %option yylineno
-
+%option debug
 
 valid_decimal_int 0|[1-9][0-9]*
 valid_hex_int [xX](0|[1-9a-f][0-9a-f]*)
@@ -24,7 +24,7 @@ valid_hex_int [xX](0|[1-9a-f][0-9a-f]*)
 %%
     /*TODO: handle comment*/
     /*TODO: handle string*/
-int|float|char {yylval = yytext; return TYPE;}
+int|float|char {yylval = strdup(yytext); return TYPE;}
 struct  {yylval = "STRUCT\n"; return STRUCT;}
 if      {yylval = "IF\n"; return IF;}
 else    {yylval = "ELSE\n"; return ELSE;}
@@ -53,9 +53,9 @@ return  {yylval = "RETURN\n"; return RETURN;}
 "]"     {yylval = "RB\n"; return RB;}
 "{"     {yylval = "LC\n"; return LC;}
 "}"     {yylval = "RC\n"; return RC;}
-[_a-zA-Z][_0-9a-zA-Z]* {yylval = yytext; return ID;}
-({valid_decimal_int})\.[0-9]+ {yylval = yytext;return FLOAT;}
-{valid_decimal_int}|0{valid_hex_int} {yylval = yytext;return INT; /*not include minus number*/}
+[_a-zA-Z][_0-9a-zA-Z]* {yylval = strdup(yytext); return ID;}
+({valid_decimal_int})\.[0-9]+ {yylval = strdup(yytext);return FLOAT;}
+{valid_decimal_int}|0{valid_hex_int} {yylval = strdup(yytext);return INT; /*not include minus number*/}
 "."     {yylval = "RC\n";return DOT;}
 "\n" { yycolno = 1; }
 "//" { char c; while((c=input()) != '\n'); }

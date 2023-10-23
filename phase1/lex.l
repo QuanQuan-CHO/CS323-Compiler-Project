@@ -27,54 +27,49 @@ valid_hex_int [xX](0|[1-9a-f][0-9a-f]*)
 
 "//".* {}
 "/*"((("*"[^/])?)|[^*])*"*/"  {}
-int|float|char {yylval = strdup(yytext); return TYPE;}
-struct  {yylval = "STRUCT\n"; return STRUCT;}
-if      {yylval = "IF\n"; return IF;}
-else    {yylval = "ELSE\n"; return ELSE;}
-while   {yylval = "WHILE\n"; return WHILE;}
-return  {yylval = "RETURN\n"; return RETURN;}
+int|float|char { yylval = strdup(yytext); return TYPE; }
+struct { yylval = "STRUCT"; return STRUCT; }
+if { yylval = "IF"; return IF; }
+else { yylval = "ELSE"; return ELSE; }
+while { yylval = "WHILE"; return WHILE; }
+return { yylval = "RETURN"; return RETURN; }
 \\x[^0-9a-fA-F]* {
-    printf("Error type A at Line %d: unknown lexeme %s\n",
-               yylineno, yytext);
+    printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, yytext);
 }
-'([^']|\\{valid_hex_int})' {yylval = yytext; return CHAR;}
-";"     {yylval = "SEMI\n"; return SEMI;}
-","     {yylval = "COMMA\n"; return COMMA;}
-"=="    {yylval = "EQ\n"; return EQ;}
-"<="    {yylval = "LE\n"; return LE;}
-">="    {yylval = "GE\n"; return GE;}
-"!="    {yylval = "NE\n"; return NE;}
-"="     {yylval = "ASSIGN\n"; return ASSIGN;}
-"!"     {yylval = "NOT\n"; return NOT;}
-"<"     {yylval = "LT\n"; return LT;}
-">"     {yylval = "GT\n"; return GT;}
-"+"     {yylval = "PLUS\n"; return PLUS;}
-"-"     {yylval = "MINUS\n"; return MINUS;}
-"*"     {yylval = "MUL\n"; return MUL;}
-"/"     {yylval = "DIV\n"; return DIV;}
-"&&"    {yylval = "AND\n"; return AND;}
-"||"    {yylval = "OR\n"; return OR;}
-"("     {yylval = "LP\n"; return LP;}
-")"     {yylval = "RP\n"; return RP;}
-"["     {yylval = "LB\n"; return LB;}
-"]"     {yylval = "RB\n"; return RB;}
-"{"     {yylval = "LC\n"; return LC;}
-"}"     {yylval = "RC\n"; return RC;}
-[_a-zA-Z][_0-9a-zA-Z]* {yylval = strdup(yytext); return ID;}
-({valid_decimal_int})\.[0-9]+ {yylval = strdup(yytext);return FLOAT;}
-{valid_decimal_int}|0{valid_hex_int} {yylval = strdup(yytext);return INT; /*not include minus number*/}
+'([^']|\\{valid_hex_int})' { yylval = yytext; return CHAR; }
+";" { yylval = "SEMI"; return SEMI; }
+"," { yylval = "COMMA"; return COMMA; }
+"==" { yylval = "EQ"; return EQ; }
+"<=" { yylval = "LE"; return LE; }
+">=" { yylval = "GE"; return GE; }
+"!=" { yylval = "NE"; return NE; }
+"=" { yylval = "ASSIGN"; return ASSIGN; }
+"!" { yylval = "NOT"; return NOT; }
+"<" { yylval = "LT"; return LT; }
+">" { yylval = "GT"; return GT; }
+"+" { yylval = "PLUS"; return PLUS; }
+"-" { yylval = "MINUS"; return MINUS; }
+"*" { yylval = "MUL"; return MUL; }
+"/" { yylval = "DIV"; return DIV; }
+"&&" { yylval = "AND"; return AND; }
+"||" { yylval = "OR"; return OR; }
+"(" { yylval = "LP"; return LP; }
+")" { yylval = "RP"; return RP; }
+"[" { yylval = "LB"; return LB; }
+"]" { yylval = "RB"; return RB; }
+"{" { yylval = "LC"; return LC; }
+"}" { yylval = "RC"; return RC; }
+[_a-zA-Z][_0-9a-zA-Z]* { yylval = strdup(yytext); return ID; }
+({valid_decimal_int})\.[0-9]+ { yylval = strdup(yytext); return FLOAT; }
+{valid_decimal_int}|0{valid_hex_int} { yylval = strdup(yytext); return INT; /* not include minus number */ }
 \\x(0|[1-9a-f][0-9a-f]*)[^0-9a-fA-F] {
-    printf("Error type A at Line %d: unknown lexeme %s\n",
-               yylineno, strdup(yytext));
+    printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, strdup(yytext));
 }
-"."     {yylval = "DOT\n";return DOT;}
-"\n" { yycolno = 1; }
+"." { yylval = "DOT"; return DOT; }
 0[Xx]([^0-9a-fA-F]|([1-9a-fA-F][0-9a-fA-F]*[^0-9a-fA-F]+)) {
-    printf("Error type A at Line %d: unknown lexeme %s\n",
-               yylineno, strdup(yytext));
+    printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, strdup(yytext));
 }
 [$@] {
-    printf("Error type A at Line %d: unknown lexeme %s\n",
-               yylineno, strdup(yytext));}
-
+    printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, strdup(yytext));
+}
 %%

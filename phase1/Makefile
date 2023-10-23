@@ -4,6 +4,10 @@ BISON=bison
 
 # Dependency Tree
 splc: syntax.tab.* lex.yy.c
+<<<<<<< HEAD
+=======
+	@mkdir -p bin
+>>>>>>> ed88174aa723af89ad535d401bafffa445c34f70
 	$(CC) syntax.tab.c -ll -o bin/splc
 	@chmod +x bin/splc
 lex.yy.c: lex.l

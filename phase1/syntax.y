@@ -413,11 +413,17 @@ char* get_name_val(const char* arg, const char* val){
 char* get_str6(const char* name, const char* str1,const char* str2,const char* str3,const char* str4,const char* str5){
     char* result = (char*)malloc(strlen(name)+strlen(str1) + strlen(str2) + strlen(str3) + strlen(str4) + strlen(str5) + 1);
     if(result){
-    strcpy(result, name);  // Copy the first string
+    strcpy(result, "  ");
+    strcat(result, name);  // Copy the first string
+
     strcat(result, str1);
+
     strcat(result, str2);  // Append the second string
+
     strcat(result, str3);  // Append the third string
+
     strcat(result, str4);
+
     strcat(result, str5);
     }
     else{
@@ -428,12 +434,17 @@ char* get_str6(const char* name, const char* str1,const char* str2,const char* s
 }
 
 char* get_str5(const char* name, const char* str1,const char* str2,const char* str3,const char* str4){
-    char* result = (char*)malloc(strlen(name)+strlen(str1) + strlen(str2) + strlen(str3) + strlen(str4) + 1);
+    char* result = (char*)malloc(strlen(name)+strlen(str1) + strlen(str2) + strlen(str3) + strlen(str4) + 11);
     if(result){
-    strcpy(result, name);  // Copy the first string
+    strcpy(result, "  ");
+    strcat(result, name);  // Copy the first string
+
     strcat(result, str1);
+
     strcat(result, str2);  // Append the second string
+
     strcat(result, str3);  // Append the third string
+
     strcat(result, str4);
     }
     else{
@@ -444,11 +455,15 @@ char* get_str5(const char* name, const char* str1,const char* str2,const char* s
 }
 
 char* get_str4(const char* name, const char* str1,const char* str2,const char* str3){
-    char* result = (char*)malloc(strlen(name)+strlen(str1) + strlen(str2) + strlen(str3) + 1);
+    char* result = (char*)malloc(strlen(name)+strlen(str1) + strlen(str2) + strlen(str3) + 9);
     if(result){
-    strcpy(result, name);  // Copy the first string
+    strcpy(result, "  ");  // Copy the first string
+    strcat(result, name);
+
     strcat(result, str1);
+
     strcat(result, str2);  // Append the second string
+
     strcat(result, str3);  // Append the third string
     }
     else{
@@ -457,10 +472,13 @@ char* get_str4(const char* name, const char* str1,const char* str2,const char* s
     return result;
 }
 char* get_str3(const char* name, const char* str1,const char* str2){
-    char* result = (char*)malloc(strlen(name)+strlen(str1) + strlen(str2) + 1);
+    char* result = (char*)malloc(strlen(name)+strlen(str1) + strlen(str2) + 7);
     if(result){
-    strcpy(result, name);  // Copy the first string
+    strcpy(result, "  ");  // Copy the first string
+    strcat(result, name);
+
     strcat(result, str1);
+
     strcat(result, str2);  // Append the second string
     }
     else{
@@ -470,9 +488,12 @@ char* get_str3(const char* name, const char* str1,const char* str2){
     return result;
 }
 char* get_str2(const char* name, const char* str1){
-    char* result = (char*)malloc(strlen(name)+strlen(str1) + 1);
+    
+    char* result = (char*)malloc(strlen(name)+strlen(str1) + 5);
     if(result){  
-    strcpy(result, name);  // Copy the first string
+    strcpy(result,"  ");
+    strcat(result, name);  // Copy the first string
+
     strcat(result, str1);}
     else{
         printf("get_str2 fail");
@@ -481,8 +502,8 @@ char* get_str2(const char* name, const char* str1){
 }
 
 void yyerror(const char* s) {
-    fprintf(stdout,"Error type B at Line %d: unknown lexeme %s\n",
-               yylineno, yytext);
+    printf("Error type B at Line %d: Missing semicolon %s\n",
+               yylineno, strdup(yytext));
 }
 
 int main(int argc, char **argv){

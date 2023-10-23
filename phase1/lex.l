@@ -16,7 +16,7 @@
 %}
 
 %option yylineno
-%option debug
+
 
 valid_decimal_int 0|[1-9][0-9]*
 valid_hex_int [xX](0|[1-9a-f][0-9a-f]*)
@@ -33,6 +33,10 @@ if      {yylval = "IF\n"; return IF;}
 else    {yylval = "ELSE\n"; return ELSE;}
 while   {yylval = "WHILE\n"; return WHILE;}
 return  {yylval = "RETURN\n"; return RETURN;}
+\\x[^0-9a-fA-F]* {
+    printf("Error type A at Line %d: unknown lexeme %s\n",
+               yylineno, yytext);
+}
 '([^']|\\{valid_hex_int})' {yylval = yytext; return CHAR;}
 ";"     {yylval = "SEMI\n"; return SEMI;}
 ","     {yylval = "COMMA\n"; return COMMA;}
@@ -59,6 +63,18 @@ return  {yylval = "RETURN\n"; return RETURN;}
 [_a-zA-Z][_0-9a-zA-Z]* {yylval = strdup(yytext); return ID;}
 ({valid_decimal_int})\.[0-9]+ {yylval = strdup(yytext);return FLOAT;}
 {valid_decimal_int}|0{valid_hex_int} {yylval = strdup(yytext);return INT; /*not include minus number*/}
-"."     {yylval = "RC\n";return DOT;}
+\\x(0|[1-9a-f][0-9a-f]*)[^0-9a-fA-F] {
+    printf("Error type A at Line %d: unknown lexeme %s\n",
+               yylineno, strdup(yytext));
+}
+"."     {yylval = "DOT\n";return DOT;}
 "\n" { yycolno = 1; }
+0[Xx]([^0-9a-fA-F]|([1-9a-fA-F][0-9a-fA-F]*[^0-9a-fA-F]+)) {
+    printf("Error type A at Line %d: unknown lexeme %s\n",
+               yylineno, strdup(yytext));
+}
+[$@] {
+    printf("Error type A at Line %d: unknown lexeme %s\n",
+               yylineno, strdup(yytext));}
+
 %%

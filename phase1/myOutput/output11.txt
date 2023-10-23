@@ -1,0 +1,7 @@
+      Error type A at Line 4: unknown lexeme 0x77G;
+  int _wrong_h
+  Error type A at Line 5: unknown lexeme 0xCS;
+  int _right_h
+  Error type A at Line 6: unknown lexeme 0xdeadbeef;
+  
+Error type B at Line 6: Missing semicolon char

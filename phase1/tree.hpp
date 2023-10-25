@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <map>
+#include <iostream>
 using namespace std;
 
 class Node{
@@ -41,6 +42,7 @@ public:
 };
 
 void printTree(Node* root, int space=0);
+void print(Node *node, int space);
 
 // 在头文件中定义全局映射，并提前设定
 extern std::map<std::string, std::string> nameToCategory;

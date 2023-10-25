@@ -1,23 +1,23 @@
-%{
+%{  #include "tree.hpp"
     #include "lex.yy.c"
     #include <stdlib.h>
     #include <stdio.h>
     extern int yylineno;
     void yyerror(const char*);
-    char* get_str2(const char* name, const char* str1);
-    char* get_str3(const char* name, const char* str1,const char* str2);
-    char* get_str4(const char* name, const char* str1, const char* str2, const char* str3);
-    char* get_str5(const char* name, const char* str1,const char* str2,const char* str3,const char* str4);
-    char* get_str6(const char* name, const char* str1,const char* str2,const char* str3,const char* str4,const char* str5);
-    char* get_name_posi(const char* arg, int posi);
-    char* get_name_val(const char* arg, const char* val);
-
 %}
+
 %locations
-%define parse.error verbose
-%token STRUCT IF ELSE WHILE RETURN SEMI COMMA
-%token EQ LE GE NE ASSIGN NOT LT GT PLUS MINUS MUL DIV AND OR
-%token LP RP LB RB LC RC INT FLOAT CHAR ID TYPE DOT
+
+%union {
+    Node* node;
+}
+
+%nonassoc LOWER_ELSE
+%nonassoc <node> ELSE
+
+%token <node> STRUCT IF WHILE RETURN SEMI COMMA
+%token <node> EQ LE GE NE ASSIGN NOT LT GT PLUS MINUS MUL DIV AND OR
+%token <node> LP RP LB RB LC RC DOT INT FLOAT CHAR ID TYPE
 %left OR
 %left AND
 %left EQ NE
@@ -28,482 +28,108 @@
 %left ASSIGN
 %left DOT
 %left LB RB
+
+%type <node> Program ExtDefList ExtDef ExtDecList
+%type <node> Specifier StructSpecifier 
+%type <node> VarDec FunDec VarList ParamDec CompSt StmtList
+%type <node> Stmt DefList Def DecList Dec Exp Args
+
 %%
 
 /* high-level definition */
 /* global variable declarations and function definitions */
-output: Program{
-char* name1=get_name_posi("Program",@1.first_line);
-char* str1=get_str2(name1,$1);
-printf("%s",str1);
-}
 
-Program: ExtDefList { 
-char* name1=get_name_posi("ExtDefList",@1.first_line);
-char* str1=get_str2(name1,$1);
-$$=str1; 
+Program: ExtDefList {
+    $$=new Node("Program",1,@$.first_line,$1);
+    printTree($$);
 }
-ExtDefList: %empty {
-    $$="";
-}
-    | ExtDef ExtDefList { 
-    char* name1=get_name_posi("ExtDef",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    $$=get_str2(str1,$2); 
-    }
-ExtDef: Specifier ExtDecList SEMI { 
-    char* name1=get_name_posi("Specifier",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name2=get_name_posi("ExtDecList",@2.first_line);
-    char* str2=get_str2(name2,$2);
-    $$=get_str3(str1,str2,$3);  
-    }
-    | Specifier SEMI { 
-    char* name1=get_name_posi("Specifier",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    $$=get_str2(str1,$2); 
-    }
-    | Specifier FunDec CompSt { 
-    char* name1=get_name_posi("Specifier",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name2=get_name_posi("FunDec",@2.first_line);
-    char* str2=get_str2(name2,$2);
-    char* name3=get_name_posi("CompSt",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str3(str1,str2,str3); 
-    }
-ExtDecList: VarDec {
-    char* name1=get_name_posi("VarDec",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    $$=str1;
-}
-    | VarDec COMMA ExtDecList { 
-    char* name1=get_name_posi("VarDec",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name3=get_name_posi("ExtDecList",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str3(str1,$2,str3); 
-    }
+ExtDefList: %empty {$$=new Node("ExtDefList");}
+    | ExtDef ExtDefList {$$=new Node("ExtDefList",2,@$.first_line,$1,$2);}
+ExtDef: Specifier ExtDecList SEMI { $$=new Node("ExtDef",3,@$.first_line,$1,$2,$3);}
+    | Specifier SEMI { $$=new Node("ExtDef",2,@$.first_line,$1,$2);}
+    | Specifier FunDec CompSt { $$=new Node("ExtDef",3,@$.first_line,$1,$2,$3);}
+ExtDecList: VarDec {$$=new Node("ExtDecList",1,@$.first_line,$1);}
+    | VarDec COMMA ExtDecList { $$=new Node("ExtDecList",3,@$.first_line,$1,$2,$3);}
 
 /* specifier */
 /* primitive types (int, float and char) and structure type */
-Specifier: TYPE { 
-    char* name1=get_name_val("TYPE",$1);
-    $$=name1; 
-    }
-    | StructSpecifier { 
-    char* name1=get_name_posi("StructSpecifier",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    $$=str1; 
-    }
-StructSpecifier: STRUCT ID LC DefList RC { 
-    char* name1=get_name_posi("STRUCT",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name2=get_name_val("ID",$2);
-    char* name4=get_name_posi("DefList",@4.first_line);
-    char* str4=get_str2(name4,$4);
-    $$=get_str5(str1,name2,$3,str4,$5); 
-    }
-    | STRUCT ID { 
-    char* name1=get_name_posi("STRUCT",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name2=get_name_val("ID",$2);
-    $$=get_str2(str1,name2); 
-    }
+Specifier: TYPE {$$=new Node("Specifier",1,@$.first_line,$1);}
+    | StructSpecifier {$$=new Node("Specifier",1,@$.first_line,$1);}
+StructSpecifier: STRUCT ID LC DefList RC {$$=new Node("StructSpecifier", 5, @$.first_line, $1, $2, $3, $4, $5);}
+    | STRUCT ID { $$=new Node("StructSpecifier",2,@$.first_line,$1,$2);}
 
 /* declarator */
 /* variable and function declaration */
-VarDec: ID { 
-    char* name1=get_name_val("ID",$1); 
-    $$=name1;
-    }
-    | VarDec LB INT RB { 
-    char* name1=get_name_posi("VarDec",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name3=get_name_val("INT",$3);
-    $$=get_str4(str1,$2,name3,$4);   
-    }
-FunDec: ID LP VarList RP { 
-    char* name1=get_name_val("ID",$1);
-    char* name3=get_name_posi("VarList",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str4(name1,$2,str3,$4);  
-    }
-    | ID LP RP { 
-    char* name1=get_name_val("ID",$1);
-    $$=get_str3(name1,$2,$3);  
-    }
-VarList: ParamDec COMMA VarList { 
-    char* name1=get_name_posi("ParamDec",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name3=get_name_posi("VarList",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str3(str1,$2,str3);  
-    }
-    | ParamDec { 
-    char* name1=get_name_posi("ParamDec",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    $$=str1;
-    }
-ParamDec: Specifier VarDec { 
-    char* name1=get_name_posi("Specifier",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name2=get_name_posi("VarDec",@2.first_line);
-    char* str2=get_str2(name2,$2);
-    $$=get_str2(str1,str2);  
-    }
+VarDec: ID {$$=new Node("VarDec",1,@$.first_line,$1); }
+    | VarDec LB INT RB { $$=new Node("VarDec",4,@$.first_line,$1,$2,$3,$4);}
+FunDec: ID LP VarList RP { $$=new Node("FunDec",4,@$.first_line,$1,$2,$3,$4);}
+    | ID LP RP {$$=new Node("FunDec",3,@$.first_line,$1,$2,$3);}
+VarList: ParamDec COMMA VarList {$$=new Node("VarList",3,@$.first_line,$1,$2,$3);}
+    | ParamDec { $$=new Node("VarList",1,@$.first_line,$1);}
+ParamDec: Specifier VarDec { $$=new Node("ParamDec",2,@$.first_line,$1,$2);}
 
 /* statement */
 /* specifies several program structures */
 /*Here is a change on DefList, may need to deal*/
 /*deflist is empty now!*/
-CompSt: LC DefList StmtList RC { 
-    char* name3=get_name_posi("StmtList",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str4($1,$2,str3,$4);  
-    }
-StmtList: %empty
-{
-    $$="";
-}
-    | Stmt StmtList { 
-    char* name1=get_name_posi("Stmt",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    $$=get_str2(str1,$2); 
-    }
-    | ifelseStmt StmtList { 
-    char* name1=get_name_posi("Stmt",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    $$=get_str2(str1,$2); }
-    | ifstmt StmtList { 
-    char* name1=get_name_posi("Stmt",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    $$=get_str2(str1,$2); }
+CompSt: LC DefList StmtList RC {$$=new Node("CompSt",4,@$.first_line,$1,$2,$3,$4);}
+StmtList: 
+    %empty
+    {$$=new Node("StmtList",@$.first_line);}
+    | Stmt StmtList { $$=new Node("StmtList",2,@$.first_line,$1,$2);}
 
-Stmt: Exp SEMI { 
-    char* name1=get_name_posi("Exp",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    $$=get_str2(str1,$2);
-    }
-    | CompSt {
-    char* name1=get_name_posi("CompSt",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    $$=str1;    
-    }
-    | RETURN Exp SEMI {
-    char* name2=get_name_posi("Exp",@2.first_line);
-    char* str2=get_str2(name2,$2);
-    $$=get_str3($1,str2,$3);
-    }
-    | WHILE LP Exp RP Stmt {
-    char* name3=get_name_posi("Exp",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    char* name5=get_name_posi("Stmt",@5.first_line);
-    char* str5=get_str2(name5,$5);
-    $$=get_str5($1,$2,str3,$4,str5);
-    }
 
-ifelseStmt: ifstmt elsest {
-    $$=get_str2($1,$2);
-}
-ifstmt: IF LP Exp RP Stmt { 
-    char* name3=get_name_posi("Exp",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    char* name5=get_name_posi("Stmt",@5.first_line);
-    char* str5=get_str2(name5,$5);
-    $$=get_str5($1,$2,str3,$4,str5); 
-    }
-elsest: ELSE Stmt {
-    char* name2=get_name_posi("Stmt",@2.first_line);
-    char* str2=get_str2(name2,$2);
-    $$=get_str2($1,str2);
- }
+Stmt: Exp SEMI {$$=new Node("Stmt",2,@$.first_line,$1,$2);}
+    | CompSt {$$=new Node("Stmt",1,@$.first_line,$1);}
+    | RETURN Exp SEMI {$$=new Node("Stmt",3,@$.first_line,$1,$2,$3);}
+    | WHILE LP Exp RP Stmt {$$=new Node("Stmt", 5, @$.first_line, $1, $2, $3, $4, $5);}
+    | IF LP Exp RP Stmt %prec LOWER_ELSE {$$=new Node("Stmt", 5, @$.first_line, $1, $2, $3, $4, $5);}
+    | IF LP Exp RP Stmt ELSE Stmt {$$=new Node( "Stmt", 7, @$.first_line, $1, $2, $3, $4, $5, $6, $7);}
 
 /* local definition */
 /* declaration and assignment of local variables */
-DefList: %empty
-{
-    $$="";
-}
-    | Def DefList {
-    char* name1=get_name_posi("Def",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    $$=get_str2(str1,$2);
-    }
-Def: Specifier DecList SEMI {
-    char* name1=get_name_posi("Specifier",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name2=get_name_posi("DecList",@2.first_line);
-    char* str2=get_str2(name1,$2);
-    $$=get_str3(str1,str2,$3);
-    }
-DecList: Dec {
-    char* name1=get_name_posi("Dec",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    $$=str1;
-    }
-    | Dec COMMA DecList { 
-    char* name1=get_name_posi("Dec",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name3=get_name_posi("DecList",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str3(str1,$2,str3);
-    }
-Dec: VarDec {
-    char* name1=get_name_posi("VarDec",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    $$=str1;
-    }
-    | VarDec ASSIGN Exp { 
-    char* name1=get_name_posi("VarDec",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name3=get_name_posi("Exp",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str3(str1,$2,str3);
-    }
+DefList: %empty{$$=new Node("DefList",@$.first_line);}
+    | Def DefList {$$=new Node("DefList",2,@$.first_line,$1,$2);}
+Def: Specifier DecList SEMI {$$=new Node("Def",3,@$.first_line,$1,$2,$3);}
+DecList: Dec {$$=new Node("DecList",1,@$.first_line,$1);}
+    | Dec COMMA DecList {$$=new Node("DecList",3,@$.first_line,$1,$2,$3);}
+
+Dec: VarDec {$$=new Node("Dec",1,@$.first_line,$1);}
+    | VarDec ASSIGN Exp {$$=new Node("Dec",3,@$.first_line,$1,$2,$3);}
 
 /* Expression */
 /* a single constant, or operations on variables */
-Exp: Exp ASSIGN Exp { 
-    char* name1=get_name_posi("Exp",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name3=get_name_posi("Exp",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str3(str1,$2,str3);
-    }
-    | Exp AND Exp { 
-    char* name1=get_name_posi("Exp",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name3=get_name_posi("Exp",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str3(str1,$2,str3);
-    }
-    | Exp OR Exp { 
-    char* name1=get_name_posi("Exp",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name3=get_name_posi("Exp",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str3(str1,$2,str3);
-    }
-    | Exp LT Exp { 
-    char* name1=get_name_posi("Exp",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name3=get_name_posi("Exp",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str3(str1,$2,str3); }
-    | Exp LE Exp { char* name1=get_name_posi("Exp",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name3=get_name_posi("Exp",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str3(str1,$2,str3); }
-    | Exp GT Exp { char* name1=get_name_posi("Exp",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name3=get_name_posi("Exp",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str3(str1,$2,str3); }
-    | Exp GE Exp { char* name1=get_name_posi("Exp",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name3=get_name_posi("Exp",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str3(str1,$2,str3); }
-    | Exp NE Exp { char* name1=get_name_posi("Exp",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name3=get_name_posi("Exp",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str3(str1,$2,str3); }
-    | Exp EQ Exp { char* name1=get_name_posi("Exp",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name3=get_name_posi("Exp",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str3(str1,$2,str3); }
-    | Exp PLUS Exp { char* name1=get_name_posi("Exp",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name3=get_name_posi("Exp",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str3(str1,$2,str3); }
-    | Exp MINUS Exp { char* name1=get_name_posi("Exp",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name3=get_name_posi("Exp",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str3(str1,$2,str3); }
-    | Exp MUL Exp { char* name1=get_name_posi("Exp",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name3=get_name_posi("Exp",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str3(str1,$2,str3); }
-    | Exp DIV Exp { char* name1=get_name_posi("Exp",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name3=get_name_posi("Exp",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str3(str1,$2,str3); }
-    | LP Exp RP {
-    char* name2=get_name_posi("Exp",@2.first_line);
-    char* str2=get_str2(name2,$2);
-    $$=get_str3($1,str2,$3); }
-    | MINUS Exp { 
-    char* name2=get_name_posi("Exp",@2.first_line);
-    char* str2=get_str2(name2,$2);
-    $$=get_str2($1,str2); }
-    | NOT Exp { char* name2=get_name_posi("Exp",@2.first_line);
-    char* str2=get_str2(name2,$2);
-    $$=get_str2($1,str2); }
-    | ID LP Args RP { 
-    char* name1=get_name_val("ID",$1);
-    char* name3=get_name_posi("Args",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str4(name1,$2,str3,$4);}
-    | ID LP RP { 
-    char* name1=get_name_val("ID",$1);
-    $$=get_str3(name1,$2,$3); }
-    | Exp LB Exp RB {
-    char* name1=get_name_posi("Exp",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name3=get_name_posi("Exp",@3.first_line);
-    char* str3=get_str2(name3,$3);
-    $$=get_str4(str1,$2,str3,$4);}
-    | Exp DOT ID {
-    char* name1=get_name_posi("Exp",@1.first_line);
-    char* str1=get_str2(name1,$1);
-    char* name3=get_name_val("ID",$3);
-    $$=get_str3(str1,$2,name3);
-    }
-    | ID { 
-        $$= get_name_val("ID",$1);
-    }
-    | INT { 
-        $$= get_name_val("INT",$1);
-    }
-    | FLOAT { 
-        $$= get_name_val("FLOAT",$1);
-    }
-    | CHAR { 
-        $$= get_name_val("CHAR",$1);
-    }
+Exp: Exp ASSIGN Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
+    | Exp AND Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
+    | Exp OR Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
+    | Exp LT Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
+    | Exp LE Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
+    | Exp GT Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
+    | Exp GE Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
+    | Exp NE Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
+    | Exp EQ Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
+    | Exp PLUS Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
+    | Exp MINUS Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
+    | Exp MUL Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
+    | Exp DIV Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
+    | LP Exp RP {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
+    | MINUS Exp {$$=new Node("Exp",2,@$.first_line,$1,$2);}
+    | NOT Exp {$$=new Node("Exp",2,@$.first_line,$1,$2);}
+    | ID LP Args RP {$$=new Node("Exp",4,@$.first_line,$1,$2,$3,$4);}
+    | ID LP RP {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
+    | Exp LB Exp RB {$$=new Node("Exp",4,@$.first_line,$1,$2,$3,$4);}
+    | Exp DOT ID {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
+    | ID {$$=new Node("Exp",1,@$.first_line,$1);}
+    | INT {$$=new Node("Exp",1,@$.first_line,$1);}
+    | FLOAT {$$=new Node("Exp",1,@$.first_line,$1);}
+    | CHAR {$$=new Node("Exp",1,@$.first_line,$1);}
 
-Args: Exp COMMA Args {
-     char* name1=get_name_posi("Exp",@1.first_line);
-     char* str1=get_str2(name1,$1);
-     char* name3=get_name_posi("Args",@3.first_line);
-     char* str3=get_str2(name3,$3);
-     $$=(char*)get_str3(str1,$2,str3);
-    }
-    | Exp {
-        char* name1=get_name_posi("Exp",@1.first_line);
-        char* str1=get_str2(name1,$1);
-        $$=str1;
-            }
+Args: Exp COMMA Args {$$=new Node("Args",3,@$.first_line,$1,$2,$3);}
+    | Exp {$$=new Node("Args",1,@$.first_line,$1);}
 
 %%
-char* get_name_posi(const char* arg, int posi){
-    char* name= (char *)malloc(50);
-    if (name){
-        sprintf(name, "%s (%d)\n",arg, posi);
-    }
-    return name;
-}
-
-char* get_name_val(const char* arg, const char* val){
-    char* name= (char *)malloc(50);
-    if (name){
-        sprintf(name, "%s: %s\n",arg,val);
-    }
-    return name;
-}
-
-char* get_str6(const char* name, const char* str1,const char* str2,const char* str3,const char* str4,const char* str5){
-    char* result = (char*)malloc(strlen(name)+strlen(str1) + strlen(str2) + strlen(str3) + strlen(str4) + strlen(str5) + 1);
-    if(result){
-    strcpy(result, "  ");
-    strcat(result, name);  // Copy the first string
-
-    strcat(result, str1);
-
-    strcat(result, str2);  // Append the second string
-
-    strcat(result, str3);  // Append the third string
-
-    strcat(result, str4);
-
-    strcat(result, str5);
-    }
-    else{
-        printf("get_str6 fail");
-    }
-
-    return result;
-}
-
-char* get_str5(const char* name, const char* str1,const char* str2,const char* str3,const char* str4){
-    char* result = (char*)malloc(strlen(name)+strlen(str1) + strlen(str2) + strlen(str3) + strlen(str4) + 11);
-    if(result){
-    strcpy(result, "  ");
-    strcat(result, name);  // Copy the first string
-
-    strcat(result, str1);
-
-    strcat(result, str2);  // Append the second string
-
-    strcat(result, str3);  // Append the third string
-
-    strcat(result, str4);
-    }
-    else{
-        printf("get_str5 fail");
-    }
-    
-    return result;
-}
-
-char* get_str4(const char* name, const char* str1,const char* str2,const char* str3){
-    char* result = (char*)malloc(strlen(name)+strlen(str1) + strlen(str2) + strlen(str3) + 9);
-    if(result){
-    strcpy(result, "  ");  // Copy the first string
-    strcat(result, name);
-
-    strcat(result, str1);
-
-    strcat(result, str2);  // Append the second string
-
-    strcat(result, str3);  // Append the third string
-    }
-    else{
-        printf("get_str4 fail");
-    }
-    return result;
-}
-char* get_str3(const char* name, const char* str1,const char* str2){
-    char* result = (char*)malloc(strlen(name)+strlen(str1) + strlen(str2) + 7);
-    if(result){
-    strcpy(result, "  ");  // Copy the first string
-    strcat(result, name);
-
-    strcat(result, str1);
-
-    strcat(result, str2);  // Append the second string
-    }
-    else{
-        printf("get_str3 fail");
-    }
-   
-    return result;
-}
-char* get_str2(const char* name, const char* str1){
-    
-    char* result = (char*)malloc(strlen(name)+strlen(str1) + 5);
-    if(result){  
-    strcpy(result,"  ");
-    strcat(result, name);  // Copy the first string
-
-    strcat(result, str1);}
-    else{
-        printf("get_str2 fail");
-        }
-    return result;
-}
-
-void yyerror(const char* s) {
-    printf("Error type B at Line %d: Missing semicolon %s\n",
-               yylineno, strdup(yytext));
+void yyerror(const char *s) {
+    fprintf(stderr, "%s\n", s);
 }
 
 int main(int argc, char **argv){

@@ -1,1 +1,1 @@
- 	           $Error type B at Line 4: Missing semicolon ;
+	Error type A at Line 4: unknown lexeme $

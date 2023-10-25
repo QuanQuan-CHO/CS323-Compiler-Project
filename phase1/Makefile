@@ -1,11 +1,10 @@
-CC=gcc
+CC=g++
 FLEX=flex
 BISON=bison
 
 # Dependency Tree
 splc: syntax.tab.* lex.yy.c
-	@mkdir -p bin
-	$(CC) syntax.tab.c -ll -o bin/splc
+	$(CC) syntax.tab.c tree.cpp -ll -o bin/splc
 	@chmod +x bin/splc
 lex.yy.c: lex.l
 	$(FLEX) lex.l

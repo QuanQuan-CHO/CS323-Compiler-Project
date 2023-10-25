@@ -1,5 +1,5 @@
 echo In test1
-diff -r myOutput/output1.txt github_test/test_1_r01.out
+diff -u myOutput/output1.txt github_test/test_1_r01.out
 # echo In test2
 # diff myOutput/output2.txt github_test/test_1_r02.out
 # echo In test3

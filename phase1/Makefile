@@ -4,7 +4,8 @@ BISON=bison
 
 # Dependency Tree
 splc: syntax.tab.* lex.yy.c
-	$(CC) syntax.tab.c tree.cpp -ll -o bin/splc
+	@mkdir -p bin
+	$(CC) syntax.tab.c -ll -std=c++17 -o bin/splc
 	@chmod +x bin/splc
 lex.yy.c: lex.l
 	$(FLEX) lex.l

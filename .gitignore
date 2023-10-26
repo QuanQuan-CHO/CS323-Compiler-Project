@@ -1,9 +1,9 @@
+.DS_Store
 .idea
 
 lex.yy.c
-lexer
-
 syntax.tab.c
 syntax.tab.h
 
+lexer
 splc

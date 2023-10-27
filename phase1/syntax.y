@@ -54,7 +54,7 @@
 
 /* HIGH-LEVEL DEFINITION specifies the top-level syntax for a SPL program, including global variable declarations and function definitions.*/
 Program:
-  ExtDefList {printf("Program (%d)\n%s\n", @1.first_line, concat_shift($1));}
+  ExtDefList {printf("Program (%d)\n%s", @1.first_line, concat_shift($1));}
 
 ExtDefList:
   %empty {$$=strdup("");}

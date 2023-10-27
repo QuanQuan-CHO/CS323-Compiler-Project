@@ -28,7 +28,6 @@ valid_hex_int [xX](0|[1-9a-f][0-9a-f]*)
 
 "//".* {}
 "/*"((("*"[^/])?)|[^*])*"*/"  {}
-\n {yycolno=1;}
 int|float|char {asprintf(&yylval,"TYPE: %s\n",yytext); return TYPE;}
 struct {yylval=strdup("STRUCT\n"); return STRUCT;}
 if {yylval=strdup("IF\n"); return IF;}
@@ -68,11 +67,7 @@ return {yylval=strdup("RETURN\n"); return RETURN;}
     printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, strdup(yytext));
 }
 "." {yylval=strdup("DOT\n"); return DOT;}
-0[Xx]([^0-9a-fA-F]|([1-9a-fA-F][0-9a-fA-F]*[^0-9a-fA-F]+)) {
-    printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, strdup(yytext));
-}
-[$@] {
-    printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, strdup(yytext));
-}
-. /*overwrite the default rule which echos any unmatched input*/
+\n {yycolno=1;}
+[ \t]+
+. {printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, strdup(yytext));}
 %%

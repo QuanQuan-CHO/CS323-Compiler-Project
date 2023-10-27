@@ -30,9 +30,14 @@
 %}
 %locations
 %define parse.error verbose
-%token STRUCT IF ELSE WHILE RETURN SEMI COMMA
-%token EQ LE GE NE ASSIGN NOT LT GT PLUS MINUS MUL DIV AND OR
-%token LP RP LB RB LC RC INT FLOAT CHAR ID TYPE DOT
+
+%nonassoc LOWER_ELSE
+%nonassoc ELSE
+
+%token TYPE INT CHAR FLOAT STRUCT ID
+%token IF WHILE RETURN /*control flow word*/
+%token COMMA
+
 %right ASSIGN
 %left OR
 %left AND
@@ -42,7 +47,9 @@
 %left MUL DIV
 %right NOT
 %left DOT
-%left LB RB
+%left LP RP LB RB
+
+%token SEMI LC RC /*punctuation word*/
 %%
 
 /* HIGH-LEVEL DEFINITION specifies the top-level syntax for a SPL program, including global variable declarations and function definitions.*/
@@ -101,18 +108,14 @@ CompSt:
 StmtList:
   %empty {$$=strdup("");}
 | Stmt StmtList {asprintf(&$$,"StmtList (%d)\n%s\n", @1.first_line, concat_shift($1,$2));}
-| ifelseStmt StmtList {asprintf(&$$,"StmtList (%d)\n%s\n", @1.first_line, concat_shift($1,$2));}
-| ifstmt StmtList {asprintf(&$$,"StmtList (%d)\n%s\n", @1.first_line, concat_shift($1,$2));}
 
 Stmt:
   Exp SEMI {asprintf(&$$,"Stmt (%d)\n%s\n", @1.first_line, concat_shift($1,$2));}
 | CompSt {asprintf(&$$,"Stmt (%d)\n%s\n", @1.first_line, concat_shift($1));}
 | RETURN Exp SEMI {asprintf(&$$,"Stmt (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
+| IF LP Exp RP Stmt %prec LOWER_ELSE {asprintf(&$$,"Stmt (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3,$4,$5));}
+| IF LP Exp RP Stmt ELSE Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3,$4,$5,$6,$7));}
 | WHILE LP Exp RP Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3,$4,$5));}
-
-ifelseStmt: ifstmt elsest {asprintf(&$$,"%s\n%s\n",$1,$2);}
-ifstmt: IF LP Exp RP Stmt {asprintf(&$$,"%s\n%s\n%s\n%s\n%s\n",$1,$2,$3,$4,$5);}
-elsest: ELSE Stmt {asprintf(&$$,"%s\n%s\n",$1,$2);}
 
 
 /* LOCAL DEFINITION includes the declaration and assignment of local variables. */

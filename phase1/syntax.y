@@ -36,20 +36,9 @@
 %}
 %locations
 %define parse.error verbose
-
-%nonassoc LOWER_ELSE
-%nonassoc ELSE
-
-%token TYPE INT CHAR FLOAT STRUCT ID
-%token IF WHILE RETURN /*control flow word*/
-%token COMMA 
-
-%token FOR 
-%token IFDEF MACROELSE ENDIF
-%token INCLUDE INFILE
-%token DEFINE MAYFOLLOW_DEFINE FOLLOW_DEFINE
-
-%right ASSIGN
+%token STRUCT IF ELSE WHILE RETURN SEMI COMMA
+%token EQ LE GE NE ASSIGN NOT LT GT PLUS MINUS MUL DIV AND OR
+%token LP RP LB RB LC RC INT FLOAT CHAR ID TYPE DOT
 %left OR
 %left AND
 %left EQ NE
@@ -63,151 +52,455 @@
 %token SEMI LC RC /*punctuation word*/
 %%
 
-/* HIGH-LEVEL DEFINITION specifies the top-level syntax for a SPL program, including global variable declarations and function definitions.*/
-RES:
-  Program {if(!has_error){printf("%s", $1);}}
+/* high-level definition */
+/* global variable declarations and function definitions */
+output: Program{
+char* name1=get_name_posi("Program",@1.first_line);
+char* str1=get_str2(name1,$1);
+printf("%s",str1);
+}
+
+Program: ExtDefList { 
+char* name1=get_name_posi("ExtDefList",@1.first_line);
+char* str1=get_str2(name1,$1);
+$$=str1; 
+}
+ExtDefList: %empty {
+    $$="";
+}
+    | ExtDef ExtDefList { 
+    char* name1=get_name_posi("ExtDef",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    $$=get_str2(str1,$2); 
+    }
+ExtDef: Specifier ExtDecList SEMI { 
+    char* name1=get_name_posi("Specifier",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name2=get_name_posi("ExtDecList",@2.first_line);
+    char* str2=get_str2(name2,$2);
+    $$=get_str3(str1,str2,$3);  
+    }
+    | Specifier SEMI { 
+    char* name1=get_name_posi("Specifier",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    $$=get_str2(str1,$2); 
+    }
+    | Specifier FunDec CompSt { 
+    char* name1=get_name_posi("Specifier",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name2=get_name_posi("FunDec",@2.first_line);
+    char* str2=get_str2(name2,$2);
+    char* name3=get_name_posi("CompSt",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str3(str1,str2,str3); 
+    }
+ExtDecList: VarDec {
+    char* name1=get_name_posi("VarDec",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    $$=str1;
+}
+    | VarDec COMMA ExtDecList { 
+    char* name1=get_name_posi("VarDec",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name3=get_name_posi("ExtDecList",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str3(str1,$2,str3); 
+    }
 
 
+/* declarator */
+/* variable and function declaration */
+VarDec: ID { 
+    char* name1=get_name_val("ID",$1); 
+    $$=name1;
+    }
+    | VarDec LB INT RB { 
+    char* name1=get_name_posi("VarDec",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name3=get_name_val("INT",$3);
+    $$=get_str4(str1,$2,name3,$4);   
+    }
+FunDec: ID LP VarList RP { 
+    char* name1=get_name_val("ID",$1);
+    char* name3=get_name_posi("VarList",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str4(name1,$2,str3,$4);  
+    }
+    | ID LP RP { 
+    char* name1=get_name_val("ID",$1);
+    $$=get_str3(name1,$2,$3);  
+    }
+VarList: ParamDec COMMA VarList { 
+    char* name1=get_name_posi("ParamDec",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name3=get_name_posi("VarList",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str3(str1,$2,str3);  
+    }
+    | ParamDec { 
+    char* name1=get_name_posi("ParamDec",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    $$=str1;
+    }
+ParamDec: Specifier VarDec { 
+    char* name1=get_name_posi("Specifier",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name2=get_name_posi("VarDec",@2.first_line);
+    char* str2=get_str2(name2,$2);
+    $$=get_str2(str1,str2);  
+    }
 
+/* statement */
+/* specifies several program structures */
+/*Here is a change on DefList, may need to deal*/
+/*deflist is empty now!*/
+CompSt: LC DefList StmtList RC { 
+    char* name3=get_name_posi("StmtList",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str4($1,$2,str3,$4);  
+    }
+StmtList: %empty
+{
+    $$="";
+}
+    | Stmt StmtList { 
+    char* name1=get_name_posi("Stmt",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    $$=get_str2(str1,$2); 
+    }
+    | ifelseStmt StmtList { 
+    char* name1=get_name_posi("Stmt",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    $$=get_str2(str1,$2); }
+    | ifstmt StmtList { 
+    char* name1=get_name_posi("Stmt",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    $$=get_str2(str1,$2); }
 
-Program:
-  ExtDefList {asprintf(&$$,"Program (%d)\n%s", @$.first_line, concat_shift($1));}
+Stmt: Exp SEMI { 
+    char* name1=get_name_posi("Exp",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    $$=get_str2(str1,$2);
+    }
+    | CompSt {
+    char* name1=get_name_posi("CompSt",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    $$=str1;    
+    }
+    | RETURN Exp SEMI {
+    char* name2=get_name_posi("Exp",@2.first_line);
+    char* str2=get_str2(name2,$2);
+    $$=get_str3($1,str2,$3);
+    }
+    | WHILE LP Exp RP Stmt {
+    char* name3=get_name_posi("Exp",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    char* name5=get_name_posi("Stmt",@5.first_line);
+    char* str5=get_str2(name5,$5);
+    $$=get_str5($1,$2,str3,$4,str5);
+    }
 
-ExtDefList:
-  %empty {$$=strdup("");}
-| ExtDef ExtDefList {asprintf(&$$,"ExtDefList (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
+ifelseStmt: ifstmt elsest {
+    $$=get_str2($1,$2);
+}
+ifstmt: IF LP Exp RP Stmt { 
+    char* name3=get_name_posi("Exp",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    char* name5=get_name_posi("Stmt",@5.first_line);
+    char* str5=get_str2(name5,$5);
+    $$=get_str5($1,$2,str3,$4,str5); 
+    }
+elsest: ELSE Stmt {
+    char* name2=get_name_posi("Stmt",@2.first_line);
+    char* str2=get_str2(name2,$2);
+    $$=get_str2($1,str2);
+ }
 
-ExtDef:
-  Specifier ExtDecList SEMI {asprintf(&$$,"ExtDef (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| Specifier ExtDecList error {syntax_error("semicolon \';\'",@$.first_line);}
-| Specifier SEMI {asprintf(&$$,"ExtDef (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
-| Specifier error {syntax_error("semicolon \';\'",@$.first_line);}
-| Specifier FunDec CompSt {asprintf(&$$,"ExtDef (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+/* local definition */
+/* declaration and assignment of local variables */
+DefList: %empty
+{
+    $$="";
+}
+    | Def DefList {
+    char* name1=get_name_posi("Def",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    $$=get_str2(str1,$2);
+    }
+Def: Specifier DecList SEMI {
+    char* name1=get_name_posi("Specifier",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name2=get_name_posi("DecList",@2.first_line);
+    char* str2=get_str2(name1,$2);
+    $$=get_str3(str1,str2,$3);
+    }
+DecList: Dec {
+    char* name1=get_name_posi("Dec",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    $$=str1;
+    }
+    | Dec COMMA DecList { 
+    char* name1=get_name_posi("Dec",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name3=get_name_posi("DecList",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str3(str1,$2,str3);
+    }
+Dec: VarDec {
+    char* name1=get_name_posi("VarDec",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    $$=str1;
+    }
+    | VarDec ASSIGN Exp { 
+    char* name1=get_name_posi("VarDec",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name3=get_name_posi("Exp",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str3(str1,$2,str3);
+    }
 
-ExtDecList:
-  VarDec {asprintf(&$$,"ExtDecList (%d)\n%s\n", @$.first_line, concat_shift($1));}
-| VarDec COMMA ExtDecList {asprintf(&$$,"ExtDecList (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+/* Expression */
+/* a single constant, or operations on variables */
+Exp: Exp ASSIGN Exp { 
+    char* name1=get_name_posi("Exp",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name3=get_name_posi("Exp",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str3(str1,$2,str3);
+    }
+    | Exp AND Exp { 
+    char* name1=get_name_posi("Exp",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name3=get_name_posi("Exp",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str3(str1,$2,str3);
+    }
+    | Exp OR Exp { 
+    char* name1=get_name_posi("Exp",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name3=get_name_posi("Exp",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str3(str1,$2,str3);
+    }
+    | Exp LT Exp { 
+    char* name1=get_name_posi("Exp",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name3=get_name_posi("Exp",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str3(str1,$2,str3); }
+    | Exp LE Exp { char* name1=get_name_posi("Exp",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name3=get_name_posi("Exp",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str3(str1,$2,str3); }
+    | Exp GT Exp { char* name1=get_name_posi("Exp",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name3=get_name_posi("Exp",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str3(str1,$2,str3); }
+    | Exp GE Exp { char* name1=get_name_posi("Exp",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name3=get_name_posi("Exp",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str3(str1,$2,str3); }
+    | Exp NE Exp { char* name1=get_name_posi("Exp",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name3=get_name_posi("Exp",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str3(str1,$2,str3); }
+    | Exp EQ Exp { char* name1=get_name_posi("Exp",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name3=get_name_posi("Exp",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str3(str1,$2,str3); }
+    | Exp PLUS Exp { char* name1=get_name_posi("Exp",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name3=get_name_posi("Exp",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str3(str1,$2,str3); }
+    | Exp MINUS Exp { char* name1=get_name_posi("Exp",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name3=get_name_posi("Exp",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str3(str1,$2,str3); }
+    | Exp MUL Exp { char* name1=get_name_posi("Exp",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name3=get_name_posi("Exp",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str3(str1,$2,str3); }
+    | Exp DIV Exp { char* name1=get_name_posi("Exp",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name3=get_name_posi("Exp",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str3(str1,$2,str3); }
+    | LP Exp RP {
+    char* name2=get_name_posi("Exp",@2.first_line);
+    char* str2=get_str2(name2,$2);
+    $$=get_str3($1,str2,$3); }
+    | MINUS Exp { 
+    char* name2=get_name_posi("Exp",@2.first_line);
+    char* str2=get_str2(name2,$2);
+    $$=get_str2($1,str2); }
+    | NOT Exp { char* name2=get_name_posi("Exp",@2.first_line);
+    char* str2=get_str2(name2,$2);
+    $$=get_str2($1,str2); }
+    | ID LP Args RP { 
+    char* name1=get_name_val("ID",$1);
+    char* name3=get_name_posi("Args",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str4(name1,$2,str3,$4);}
+    | ID LP RP { 
+    char* name1=get_name_val("ID",$1);
+    $$=get_str3(name1,$2,$3); }
+    | Exp LB Exp RB {
+    char* name1=get_name_posi("Exp",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name3=get_name_posi("Exp",@3.first_line);
+    char* str3=get_str2(name3,$3);
+    $$=get_str4(str1,$2,str3,$4);}
+    | Exp DOT ID {
+    char* name1=get_name_posi("Exp",@1.first_line);
+    char* str1=get_str2(name1,$1);
+    char* name3=get_name_val("ID",$3);
+    $$=get_str3(str1,$2,name3);
+    }
+    | ID { 
+        $$= get_name_val("ID",$1);
+    }
+    | INT { 
+        $$= get_name_val("INT",$1);
+    }
+    | FLOAT { 
+        $$= get_name_val("FLOAT",$1);
+    }
+    | CHAR { 
+        $$= get_name_val("CHAR",$1);
+    }
 
-
-/* SPECIFIER is related to the type system, in SPL, we have primitive types (int, float and char) and structure type. */
-Specifier:
-  TYPE {asprintf(&$$,"Specifier (%d)\n%s\n", @$.first_line, concat_shift($1));}
-| StructSpecifier {asprintf(&$$,"Specifier (%d)\n%s\n", @$.first_line, concat_shift($1));}
-
-StructSpecifier:
-  STRUCT ID LC DefList RC {asprintf(&$$,"StructSpecifier (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
-| STRUCT ID LC DefList error {syntax_error("closing curly brace \'}\'",@$.first_line);}
-| STRUCT ID {asprintf(&$$,"StructSpecifier (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
-
-
-/* DECLARATOR defines the variable and function declaration.
- * Note that the array type is specified by the declarator. */
-VarDec:
-  ID {asprintf(&$$,"VarDec (%d)\n%s\n", @$.first_line, concat_shift($1));}
-| VarDec LB INT RB {asprintf(&$$,"VarDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
-| VarDec LB INT error {syntax_error("closing bracket \']\'",@$.first_line);}
-
-FunDec:
-  ID LP VarList RP {asprintf(&$$,"FunDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
-| ID LP VarList error {syntax_error("closing parenthesis \')\'",@$.first_line);}
-| ID LP RP {asprintf(&$$,"FunDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| ID LP error {syntax_error("closing parenthesis \')\'",@$.first_line);}
-
-VarList:
-  ParamDec COMMA VarList {asprintf(&$$,"VarList (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| ParamDec {asprintf(&$$,"VarList (%d)\n%s\n", @$.first_line, concat_shift($1));}
-
-ParamDec:
-  Specifier VarDec {asprintf(&$$,"ParamDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
-
-
-/* STATEMENT specifies several program structures, such as branching structure or loop structure.
- * They are mostly enclosed by curly braces, or end with a semicolon. */
-CompSt:
-  LC DefList StmtList RC {asprintf(&$$,"CompSt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
-| LC DefList StmtList error {syntax_error("closing curly brace \'}\'",@$.first_line);}
-
-StmtList:
-  %empty {$$=strdup("");}
-| Stmt StmtList {asprintf(&$$,"StmtList (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
-
-Stmt:
-  Exp SEMI {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
-| Exp error {syntax_error("semicolon \';\'",@$.first_line);}
-| CompSt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1));}
-| RETURN Exp SEMI {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| RETURN Exp error {syntax_error("semicolon \';\'",@$.first_line);}
-| RETURN error SEMI /* e.g. return @; only report lexical error */
-| IF LP Exp RP Stmt %prec LOWER_ELSE {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
-| IF LP Exp RP Stmt ELSE Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5,$6,$7));}
-| IF LP Exp error Stmt {syntax_error("closing parenthesis \')\'",@$.first_line);}
-| WHILE LP Exp RP Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
-| WHILE LP Exp error Stmt {syntax_error("closing parenthesis \')\'",@$.first_line);}
-
-| FOR LP Exp SEMI Exp SEMI Exp RP Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5,$6,$7,$8,$9));}
-| IFDEF Stmt ENDIF {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| IFDEF Stmt MACROELSE Stmt ENDIF {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
-
-
-/* LOCAL DEFINITION includes the declaration and assignment of local variables. */
-DefList:
-  %empty {$$=strdup("");}
-| Def DefList {asprintf(&$$,"DefList (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
-
-Def:
-  Specifier DecList SEMI {asprintf(&$$,"Def (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| Specifier DecList error {syntax_error("semicolon \';\'",@$.first_line);}
-
-DecList:
-  Dec {asprintf(&$$,"DecList (%d)\n%s\n", @$.first_line, concat_shift($1));}
-| Dec COMMA DecList {asprintf(&$$,"DecList (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-
-Dec:
-  VarDec {asprintf(&$$,"Dec (%d)\n%s\n", @$.first_line, concat_shift($1));}
-| VarDec ASSIGN Exp {asprintf(&$$,"Dec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| VarDec ASSIGN error /* e.g. int a = $, only report lexical error */
-
-
-/* EXPRESSION can be a single constant, or operations on variables.
- * Note that these operators have their precedence and associativity, as shown in Table 2 in phase1-guide.pdf. */
-Exp:
-  Exp ASSIGN Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| Exp AND Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| Exp OR Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| Exp LT Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| Exp LE Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| Exp GT Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| Exp GE Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| Exp NE Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| Exp EQ Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| Exp PLUS Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| Exp MINUS Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| Exp MUL Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| Exp DIV Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| LP Exp RP {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| LP Exp error {syntax_error("closing parenthesis \')\'",@$.first_line);}
-| MINUS Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
-| NOT Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
-| ID LP Args RP {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
-| ID LP Args error {syntax_error("closing parenthesis \')\'",@$.first_line);}
-| ID LP RP {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| ID LP error {syntax_error("closing parenthesis \')\'",@$.first_line);}
-| Exp LB Exp RB {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
-| Exp LB Exp error {syntax_error("closing bracket \']\'",@$.first_line);}
-| Exp DOT ID {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| ID {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
-| INT {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
-| FLOAT {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
-| CHAR {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
-
-Args:
-  Exp COMMA Args {asprintf(&$$,"Args (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| Exp {asprintf(&$$,"Args (%d)\n%s\n", @$.first_line, concat_shift($1));}
+Args: Exp COMMA Args {
+     char* name1=get_name_posi("Exp",@1.first_line);
+     char* str1=get_str2(name1,$1);
+     char* name3=get_name_posi("Args",@3.first_line);
+     char* str3=get_str2(name3,$3);
+     $$=(char*)get_str3(str1,$2,str3);
+    }
+    | Exp {
+        char* name1=get_name_posi("Exp",@1.first_line);
+        char* str1=get_str2(name1,$1);
+        $$=str1;
+            }
 
 %%
+char* get_name_posi(const char* arg, int posi){
+    char* name= (char *)malloc(50);
+    if (name){
+        sprintf(name, "%s (%d)\n",arg, posi);
+    }
+    return name;
+}
+
+char* get_name_val(const char* arg, const char* val){
+    char* name= (char *)malloc(50);
+    if (name){
+        sprintf(name, "%s: %s\n",arg,val);
+    }
+    return name;
+}
+
+char* get_str6(const char* name, const char* str1,const char* str2,const char* str3,const char* str4,const char* str5){
+    char* result = (char*)malloc(strlen(name)+strlen(str1) + strlen(str2) + strlen(str3) + strlen(str4) + strlen(str5) + 1);
+    if(result){
+    strcpy(result, "  ");
+    strcat(result, name);  // Copy the first string
+
+    strcat(result, str1);
+
+    strcat(result, str2);  // Append the second string
+
+    strcat(result, str3);  // Append the third string
+
+    strcat(result, str4);
+
+    strcat(result, str5);
+    }
+    else{
+        printf("get_str6 fail");
+    }
+
+    return result;
+}
+
+char* get_str5(const char* name, const char* str1,const char* str2,const char* str3,const char* str4){
+    char* result = (char*)malloc(strlen(name)+strlen(str1) + strlen(str2) + strlen(str3) + strlen(str4) + 11);
+    if(result){
+    strcpy(result, "  ");
+    strcat(result, name);  // Copy the first string
+
+    strcat(result, str1);
+
+    strcat(result, str2);  // Append the second string
+
+    strcat(result, str3);  // Append the third string
+
+    strcat(result, str4);
+    }
+    else{
+        printf("get_str5 fail");
+    }
+    
+    return result;
+}
+
+char* get_str4(const char* name, const char* str1,const char* str2,const char* str3){
+    char* result = (char*)malloc(strlen(name)+strlen(str1) + strlen(str2) + strlen(str3) + 9);
+    if(result){
+    strcpy(result, "  ");  // Copy the first string
+    strcat(result, name);
+
+    strcat(result, str1);
+
+    strcat(result, str2);  // Append the second string
+
+    strcat(result, str3);  // Append the third string
+    }
+    else{
+        printf("get_str4 fail");
+    }
+    return result;
+}
+char* get_str3(const char* name, const char* str1,const char* str2){
+    char* result = (char*)malloc(strlen(name)+strlen(str1) + strlen(str2) + 7);
+    if(result){
+    strcpy(result, "  ");  // Copy the first string
+    strcat(result, name);
+
+    strcat(result, str1);
+
+    strcat(result, str2);  // Append the second string
+    }
+    else{
+        printf("get_str3 fail");
+    }
+   
+    return result;
+}
+char* get_str2(const char* name, const char* str1){
+    
+    char* result = (char*)malloc(strlen(name)+strlen(str1) + 5);
+    if(result){  
+    strcpy(result,"  ");
+    strcat(result, name);  // Copy the first string
+
+    strcat(result, str1);}
+    else{
+        printf("get_str2 fail");
+        }
+    return result;
+}
 
 void yyerror(const char* s) {
-    printf("Error type B at Line %d: Missing %s",yylineno,yylval);
+    printf("Error type B at Line %d: Missing semicolon %s\n",
+               yylineno, strdup(yytext));
 }
 
 int main(int argc, char **argv){

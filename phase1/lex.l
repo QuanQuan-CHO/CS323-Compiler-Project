@@ -24,7 +24,7 @@
 %}
 
 %option yylineno
-
+%option debug
 
 valid_decimal_int 0|[1-9][0-9]*
 valid_hex_int [xX](0|[1-9a-f][0-9a-f]*)
@@ -37,6 +37,7 @@ id [_a-zA-Z][_0-9a-zA-Z]*
 "//".* {}
 "/*"((("*"[^/])?)|[^*])*"*/"  {}
 int|float|char {asprintf(&yylval,"TYPE: %s\n",yytext); return TYPE;}
+for {yylval=strdup("FOR\n"); return FOR;}
 struct {yylval=strdup("STRUCT\n"); return STRUCT;}
 if {yylval=strdup("IF\n"); return IF;}
 else {yylval=strdup("ELSE\n"); return ELSE;}
@@ -45,7 +46,7 @@ return {yylval=strdup("RETURN\n"); return RETURN;}
 \\x[^0-9a-fA-F]* {
     printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, yytext);
 }
-'([^']|\\{valid_hex_int})' {asprintf(&yylval,"CHAR: %s\n",yytext); return CHAR;}
+'([^']*)'|\\{valid_hex_int} {asprintf(&yylval,"CHAR: %s\n",yytext); return CHAR;}
 ";" {yylval=strdup("SEMI\n"); return SEMI;}
 "," {yylval=strdup("COMMA\n"); return COMMA;}
 "==" {yylval=strdup("EQ\n"); return EQ;}

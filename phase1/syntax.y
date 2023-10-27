@@ -43,6 +43,9 @@
 %token TYPE INT CHAR FLOAT STRUCT ID
 %token IF WHILE RETURN /*control flow word*/
 %token COMMA
+%token FOR
+%token DEFINE FOLLOW_DEFINE MAYFOLLOW_DEFINE
+%token INCLUDE INFILE
 
 %right ASSIGN
 %left OR
@@ -132,7 +135,7 @@ Stmt:
 | IF LP Exp error Stmt {syntax_error("closing parenthesis \')\'",@$.first_line);}
 | WHILE LP Exp RP Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
 | WHILE LP Exp error Stmt {syntax_error("closing parenthesis \')\'",@$.first_line);}
-
+| FOR LP Exp SEMI Exp SEMI Exp RP Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5,$6,$7,$8,$9));}
 
 /* LOCAL DEFINITION includes the declaration and assignment of local variables. */
 DefList:

@@ -54,48 +54,48 @@
 
 /* HIGH-LEVEL DEFINITION specifies the top-level syntax for a SPL program, including global variable declarations and function definitions.*/
 Program:
-  ExtDefList {printf("Program (%d)\n%s", @1.first_line, concat_shift($1));}
+  ExtDefList {printf("Program (%d)\n%s", @$.first_line, concat_shift($1));}
 
 ExtDefList:
   %empty {$$=strdup("");}
-| ExtDef ExtDefList {asprintf(&$$,"ExtDefList (%d)\n%s\n", @1.first_line, concat_shift($1,$2));}
+| ExtDef ExtDefList {asprintf(&$$,"ExtDefList (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
 
 ExtDef:
-  Specifier ExtDecList SEMI {asprintf(&$$,"ExtDef (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
-| Specifier SEMI {asprintf(&$$,"ExtDef (%d)\n%s\n", @1.first_line, concat_shift($1,$2));}
-| Specifier FunDec CompSt {asprintf(&$$,"ExtDef (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
+  Specifier ExtDecList SEMI {asprintf(&$$,"ExtDef (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Specifier SEMI {asprintf(&$$,"ExtDef (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
+| Specifier FunDec CompSt {asprintf(&$$,"ExtDef (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
 
 ExtDecList:
-  VarDec {asprintf(&$$,"ExtDecList (%d)\n%s\n", @1.first_line, concat_shift($1));}
-| VarDec COMMA ExtDecList {asprintf(&$$,"ExtDecList (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
+  VarDec {asprintf(&$$,"ExtDecList (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| VarDec COMMA ExtDecList {asprintf(&$$,"ExtDecList (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
 
 
 /* SPECIFIER is related to the type system, in SPL, we have primitive types (int, float and char) and structure type. */
 Specifier:
-  TYPE {asprintf(&$$,"Specifier (%d)\n%s\n", @1.first_line, concat_shift($1));}
-| StructSpecifier {asprintf(&$$,"Specifier (%d)\n%s\n", @1.first_line, concat_shift($1));}
+  TYPE {asprintf(&$$,"Specifier (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| StructSpecifier {asprintf(&$$,"Specifier (%d)\n%s\n", @$.first_line, concat_shift($1));}
 
 StructSpecifier:
-  STRUCT ID LC DefList RC {asprintf(&$$,"StructSpecifier (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3,$4,$5));}
-| STRUCT ID {asprintf(&$$,"StructSpecifier (%d)\n%s\n", @1.first_line, concat_shift($1,$2));}
+  STRUCT ID LC DefList RC {asprintf(&$$,"StructSpecifier (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
+| STRUCT ID {asprintf(&$$,"StructSpecifier (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
 
 
 /* DECLARATOR defines the variable and function declaration.
  * Note that the array type is specified by the declarator. */
 VarDec:
-  ID {asprintf(&$$,"VarDec (%d)\n%s\n", @1.first_line, concat_shift($1));}
-| VarDec LB INT RB {asprintf(&$$,"VarDec (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3,$4));}
+  ID {asprintf(&$$,"VarDec (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| VarDec LB INT RB {asprintf(&$$,"VarDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
 
 FunDec:
-  ID LP VarList RP {asprintf(&$$,"FunDec (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3,$4));}
-| ID LP RP {asprintf(&$$,"FunDec (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
+  ID LP VarList RP {asprintf(&$$,"FunDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
+| ID LP RP {asprintf(&$$,"FunDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
 
 VarList:
-  ParamDec COMMA VarList {asprintf(&$$,"VarList (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
-| ParamDec {asprintf(&$$,"VarList (%d)\n%s\n", @1.first_line, concat_shift($1));}
+  ParamDec COMMA VarList {asprintf(&$$,"VarList (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| ParamDec {asprintf(&$$,"VarList (%d)\n%s\n", @$.first_line, concat_shift($1));}
 
 ParamDec:
-  Specifier VarDec {asprintf(&$$,"ParamDec (%d)\n%s\n", @1.first_line, concat_shift($1,$2));}
+  Specifier VarDec {asprintf(&$$,"ParamDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
 
 
 /* STATEMENT specifies several program structures, such as branching structure or loop structure.
@@ -103,74 +103,74 @@ ParamDec:
 /*Here is a change on DefList, may need to deal*/
 /*deflist is empty now!*/
 CompSt:
-  LC DefList StmtList RC {asprintf(&$$,"CompSt (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3,$4));}
+  LC DefList StmtList RC {asprintf(&$$,"CompSt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
 
 StmtList:
   %empty {$$=strdup("");}
-| Stmt StmtList {asprintf(&$$,"StmtList (%d)\n%s\n", @1.first_line, concat_shift($1,$2));}
+| Stmt StmtList {asprintf(&$$,"StmtList (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
 
 Stmt:
-  Exp SEMI {asprintf(&$$,"Stmt (%d)\n%s\n", @1.first_line, concat_shift($1,$2));}
-| CompSt {asprintf(&$$,"Stmt (%d)\n%s\n", @1.first_line, concat_shift($1));}
-| RETURN Exp SEMI {asprintf(&$$,"Stmt (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
-| IF LP Exp RP Stmt %prec LOWER_ELSE {asprintf(&$$,"Stmt (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3,$4,$5));}
-| IF LP Exp RP Stmt ELSE Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3,$4,$5,$6,$7));}
-| WHILE LP Exp RP Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3,$4,$5));}
+  Exp SEMI {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
+| CompSt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| RETURN Exp SEMI {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| IF LP Exp RP Stmt %prec LOWER_ELSE {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
+| IF LP Exp RP Stmt ELSE Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5,$6,$7));}
+| WHILE LP Exp RP Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
 
 
 /* LOCAL DEFINITION includes the declaration and assignment of local variables. */
 DefList:
   %empty {$$=strdup("");}
-| Def DefList {asprintf(&$$,"DefList (%d)\n%s\n", @1.first_line, concat_shift($1,$2));}
+| Def DefList {asprintf(&$$,"DefList (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
 
 Def:
-  Specifier DecList SEMI {asprintf(&$$,"Def (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
+  Specifier DecList SEMI {asprintf(&$$,"Def (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
 
 DecList:
-  Dec {asprintf(&$$,"DecList (%d)\n%s\n", @1.first_line, concat_shift($1));}
-| Dec COMMA DecList {asprintf(&$$,"DecList (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
+  Dec {asprintf(&$$,"DecList (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| Dec COMMA DecList {asprintf(&$$,"DecList (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
 
 Dec:
-  VarDec {asprintf(&$$,"Dec (%d)\n%s\n", @1.first_line, concat_shift($1));}
-| VarDec ASSIGN Exp {asprintf(&$$,"Dec (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
+  VarDec {asprintf(&$$,"Dec (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| VarDec ASSIGN Exp {asprintf(&$$,"Dec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
 
 
 /* EXPRESSION can be a single constant, or operations on variables.
  * Note that these operators have their precedence and associativity, as shown in Table 2 in phase1-guide.pdf. */
 Exp:
-  Exp ASSIGN Exp {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
-| Exp AND Exp {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
-| Exp OR Exp {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
-| Exp LT Exp {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
-| Exp LE Exp {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
-| Exp GT Exp {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
-| Exp GE Exp {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
-| Exp NE Exp {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
-| Exp EQ Exp {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
-| Exp PLUS Exp {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
-| Exp MINUS Exp {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
-| Exp MUL Exp {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
-| Exp DIV Exp {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
-| LP Exp RP {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
-| MINUS Exp {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1,$2));}
-| NOT Exp {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1,$2));}
-| ID LP Args RP {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3,$4));}
-| ID LP RP {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
-| Exp LB Exp RB {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3,$4));}
-| Exp DOT ID {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
-| ID {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1));}
-| INT {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1));}
-| FLOAT {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1));}
-| CHAR {asprintf(&$$,"Exp (%d)\n%s\n", @1.first_line, concat_shift($1));}
+  Exp ASSIGN Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp AND Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp OR Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp LT Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp LE Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp GT Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp GE Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp NE Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp EQ Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp PLUS Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp MINUS Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp MUL Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp DIV Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| LP Exp RP {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| MINUS Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
+| NOT Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
+| ID LP Args RP {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
+| ID LP RP {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp LB Exp RB {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
+| Exp DOT ID {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| ID {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| INT {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| FLOAT {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| CHAR {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
 
 Args:
-  Exp COMMA Args {asprintf(&$$,"Args (%d)\n%s\n", @1.first_line, concat_shift($1,$2,$3));}
-| Exp {asprintf(&$$,"Args (%d)\n%s\n", @1.first_line, concat_shift($1));}
+  Exp COMMA Args {asprintf(&$$,"Args (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp {asprintf(&$$,"Args (%d)\n%s\n", @$.first_line, concat_shift($1));}
 
 %%
 
 void yyerror(const char* s) {
-    printf("Error type B at Line %d: Missing semicolon %s\n",
+    printf("Error type B at Line %d: Missing semicolon '%s'\n",
                yylineno, strdup(yytext));
 }
 

@@ -1,23 +1,55 @@
-%{  #include "tree.hpp"
+%{
+    using namespace std;
+
+    #define YYSTYPE char* //Define the type of `yylval`
+
     #include "lex.yy.c"
-    #include <stdlib.h>
-    #include <stdio.h>
+
     extern int yylineno;
+    bool has_error=false; //Has lexical or syntax error
     void yyerror(const char*);
+    
+    //concat the strings and shift two spaces
+    template<typename... Args>
+    char* concat_shift(Args... strs) {
+        //1.concat the strings
+        char* concat = strdup("");
+        (asprintf(&concat,"%s%s",concat,strs), ...);
+
+        //2.shift two spaces in each line
+        char* result = strdup("");
+        char* line=strtok(concat,"\n");
+        while(line!=NULL){
+            asprintf(&result,"%s  %s\n",result,line);
+            line=strtok(NULL,"\n");
+        }
+
+        return result;
+    }
+
+    void syntax_error(const char* missing_token, int lineno){
+        has_error=true;
+        printf("Error type B at Line %d: Missing %s\n", lineno, missing_token);
+    }
+
+    //TODO: Optimize by macro
 %}
-
 %locations
-
-%union {
-    Node* node;
-}
+%define parse.error verbose
 
 %nonassoc LOWER_ELSE
-%nonassoc <node> ELSE
+%nonassoc ELSE
 
-%token <node> STRUCT IF WHILE RETURN SEMI COMMA
-%token <node> EQ LE GE NE ASSIGN NOT LT GT PLUS MINUS MUL DIV AND OR
-%token <node> LP RP LB RB LC RC DOT INT FLOAT CHAR ID TYPE
+%token TYPE INT CHAR FLOAT STRUCT ID
+%token IF WHILE RETURN /*control flow word*/
+%token COMMA 
+
+%token FOR 
+%token IFDEF MACROELSE ENDIF
+%token INCLUDE INFILE
+%token DEFINE MAYFOLLOW_DEFINE FOLLOW_DEFINE
+
+%right ASSIGN
 %left OR
 %left AND
 %left EQ NE
@@ -25,111 +57,157 @@
 %left PLUS MINUS
 %left MUL DIV
 %right NOT
-%left ASSIGN
 %left DOT
-%left LB RB
+%left LP RP LB RB
 
-%type <node> Program ExtDefList ExtDef ExtDecList
-%type <node> Specifier StructSpecifier 
-%type <node> VarDec FunDec VarList ParamDec CompSt StmtList
-%type <node> Stmt DefList Def DecList Dec Exp Args
+%token SEMI LC RC /*punctuation word*/
+%%
+
+/* HIGH-LEVEL DEFINITION specifies the top-level syntax for a SPL program, including global variable declarations and function definitions.*/
+RES:
+  Program {if(!has_error){printf("%s", $1);}}
+
+
+
+
+Program:
+  ExtDefList {asprintf(&$$,"Program (%d)\n%s", @$.first_line, concat_shift($1));}
+
+ExtDefList:
+  %empty {$$=strdup("");}
+| ExtDef ExtDefList {asprintf(&$$,"ExtDefList (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
+
+ExtDef:
+  Specifier ExtDecList SEMI {asprintf(&$$,"ExtDef (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Specifier ExtDecList error {syntax_error("semicolon \';\'",@$.first_line);}
+| Specifier SEMI {asprintf(&$$,"ExtDef (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
+| Specifier error {syntax_error("semicolon \';\'",@$.first_line);}
+| Specifier FunDec CompSt {asprintf(&$$,"ExtDef (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+
+ExtDecList:
+  VarDec {asprintf(&$$,"ExtDecList (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| VarDec COMMA ExtDecList {asprintf(&$$,"ExtDecList (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+
+
+/* SPECIFIER is related to the type system, in SPL, we have primitive types (int, float and char) and structure type. */
+Specifier:
+  TYPE {asprintf(&$$,"Specifier (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| StructSpecifier {asprintf(&$$,"Specifier (%d)\n%s\n", @$.first_line, concat_shift($1));}
+
+StructSpecifier:
+  STRUCT ID LC DefList RC {asprintf(&$$,"StructSpecifier (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
+| STRUCT ID LC DefList error {syntax_error("closing curly brace \'}\'",@$.first_line);}
+| STRUCT ID {asprintf(&$$,"StructSpecifier (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
+
+
+/* DECLARATOR defines the variable and function declaration.
+ * Note that the array type is specified by the declarator. */
+VarDec:
+  ID {asprintf(&$$,"VarDec (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| VarDec LB INT RB {asprintf(&$$,"VarDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
+| VarDec LB INT error {syntax_error("closing bracket \']\'",@$.first_line);}
+
+FunDec:
+  ID LP VarList RP {asprintf(&$$,"FunDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
+| ID LP VarList error {syntax_error("closing parenthesis \')\'",@$.first_line);}
+| ID LP RP {asprintf(&$$,"FunDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| ID LP error {syntax_error("closing parenthesis \')\'",@$.first_line);}
+
+VarList:
+  ParamDec COMMA VarList {asprintf(&$$,"VarList (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| ParamDec {asprintf(&$$,"VarList (%d)\n%s\n", @$.first_line, concat_shift($1));}
+
+ParamDec:
+  Specifier VarDec {asprintf(&$$,"ParamDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
+
+
+/* STATEMENT specifies several program structures, such as branching structure or loop structure.
+ * They are mostly enclosed by curly braces, or end with a semicolon. */
+CompSt:
+  LC DefList StmtList RC {asprintf(&$$,"CompSt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
+| LC DefList StmtList error {syntax_error("closing curly brace \'}\'",@$.first_line);}
+
+StmtList:
+  %empty {$$=strdup("");}
+| Stmt StmtList {asprintf(&$$,"StmtList (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
+
+Stmt:
+  Exp SEMI {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
+| Exp error {syntax_error("semicolon \';\'",@$.first_line);}
+| CompSt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| RETURN Exp SEMI {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| RETURN Exp error {syntax_error("semicolon \';\'",@$.first_line);}
+| RETURN error SEMI /* e.g. return @; only report lexical error */
+| IF LP Exp RP Stmt %prec LOWER_ELSE {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
+| IF LP Exp RP Stmt ELSE Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5,$6,$7));}
+| IF LP Exp error Stmt {syntax_error("closing parenthesis \')\'",@$.first_line);}
+| WHILE LP Exp RP Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
+| WHILE LP Exp error Stmt {syntax_error("closing parenthesis \')\'",@$.first_line);}
+
+| FOR LP Exp SEMI Exp SEMI Exp RP Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5,$6,$7,$8,$9));}
+| IFDEF Stmt ENDIF {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| IFDEF Stmt MACROELSE Stmt ENDIF {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
+
+
+/* LOCAL DEFINITION includes the declaration and assignment of local variables. */
+DefList:
+  %empty {$$=strdup("");}
+| Def DefList {asprintf(&$$,"DefList (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
+
+Def:
+  Specifier DecList SEMI {asprintf(&$$,"Def (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Specifier DecList error {syntax_error("semicolon \';\'",@$.first_line);}
+
+DecList:
+  Dec {asprintf(&$$,"DecList (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| Dec COMMA DecList {asprintf(&$$,"DecList (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+
+Dec:
+  VarDec {asprintf(&$$,"Dec (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| VarDec ASSIGN Exp {asprintf(&$$,"Dec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| VarDec ASSIGN error /* e.g. int a = $, only report lexical error */
+
+
+/* EXPRESSION can be a single constant, or operations on variables.
+ * Note that these operators have their precedence and associativity, as shown in Table 2 in phase1-guide.pdf. */
+Exp:
+  Exp ASSIGN Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp AND Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp OR Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp LT Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp LE Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp GT Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp GE Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp NE Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp EQ Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp PLUS Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp MINUS Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp MUL Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp DIV Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| LP Exp RP {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| LP Exp error {syntax_error("closing parenthesis \')\'",@$.first_line);}
+| MINUS Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
+| NOT Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
+| ID LP Args RP {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
+| ID LP Args error {syntax_error("closing parenthesis \')\'",@$.first_line);}
+| ID LP RP {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| ID LP error {syntax_error("closing parenthesis \')\'",@$.first_line);}
+| Exp LB Exp RB {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
+| Exp LB Exp error {syntax_error("closing bracket \']\'",@$.first_line);}
+| Exp DOT ID {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| ID {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| INT {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| FLOAT {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| CHAR {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
+
+Args:
+  Exp COMMA Args {asprintf(&$$,"Args (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Exp {asprintf(&$$,"Args (%d)\n%s\n", @$.first_line, concat_shift($1));}
 
 %%
 
-/* high-level definition */
-/* global variable declarations and function definitions */
-
-Program: ExtDefList {
-    $$=new Node("Program",1,@$.first_line,$1);
-    printTree($$);
-}
-ExtDefList: %empty {$$=new Node("ExtDefList");}
-    | ExtDef ExtDefList {$$=new Node("ExtDefList",2,@$.first_line,$1,$2);}
-ExtDef: Specifier ExtDecList SEMI { $$=new Node("ExtDef",3,@$.first_line,$1,$2,$3);}
-    | Specifier SEMI { $$=new Node("ExtDef",2,@$.first_line,$1,$2);}
-    | Specifier FunDec CompSt { $$=new Node("ExtDef",3,@$.first_line,$1,$2,$3);}
-ExtDecList: VarDec {$$=new Node("ExtDecList",1,@$.first_line,$1);}
-    | VarDec COMMA ExtDecList { $$=new Node("ExtDecList",3,@$.first_line,$1,$2,$3);}
-
-/* specifier */
-/* primitive types (int, float and char) and structure type */
-Specifier: TYPE {$$=new Node("Specifier",1,@$.first_line,$1);}
-    | StructSpecifier {$$=new Node("Specifier",1,@$.first_line,$1);}
-StructSpecifier: STRUCT ID LC DefList RC {$$=new Node("StructSpecifier", 5, @$.first_line, $1, $2, $3, $4, $5);}
-    | STRUCT ID { $$=new Node("StructSpecifier",2,@$.first_line,$1,$2);}
-
-/* declarator */
-/* variable and function declaration */
-VarDec: ID {$$=new Node("VarDec",1,@$.first_line,$1); }
-    | VarDec LB INT RB { $$=new Node("VarDec",4,@$.first_line,$1,$2,$3,$4);}
-FunDec: ID LP VarList RP { $$=new Node("FunDec",4,@$.first_line,$1,$2,$3,$4);}
-    | ID LP RP {$$=new Node("FunDec",3,@$.first_line,$1,$2,$3);}
-VarList: ParamDec COMMA VarList {$$=new Node("VarList",3,@$.first_line,$1,$2,$3);}
-    | ParamDec { $$=new Node("VarList",1,@$.first_line,$1);}
-ParamDec: Specifier VarDec { $$=new Node("ParamDec",2,@$.first_line,$1,$2);}
-
-/* statement */
-/* specifies several program structures */
-/*Here is a change on DefList, may need to deal*/
-/*deflist is empty now!*/
-CompSt: LC DefList StmtList RC {$$=new Node("CompSt",4,@$.first_line,$1,$2,$3,$4);}
-StmtList: 
-    %empty
-    {$$=new Node("StmtList",@$.first_line);}
-    | Stmt StmtList { $$=new Node("StmtList",2,@$.first_line,$1,$2);}
-
-
-Stmt: Exp SEMI {$$=new Node("Stmt",2,@$.first_line,$1,$2);}
-    | CompSt {$$=new Node("Stmt",1,@$.first_line,$1);}
-    | RETURN Exp SEMI {$$=new Node("Stmt",3,@$.first_line,$1,$2,$3);}
-    | WHILE LP Exp RP Stmt {$$=new Node("Stmt", 5, @$.first_line, $1, $2, $3, $4, $5);}
-    | IF LP Exp RP Stmt %prec LOWER_ELSE {$$=new Node("Stmt", 5, @$.first_line, $1, $2, $3, $4, $5);}
-    | IF LP Exp RP Stmt ELSE Stmt {$$=new Node( "Stmt", 7, @$.first_line, $1, $2, $3, $4, $5, $6, $7);}
-
-/* local definition */
-/* declaration and assignment of local variables */
-DefList: %empty{$$=new Node("DefList",@$.first_line);}
-    | Def DefList {$$=new Node("DefList",2,@$.first_line,$1,$2);}
-Def: Specifier DecList SEMI {$$=new Node("Def",3,@$.first_line,$1,$2,$3);}
-DecList: Dec {$$=new Node("DecList",1,@$.first_line,$1);}
-    | Dec COMMA DecList {$$=new Node("DecList",3,@$.first_line,$1,$2,$3);}
-
-Dec: VarDec {$$=new Node("Dec",1,@$.first_line,$1);}
-    | VarDec ASSIGN Exp {$$=new Node("Dec",3,@$.first_line,$1,$2,$3);}
-
-/* Expression */
-/* a single constant, or operations on variables */
-Exp: Exp ASSIGN Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
-    | Exp AND Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
-    | Exp OR Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
-    | Exp LT Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
-    | Exp LE Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
-    | Exp GT Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
-    | Exp GE Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
-    | Exp NE Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
-    | Exp EQ Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
-    | Exp PLUS Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
-    | Exp MINUS Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
-    | Exp MUL Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
-    | Exp DIV Exp {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
-    | LP Exp RP {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
-    | MINUS Exp {$$=new Node("Exp",2,@$.first_line,$1,$2);}
-    | NOT Exp {$$=new Node("Exp",2,@$.first_line,$1,$2);}
-    | ID LP Args RP {$$=new Node("Exp",4,@$.first_line,$1,$2,$3,$4);}
-    | ID LP RP {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
-    | Exp LB Exp RB {$$=new Node("Exp",4,@$.first_line,$1,$2,$3,$4);}
-    | Exp DOT ID {$$=new Node("Exp",3,@$.first_line,$1,$2,$3);}
-    | ID {$$=new Node("Exp",1,@$.first_line,$1);}
-    | INT {$$=new Node("Exp",1,@$.first_line,$1);}
-    | FLOAT {$$=new Node("Exp",1,@$.first_line,$1);}
-    | CHAR {$$=new Node("Exp",1,@$.first_line,$1);}
-
-Args: Exp COMMA Args {$$=new Node("Args",3,@$.first_line,$1,$2,$3);}
-    | Exp {$$=new Node("Args",1,@$.first_line,$1);}
-
-%%
-void yyerror(const char *s) {
-    fprintf(stderr, "%s\n", s);
+void yyerror(const char* s) {
+    printf("Error type B at Line %d: Missing %s",yylineno,yylval);
 }
 
 int main(int argc, char **argv){

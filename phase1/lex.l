@@ -1,10 +1,10 @@
-%{  
+%{ 
+    using namespace std;
+    
     #define EXIT_OK 0
     #define EXIT_FAIL 1
-    #include "string.h"
-    #include "syntax.tab.h"
-%}
-%{
+    #define YYSTYPE char* /* Define the type of `yylval` */
+    /* Rewrite the internal macro in Flex to update the location */
     int yycolno = 1;
     #define YY_USER_ACTION \
     yylloc.first_line = yylineno; \
@@ -12,6 +12,18 @@
     yylloc.last_line = yylineno; \
     yylloc.last_column = yycolno + yyleng; \
     yycolno += yyleng;
+
+    extern bool has_error; //Has lexical or syntax error
+
+    #include "syntax.tab.h"
+    #include <string.h>
+    #include <regex>
+    void lexical_error(char* unknown_lexeme, int lineno){
+        has_error=true;
+        printf("Error type A at Line %d: unknown lexeme %s\n", lineno, unknown_lexeme);
+    }
+
+
 %}
 
 %option yylineno
@@ -19,169 +31,79 @@
 
 valid_decimal_int 0|[1-9][0-9]*
 valid_hex_int [xX](0|[1-9a-f][0-9a-f]*)
-
+id [_a-zA-Z][_0-9a-zA-Z]*
+anysp " "*
 %%
     /*TODO: handle comment*/
     /*TODO: handle string*/
 
 "//".* {}
-
 "/*"((("*"[^/])?)|[^*])*"*/"  {}
+int|float|char {asprintf(&yylval,"TYPE: %s\n",yytext); return TYPE;}
 
-int|float|char { 
-    yylval.node = new Node("TYPE",strdup(yytext)); 
-    return TYPE; }
+for {yylval=strdup("FOR\n"); return FOR;}
+"#define" {yylval=strdup("DEFINE\n"); return DEFINE;}
+"#include" {yylval=strdup("INCLUDE\n"); return INCLUDE;}
+"#ifdef" {yylval=strdup("IFDEF\n"); return IFDEF;}
+"#else" {yylval=strdup("MACROELSE\n"); return MACROELSE;}
+"#endif" {yylval=strdup("ENDIF\n"); return ENDIF;}
 
-\'(\\x{valid_hex_int}{2}|.)\' {
-    yylval.node = new Node("CHAR",strdup(yytext));
-    return CHAR;
-}
-
-"struct" { 
-    yylval.node = new Node("STRUCT"); 
-    return STRUCT; }
-
-"if" {
-    yylval.node = new Node("IF");
-    return IF;
-}
-
-"else" {
-    yylval.node = new Node("ELSE");
-    return ELSE;
-}
-
-"while" {
-    yylval.node = new Node("WHILE");
-    return WHILE;
-}
-
-"return" {
-    yylval.node = new Node("RETURN");
-    return RETURN;
-}
-
-";" {
-    yylval.node = new Node("SEMI");
-    return SEMI;
-}
-"," {
-    yylval.node = new Node("COMMA");
-    return COMMA;
-}
-"==" {
-    yylval.node = new Node("EQ");
-    return EQ;
-}
-"<=" {
-    yylval.node = new Node("LE");
-    return LE;
-}
-">=" {
-    yylval.node = new Node("GE");
-    return GE;
-}
-"!=" {
-    yylval.node = new Node("NE");
-    return NE;
-}
-"=" {
-    yylval.node = new Node("ASSIGN");
-    return ASSIGN;
-}
-"!" {
-    yylval.node = new Node("NOT");
-    return NOT;
-}
-"<" {
-    yylval.node = new Node("LT");
-    return LT;
-}
-">" {
-    yylval.node = new Node("GT");
-    return GT;
-}
-"+" {
-    yylval.node = new Node("PLUS");
-    return PLUS;
-}
-"-" {
-    yylval.node = new Node("MINUS");
-    return MINUS;
-}
-"*" {
-    yylval.node = new Node("MUL");
-    return MUL;
-}
-"/" {
-    yylval.node = new Node("DIV");
-    return DIV;
-}
-"&&" {
-    yylval.node = new Node("AND");
-    return AND;
-}
-"||" {
-    yylval.node = new Node("OR");
-    return OR;
-}
-"(" {
-    yylval.node = new Node("LP");
-    return LP;
-}
-")" {
-    yylval.node = new Node("RP");
-    return RP;
-}
-"[" {
-    yylval.node = new Node("LB");
-    return LB;
-}
-"]" {
-    yylval.node = new Node("RB");
-    return RB;
-}
-"{" {
-    yylval.node = new Node("LC");
-    return LC;
-}
-"}" {
-    yylval.node = new Node("RC");
-    return RC;
-}
-
-[_a-zA-Z][_0-9a-zA-Z]* { 
-    yylval.node = new Node("ID",strdup(yytext)); 
-    return ID; }
-
-({valid_decimal_int})\.[0-9]+ { 
-    yylval.node = new Node("FLOAT", (float)atof(yytext)); 
-    return FLOAT; }
-
-{valid_decimal_int}|0{valid_hex_int} { 
-    yylval.node = new Node("FLOAT", atoi(yytext)); 
-    return INT; /* not include minus number */ }
-
-"." { 
-    yylval.node = new Node("DOT");
-    return DOT; }
-
-\\x(0|[1-9a-f][0-9a-f]*)[^0-9a-fA-F] {
-    printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, strdup(yytext));
-}
-
-0[Xx]([^0-9a-fA-F]|([1-9a-fA-F][0-9a-fA-F]*[^0-9a-fA-F]+)) {
-    printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, strdup(yytext));
-}
-[$@] {
-    printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, strdup(yytext));
-}
+struct {yylval=strdup("STRUCT\n"); return STRUCT;}
+if {yylval=strdup("IF\n"); return IF;}
+else {yylval=strdup("ELSE\n"); return ELSE;}
+while {yylval=strdup("WHILE\n"); return WHILE;}
+return {yylval=strdup("RETURN\n"); return RETURN;}
 \\x[^0-9a-fA-F]* {
     printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, yytext);
 }
+'([^']*)'|(\\{valid_hex_int}) {asprintf(&yylval,"CHAR: %s\n",yytext); return CHAR;}
+";" {yylval=strdup("SEMI\n"); return SEMI;}
+"," {yylval=strdup("COMMA\n"); return COMMA;}
+"==" {yylval=strdup("EQ\n"); return EQ;}
+"<=" {yylval=strdup("LE\n"); return LE;}
+">=" {yylval=strdup("GE\n"); return GE;}
+"!=" {yylval=strdup("NE\n"); return NE;}
+"=" {yylval=strdup("ASSIGN\n"); return ASSIGN;}
+"!" {yylval=strdup("NOT\n"); return NOT;}
+"<" {yylval=strdup("LT\n"); return LT;}
+">" {yylval=strdup("GT\n"); return GT;}
+"+" {yylval=strdup("PLUS\n"); return PLUS;}
+"-" {yylval=strdup("MINUS\n"); return MINUS;}
+"*" {yylval=strdup("MUL\n"); return MUL;}
+"/" {yylval=strdup("DIV\n"); return DIV;}
+"&&" {yylval=strdup("AND\n"); return AND;}
+"&" {lexical_error(yytext,yylineno); return AND;} //treat it as AND to prevent the syntax error later
+"||" {yylval=strdup("OR\n"); return OR;}
+"|" {lexical_error(yytext,yylineno); return OR;} //treat it as OR to prevent the syntax error later
+"(" {yylval=strdup("LP\n"); return LP;}
+")" {yylval=strdup("RP\n"); return RP;}
+"[" {yylval=strdup("LB\n"); return LB;}
+"]" {yylval=strdup("RB\n"); return RB;}
+"{" {yylval=strdup("LC\n"); return LC;}
+"}" {yylval=strdup("RC\n"); return RC;}
+[0-9]+{id} {lexical_error(yytext, yylineno); return ID;}
+{id} {asprintf(&yylval,"ID: %s\n",yytext); return ID;}
+({valid_decimal_int})\.[0-9]+ {asprintf(&yylval,"FLOAT: %s\n",yytext); return FLOAT;}
+{valid_decimal_int}|0{valid_hex_int} {asprintf(&yylval,"INT: %s\n",yytext); return INT;/* not include minus number */}
+\\x(0|[1-9a-f][0-9a-f]*)[^0-9a-fA-F] {
+    printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, strdup(yytext));
+}
+"." {yylval=strdup("DOT\n"); return DOT;}
+\n {yycolno=1;}
+[ \t]+ /*ignore word splits*/
 
-\n { yycolno = 1;}
+\<[^" "\n]*\> |  \"[^" "\n]*\"  {yylval = strndup(yytext + 1, strlen(yytext) - 2); return INFILE;}
 
+" "*[^" "\n]* {string inputString(yytext); 
+              regex pattern("\\s*");
+              yylval=strdup(yytext); 
+              regex_replace(inputString, pattern, "");
+              return FOLLOW_DEFINE;}
+," "*[^" "\n]* {string inputString(yytext); 
+                regex pattern(",\\s*");
+                yylval=strdup(yytext); 
+                regex_replace(inputString, pattern, "");
+                return MAYFOLLOW_DEFINE;}
+
+. {lexical_error(yytext, yylineno);}
 %%
-   
-   

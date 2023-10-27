@@ -1,0 +1,16 @@
+, mac
+#define MACRO_NAME replacement_text, MACRO_NAME1 replacement_text1
+#define MACRO_NAME1 replacement_text1
+#include <header_file.h>
+#include "header_file.h"
+int test_1_r01(int a, int b){
+  c = 'c';
+  if (a > b)
+  {
+    return a;
+  }
+  else
+  {
+    return b;
+  }
+  }

@@ -1,11 +1,12 @@
 %{
     using namespace std;
 
-    #define YYSTYPE char* /* Define the type of `yylval` */
+    #define YYSTYPE char* //Define the type of `yylval`
 
     #include "lex.yy.c"
 
     extern int yylineno;
+    bool has_error=false; //Has lexical or syntax error
     void yyerror(const char*);
     
     //concat the strings and shift two spaces
@@ -24,6 +25,11 @@
         }
 
         return result;
+    }
+
+    void syntax_error(const char* missing_token, int lineno){
+        has_error=true;
+        printf("Error type B at Line %d: Missing %s\n", lineno, missing_token);
     }
 
     //TODO: Optimize by macro
@@ -54,7 +60,7 @@
 
 /* HIGH-LEVEL DEFINITION specifies the top-level syntax for a SPL program, including global variable declarations and function definitions.*/
 Program:
-  ExtDefList {printf("Program (%d)\n%s", @$.first_line, concat_shift($1));}
+  ExtDefList {if(!has_error){printf("Program (%d)\n%s", @$.first_line, concat_shift($1));}}
 
 ExtDefList:
   %empty {$$=strdup("");}
@@ -62,7 +68,9 @@ ExtDefList:
 
 ExtDef:
   Specifier ExtDecList SEMI {asprintf(&$$,"ExtDef (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Specifier ExtDecList error {syntax_error("semicolon \';\'",@$.first_line);}
 | Specifier SEMI {asprintf(&$$,"ExtDef (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
+| Specifier error {syntax_error("semicolon \';\'",@$.first_line);}
 | Specifier FunDec CompSt {asprintf(&$$,"ExtDef (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
 
 ExtDecList:
@@ -77,6 +85,7 @@ Specifier:
 
 StructSpecifier:
   STRUCT ID LC DefList RC {asprintf(&$$,"StructSpecifier (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
+| STRUCT ID LC DefList error {syntax_error("closing curly brace \'}\'",@$.first_line);}
 | STRUCT ID {asprintf(&$$,"StructSpecifier (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
 
 
@@ -85,10 +94,13 @@ StructSpecifier:
 VarDec:
   ID {asprintf(&$$,"VarDec (%d)\n%s\n", @$.first_line, concat_shift($1));}
 | VarDec LB INT RB {asprintf(&$$,"VarDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
+| VarDec LB INT error {syntax_error("closing bracket \']\'",@$.first_line);}
 
 FunDec:
   ID LP VarList RP {asprintf(&$$,"FunDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
+| ID LP VarList error {syntax_error("closing parenthesis \')\'",@$.first_line);}
 | ID LP RP {asprintf(&$$,"FunDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| ID LP error {syntax_error("closing parenthesis \')\'",@$.first_line);}
 
 VarList:
   ParamDec COMMA VarList {asprintf(&$$,"VarList (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
@@ -100,10 +112,9 @@ ParamDec:
 
 /* STATEMENT specifies several program structures, such as branching structure or loop structure.
  * They are mostly enclosed by curly braces, or end with a semicolon. */
-/*Here is a change on DefList, may need to deal*/
-/*deflist is empty now!*/
 CompSt:
   LC DefList StmtList RC {asprintf(&$$,"CompSt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
+| LC DefList StmtList error {syntax_error("closing curly brace \'}\'",@$.first_line);}
 
 StmtList:
   %empty {$$=strdup("");}
@@ -111,11 +122,16 @@ StmtList:
 
 Stmt:
   Exp SEMI {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
+| Exp error {syntax_error("semicolon \';\'",@$.first_line);}
 | CompSt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1));}
 | RETURN Exp SEMI {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| RETURN Exp error {syntax_error("semicolon \';\'",@$.first_line);}
+| RETURN error SEMI /* e.g. return @; only report lexical error */
 | IF LP Exp RP Stmt %prec LOWER_ELSE {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
 | IF LP Exp RP Stmt ELSE Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5,$6,$7));}
+| IF LP Exp error Stmt {syntax_error("closing parenthesis \')\'",@$.first_line);}
 | WHILE LP Exp RP Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
+| WHILE LP Exp error Stmt {syntax_error("closing parenthesis \')\'",@$.first_line);}
 
 
 /* LOCAL DEFINITION includes the declaration and assignment of local variables. */
@@ -125,6 +141,7 @@ DefList:
 
 Def:
   Specifier DecList SEMI {asprintf(&$$,"Def (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| Specifier DecList error {syntax_error("semicolon \';\'",@$.first_line);}
 
 DecList:
   Dec {asprintf(&$$,"DecList (%d)\n%s\n", @$.first_line, concat_shift($1));}
@@ -133,6 +150,7 @@ DecList:
 Dec:
   VarDec {asprintf(&$$,"Dec (%d)\n%s\n", @$.first_line, concat_shift($1));}
 | VarDec ASSIGN Exp {asprintf(&$$,"Dec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| VarDec ASSIGN error /* e.g. int a = $, only report lexical error */
 
 
 /* EXPRESSION can be a single constant, or operations on variables.
@@ -152,11 +170,15 @@ Exp:
 | Exp MUL Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
 | Exp DIV Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
 | LP Exp RP {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| LP Exp error {syntax_error("closing parenthesis \')\'",@$.first_line);}
 | MINUS Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
 | NOT Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
 | ID LP Args RP {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
+| ID LP Args error {syntax_error("closing parenthesis \')\'",@$.first_line);}
 | ID LP RP {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| ID LP error {syntax_error("closing parenthesis \')\'",@$.first_line);}
 | Exp LB Exp RB {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
+| Exp LB Exp error {syntax_error("closing bracket \']\'",@$.first_line);}
 | Exp DOT ID {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
 | ID {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
 | INT {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
@@ -169,10 +191,7 @@ Args:
 
 %%
 
-void yyerror(const char* s) {
-    printf("Error type B at Line %d: Missing semicolon '%s'\n",
-               yylineno, strdup(yytext));
-}
+void yyerror(const char* s) {}
 
 int main(int argc, char **argv){
     char *file_path;

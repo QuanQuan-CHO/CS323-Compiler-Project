@@ -13,7 +13,14 @@
     yylloc.last_column = yycolno + yyleng; \
     yycolno += yyleng;
 
+    extern bool has_error; //Has lexical or syntax error
+
     #include "syntax.tab.h"
+
+    void lexical_error(char* unknown_lexeme, int lineno){
+        has_error=true;
+        printf("Error type A at Line %d: unknown lexeme %s\n", lineno, unknown_lexeme);
+    }
 %}
 
 %option yylineno
@@ -21,6 +28,7 @@
 
 valid_decimal_int 0|[1-9][0-9]*
 valid_hex_int [xX](0|[1-9a-f][0-9a-f]*)
+id [_a-zA-Z][_0-9a-zA-Z]*
 
 %%
     /*TODO: handle comment*/
@@ -60,7 +68,8 @@ return {yylval=strdup("RETURN\n"); return RETURN;}
 "]" {yylval=strdup("RB\n"); return RB;}
 "{" {yylval=strdup("LC\n"); return LC;}
 "}" {yylval=strdup("RC\n"); return RC;}
-[_a-zA-Z][_0-9a-zA-Z]* {asprintf(&yylval,"ID: %s\n",yytext); return ID;}
+[0-9]+{id} {lexical_error(yytext, yylineno); return ID;}
+{id} {asprintf(&yylval,"ID: %s\n",yytext); return ID;}
 ({valid_decimal_int})\.[0-9]+ {asprintf(&yylval,"FLOAT: %s\n",yytext); return FLOAT;}
 {valid_decimal_int}|0{valid_hex_int} {asprintf(&yylval,"INT: %s\n",yytext); return INT;/* not include minus number */}
 \\x(0|[1-9a-f][0-9a-f]*)[^0-9a-fA-F] {
@@ -68,6 +77,6 @@ return {yylval=strdup("RETURN\n"); return RETURN;}
 }
 "." {yylval=strdup("DOT\n"); return DOT;}
 \n {yycolno=1;}
-[ \t]+
-. {printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, strdup(yytext));}
+[ \t]+ /*ignore word splits*/
+. {lexical_error(yytext, yylineno);}
 %%

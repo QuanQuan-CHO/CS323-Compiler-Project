@@ -77,9 +77,9 @@ return {yylval=strdup("RETURN\n"); return RETURN;}
 "*" {yylval=strdup("MUL\n"); return MUL;}
 "/" {yylval=strdup("DIV\n"); return DIV;}
 "&&" {yylval=strdup("AND\n"); return AND;}
-"&" {lexical_error(yytext,yylineno); return AND;} //treat it as AND to prevent the syntax error later
+"&" {lexical_error(yytext,yylineno); return AND;} //treat & as AND to prevent the syntax error later
 "||" {yylval=strdup("OR\n"); return OR;}
-"|" {lexical_error(yytext,yylineno); return OR;} //treat it as OR to prevent the syntax error later
+"|" {lexical_error(yytext,yylineno); return OR;} //treat | as OR to prevent the syntax error later
 "(" {yylval=strdup("LP\n"); return LP;}
 ")" {yylval=strdup("RP\n"); return RP;}
 "[" {yylval=strdup("LB\n"); return LB;}

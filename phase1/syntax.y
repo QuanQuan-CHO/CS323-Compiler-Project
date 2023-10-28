@@ -140,10 +140,16 @@ ParamDec:
  * They are mostly enclosed by curly braces, or end with a semicolon. */
 CompSt:
   LC DefList StmtList RC {asprintf(&$$,"CompSt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
-| LC DefList StmtList error {syntax_error("closing curly brace \'}\'",@$.first_line);}
+| LC DefList StmtList error {syntax_error("closing curly brace \'}\'",@3.last_line);}
+| LC DefList RC {asprintf(&$$,"CompSt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| LC DefList error {syntax_error("closing curly brace \'}\'",@2.last_line);}
+| LC StmtList RC {asprintf(&$$,"CompSt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| LC StmtList error {syntax_error("closing curly brace \'}\'",@2.last_line);}
+| LC DefList StmtList DefList error {syntax_error("specifier",@3.first_line);}
+| LC StmtList DefList error {syntax_error("specifier",@2.first_line);}
 
 StmtList:
-  %empty {$$=strdup("");}
+  Stmt {asprintf(&$$,"StmtList (%d)\n%s\n", @$.first_line, concat_shift($1));}
 | Stmt StmtList {asprintf(&$$,"StmtList (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
 
 Stmt:
@@ -167,7 +173,7 @@ Stmt:
 
 /* LOCAL DEFINITION includes the declaration and assignment of local variables. */
 DefList:
-  %empty {$$=strdup("");}
+  Def {asprintf(&$$,"DefList (%d)\n%s\n", @$.first_line, concat_shift($1));}
 | Def DefList {asprintf(&$$,"DefList (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
 
 Def:

@@ -1,0 +1,19 @@
+#include <stdio.h>
+
+/*
+Please disable ASLR by sudo sysctl -w kernel.randomize_va_space=0
+*/
+
+void win() {  // at 0x08048456
+    puts("Excellent, now let's go hack the world");
+}
+void vuln() {
+    char buf[16];
+    scanf("%s", buf);
+}
+int main() {
+    puts("Welcome back to 2023 CS315, let's have some fun!");
+    vuln();
+    puts("Have a good day, Bye~");
+    return 0;
+}

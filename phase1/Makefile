@@ -17,6 +17,7 @@ lexer: syntax.tab.* lex.yy.c  # For debugging lex.l
 
 .PHONY: test clean
 test: splc
+	@bin/splc extratest/test4.spl > extratest/test4.out
 	@bin/splc extratest/test1.spl > extratest/test1.myout
 	diff extratest/test1.out extratest/test1.myout
 	@bin/splc extratest/test2.spl > extratest/test2.myout

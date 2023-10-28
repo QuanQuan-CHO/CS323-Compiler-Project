@@ -1,5 +1,4 @@
-, mac
-#define MACRO_NAME replacement_text, MACRO_NAME1 replacement_text1
+#define MACRO_NAME replacement_text, MACRO_NAME2 replacement_text2
 #define MACRO_NAME1 replacement_text1
 #include <header_file.h>
 #include "header_file.h"

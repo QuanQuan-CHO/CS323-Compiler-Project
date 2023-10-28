@@ -30,18 +30,27 @@
 valid_decimal_int 0|[1-9][0-9]*
 valid_hex_int [xX](0|[1-9a-f][0-9a-f]*)
 id [_a-zA-Z][_0-9a-zA-Z]*
-
+%x macro
 %%
     /*TODO: handle comment*/
     /*TODO: handle string*/
 
 "//".* {}
 "/*"((("*"[^/])?)|[^*])*"*/"  {}
-"#define" {yylval=strdup("DEFINE\n"); return DEFINE;}
-"#include" {yylval=strdup("INCLUDE\n"); return INCLUDE;}
-"#ifdef" {yylval=strdup("IFDEF\n"); return IFDEF;}
-"#else" {yylval=strdup("MACROELSE\n"); return MACROELSE;}
-"#endif" {yylval=strdup("ENDIF\n"); return ENDIF;}
+"#define" {yylval=strdup("DEFINE\n"); BEGIN(macro); return DEFINE;}
+"#include" {yylval=strdup("INCLUDE\n"); BEGIN(macro); return INCLUDE;}
+"#ifdef" {yylval=strdup("IFDEF\n"); BEGIN(macro); return IFDEF;}
+"#else" {yylval=strdup("MACROELSE\n"); BEGIN(macro); return MACROELSE;}
+"#endif" {yylval=strdup("ENDIF\n"); BEGIN(macro); return ENDIF;}
+<macro>{
+    "," {yylval=strdup("COMMA\n");return COMMA;}
+    "<" {return LT;}
+    ">" {return GT;}
+    \"  {return DQUOT;}
+    \n  {BEGIN(INITIAL);}
+    [ \t]+ /*ignore word splits*/{}
+    [^," "<>"\n]+ {asprintf(&yylval,"%s\n",yytext);return MACRO;}
+}
 int|float|char {asprintf(&yylval,"TYPE: %s\n",yytext); return TYPE;}
 for {yylval=strdup("FOR\n"); return FOR;}
 struct {yylval=strdup("STRUCT\n"); return STRUCT;}
@@ -86,20 +95,9 @@ return {yylval=strdup("RETURN\n"); return RETURN;}
 }
 "." {yylval=strdup("DOT\n"); return DOT;}
 \n {yycolno=1;}
-[ \t]+ /*ignore word splits*/
-
-\<[^" "\n]*\> |  \"[^" "\n]*\"  {yylval = strndup(yytext + 1, strlen(yytext) - 2); return INFILE;}
-
-" "*[^" "\n]* {string inputString(yytext); 
-              regex pattern("\\s*");
-              yylval=strdup(yytext); 
-              regex_replace(inputString, pattern, "");
-              return FOLLOW_DEFINE;}
-," "*[^" "\n]* {string inputString(yytext); 
-                regex pattern(",\\s*");
-                yylval=strdup(yytext); 
-                regex_replace(inputString, pattern, "");
-                return MAYFOLLOW_DEFINE;}
-
+[ \r\t]+ /*ignore word splits*/
 . {lexical_error(yytext, yylineno);}
+
+
+
 %%

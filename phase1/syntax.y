@@ -46,8 +46,8 @@
 
 %token FOR 
 %token IFDEF MACROELSE ENDIF
-%token INCLUDE INFILE
-%token DEFINE MAYFOLLOW_DEFINE FOLLOW_DEFINE
+%token INCLUDE DQUOT
+%token DEFINE MACRO
 
 %right ASSIGN
 %left OR
@@ -66,7 +66,24 @@
 /* HIGH-LEVEL DEFINITION specifies the top-level syntax for a SPL program, including global variable declarations and function definitions.*/
 RES:
   Program {if(!has_error){printf("%s", $1);}}
+| MACROStmt Program {
+  if(!has_error){printf("%s", $1);}
+  if(!has_error){printf("%s", $2);}
+}
+MACROStmt:
+  INCLUDEStmt {$$=$1;}
+| DEFINEStmt {$$=$1;}
+| DEFINEStmt MACROStmt {asprintf(&$$,"%s%s", $1,$2);}
+| INCLUDEStmt MACROStmt {asprintf(&$$,"%s%s", $1,$2);}
 
+
+INCLUDEStmt:
+  INCLUDE LT MACRO GT {asprintf(&$$,"INCLUDE (%d)\n%s", @1.first_line ,concat_shift($3));}
+| INCLUDE DQUOT MACRO DQUOT {asprintf(&$$,"INCLUDE (%d)\n%s", @1.first_line ,concat_shift($3));}
+
+DEFINEStmt:
+  DEFINE MACRO MACRO {asprintf(&$$,"DEFINE (%d)\n%s", @1.first_line ,concat_shift($2,$3));}
+| DEFINEStmt COMMA MACRO MACRO {asprintf(&$$,"%sDEFINE (%d)\n%s",$1, @1.first_line ,concat_shift($3,$4));}
 
 Program:
   ExtDefList {asprintf(&$$,"Program (%d)\n%s", @$.first_line, concat_shift($1));}

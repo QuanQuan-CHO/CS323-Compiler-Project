@@ -35,7 +35,7 @@ Program (7)
                 LP
                 Args (9)
                   Exp (9)
-                    CHAR: 'Debug mode is enabled.\n'
+                    CHAR: 'y'
                 RP
               SEMI
             MACROELSE
@@ -45,7 +45,7 @@ Program (7)
                 LP
                 Args (11)
                   Exp (11)
-                    CHAR: 'Debug mode is disabled.\n'
+                    CHAR: 'n'
                 RP
               SEMI
           StmtList (14)

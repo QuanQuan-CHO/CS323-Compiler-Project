@@ -28,7 +28,6 @@
 /*%option debug*/
 
 valid_decimal_int 0|[1-9][0-9]*
-valid_hex_int [xX](0|[1-9a-f][0-9a-f]*)
 id [_a-zA-Z][_0-9a-zA-Z]*
 %x macro
 %%
@@ -58,10 +57,9 @@ if {yylval=strdup("IF\n"); return IF;}
 else {yylval=strdup("ELSE\n"); return ELSE;}
 while {yylval=strdup("WHILE\n"); return WHILE;}
 return {yylval=strdup("RETURN\n"); return RETURN;}
-\\x[^0-9a-fA-F]* {
-    printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, yytext);
-}
-'([^']*)'|\\{valid_hex_int} {asprintf(&yylval,"CHAR: %s\n",yytext); return CHAR;}
+    /* Because CHAR is 2 Byte, only 1 or 2 hex char is allowed */
+'([^']|\\[xX](0|[1-9a-fA-F][0-9a-fA-F]?))' {asprintf(&yylval,"CHAR: %s\n",yytext); return CHAR;}
+'[^']*' {lexical_error(yytext,yylineno); return CHAR;} /*Invalid CHAR: not matched by the above valid CHAR regex will fail to this regex*/
 ";" {yylval=strdup("SEMI\n"); return SEMI;}
 "," {yylval=strdup("COMMA\n"); return COMMA;}
 "==" {yylval=strdup("EQ\n"); return EQ;}
@@ -86,18 +84,15 @@ return {yylval=strdup("RETURN\n"); return RETURN;}
 "]" {yylval=strdup("RB\n"); return RB;}
 "{" {yylval=strdup("LC\n"); return LC;}
 "}" {yylval=strdup("RC\n"); return RC;}
-[0-9]+{id} {lexical_error(yytext, yylineno); return ID;}
-{id} {asprintf(&yylval,"ID: %s\n",yytext); return ID;}
 ({valid_decimal_int})\.[0-9]+ {asprintf(&yylval,"FLOAT: %s\n",yytext); return FLOAT;}
-{valid_decimal_int}|0{valid_hex_int} {asprintf(&yylval,"INT: %s\n",yytext); return INT;/* not include minus number */}
-\\x(0|[1-9a-f][0-9a-f]*)[^0-9a-fA-F] {
-    printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, strdup(yytext));
-}
+{valid_decimal_int} {asprintf(&yylval,"INT: %s\n",yytext); return INT;/* not include minus number */}
+0[xX](0|[1-9a-fA-F][0-9a-fA-F]*) {asprintf(&yylval,"INT: %lu\n",strtol(yytext,&yytext,16)); return INT;} /* valid_hex_int should be converted to decimal form */
+0[0-9]+|0[xX]0[0-9a-fA-F]+ {lexical_error(yytext,yylineno); return INT;} /* invalid decimal and hex INT: starting with 0 */
+[0-9]+{id} {lexical_error(yytext,yylineno); return ID;}
+{id} {asprintf(&yylval,"ID: %s\n",yytext); return ID;}
 "." {yylval=strdup("DOT\n"); return DOT;}
 \n {yycolno=1;}
 [ \r\t]+ /*ignore word splits*/
-. {lexical_error(yytext, yylineno);}
-
-
+. {yymore();lexical_error(yytext,yylineno);}
 
 %%

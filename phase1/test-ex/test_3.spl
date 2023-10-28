@@ -6,9 +6,9 @@
 
 int main() {
 #ifdef DEBUG
-    printf('Debug mode is enabled.');
+    printf('y');
 #else
-    printf('Debug mode is disabled.');
+    printf('n');
 #endif
 
     return 0;

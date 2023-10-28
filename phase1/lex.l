@@ -40,8 +40,8 @@ id [_a-zA-Z][_0-9a-zA-Z]*
 "#define" {yylval=strdup("DEFINE\n"); BEGIN(macro); return DEFINE;}
 "#include" {yylval=strdup("INCLUDE\n"); BEGIN(macro); return INCLUDE;}
 "#ifdef" {yylval=strdup("IFDEF\n"); BEGIN(macro); return IFDEF;}
-"#else" {yylval=strdup("MACROELSE\n"); BEGIN(macro); return MACROELSE;}
-"#endif" {yylval=strdup("ENDIF\n"); BEGIN(macro); return ENDIF;}
+"#else" {yylval=strdup("MACROELSE\n"); return MACROELSE;}
+"#endif" {yylval=strdup("ENDIF\n"); return ENDIF;}
 <macro>{
     "," {yylval=strdup("COMMA\n");return COMMA;}
     "<" {return LT;}

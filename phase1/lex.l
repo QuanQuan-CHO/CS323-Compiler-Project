@@ -58,7 +58,7 @@ else {yylval=strdup("ELSE\n"); return ELSE;}
 while {yylval=strdup("WHILE\n"); return WHILE;}
 return {yylval=strdup("RETURN\n"); return RETURN;}
     /* Because CHAR is 2 Byte, only 1 or 2 hex char is allowed */
-'[^'\\n\\t]*'|\\[xX](0|[1-9a-fA-F][0-9a-fA-F]?) {asprintf(&yylval,"CHAR: %s\n",yytext); return CHAR;}
+'([^']|\\[xX](0|[1-9a-fA-F][0-9a-fA-F]?))' {asprintf(&yylval,"CHAR: %s\n",yytext); return CHAR;}
 '[^']*' {lexical_error(yytext,yylineno); return CHAR;} /*Invalid CHAR: not matched by the above valid CHAR regex will fail to this regex*/
 ";" {yylval=strdup("SEMI\n"); return SEMI;}
 "," {yylval=strdup("COMMA\n"); return COMMA;}

@@ -1,0 +1,57 @@
+DEFINE (1)
+  MACRO_NAME
+  replacement_text
+DEFINE (1)
+  MACRO_NAME2
+  replacement_text2
+DEFINE (2)
+  MACRO_NAME1
+  replacement_text1
+INCLUDE (3)
+  header_file.h
+INCLUDE (4)
+  header_file.h
+DEFINE (5)
+  DEBUG
+  1
+Program (7)
+  ExtDefList (7)
+    ExtDef (7)
+      Specifier (7)
+        TYPE: int
+      FunDec (7)
+        ID: main
+        LP
+        RP
+      CompSt (7)
+        LC
+        StmtList (8)
+          Stmt (8)
+            IFDEF
+            DEBUG
+            Stmt (9)
+              Exp (9)
+                ID: printf
+                LP
+                Args (9)
+                  Exp (9)
+                    CHAR: 'Debug mode is enabled.\n'
+                RP
+              SEMI
+            MACROELSE
+            Stmt (11)
+              Exp (11)
+                ID: printf
+                LP
+                Args (11)
+                  Exp (11)
+                    CHAR: 'Debug mode is disabled.\n'
+                RP
+              SEMI
+          StmtList (14)
+            Stmt (14)
+              RETURN
+              Exp (14)
+                INT: 0
+              SEMI
+        RC

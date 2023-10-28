@@ -94,9 +94,9 @@ ExtDefList:
 
 ExtDef:
   Specifier ExtDecList SEMI {asprintf(&$$,"ExtDef (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| Specifier ExtDecList error {syntax_error("semicolon \';\'",@$.first_line);}
+| Specifier ExtDecList error {syntax_error("semicolon \';\'",@2.last_line);}
 | Specifier SEMI {asprintf(&$$,"ExtDef (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
-| Specifier error {syntax_error("semicolon \';\'",@$.first_line);}
+| Specifier error {syntax_error("semicolon \';\'",@1.last_line);}
 | Specifier FunDec CompSt {asprintf(&$$,"ExtDef (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
 
 ExtDecList:
@@ -111,7 +111,7 @@ Specifier:
 
 StructSpecifier:
   STRUCT ID LC DefList RC {asprintf(&$$,"StructSpecifier (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
-| STRUCT ID LC DefList error {syntax_error("closing curly brace \'}\'",@$.first_line);}
+| STRUCT ID LC DefList error {syntax_error("closing curly brace \'}\'",@4.last_line);}
 | STRUCT ID {asprintf(&$$,"StructSpecifier (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
 
 
@@ -120,13 +120,13 @@ StructSpecifier:
 VarDec:
   ID {asprintf(&$$,"VarDec (%d)\n%s\n", @$.first_line, concat_shift($1));}
 | VarDec LB INT RB {asprintf(&$$,"VarDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
-| VarDec LB INT error {syntax_error("closing bracket \']\'",@$.first_line);}
+| VarDec LB INT error {syntax_error("closing bracket \']\'",@3.last_line);}
 
 FunDec:
   ID LP VarList RP {asprintf(&$$,"FunDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
-| ID LP VarList error {syntax_error("closing parenthesis \')\'",@$.first_line);}
+| ID LP VarList error {syntax_error("closing parenthesis \')\'",@3.last_line);}
 | ID LP RP {asprintf(&$$,"FunDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| ID LP error {syntax_error("closing parenthesis \')\'",@$.first_line);}
+| ID LP error {syntax_error("closing parenthesis \')\'",@2.last_line);}
 
 VarList:
   ParamDec COMMA VarList {asprintf(&$$,"VarList (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
@@ -154,16 +154,16 @@ StmtList:
 
 Stmt:
   Exp SEMI {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
-| Exp error {syntax_error("semicolon \';\'",@$.first_line);}
+| Exp error {syntax_error("semicolon \';\'",@1.last_line);}
 | CompSt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1));}
 | RETURN Exp SEMI {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| RETURN Exp error {syntax_error("semicolon \';\'",@$.first_line);}
+| RETURN Exp error {syntax_error("semicolon \';\'",@2.last_line);}
 | RETURN error SEMI /* e.g. return @; only report lexical error */
 | IF LP Exp RP Stmt %prec LOWER_ELSE {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
 | IF LP Exp RP Stmt ELSE Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5,$6,$7));}
-| IF LP Exp error Stmt {syntax_error("closing parenthesis \')\'",@$.first_line);}
+| IF LP Exp error Stmt {syntax_error("closing parenthesis \')\'",@3.last_line);}
 | WHILE LP Exp RP Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
-| WHILE LP Exp error Stmt {syntax_error("closing parenthesis \')\'",@$.first_line);}
+| WHILE LP Exp error Stmt {syntax_error("closing parenthesis \')\'",@3.last_line);}
 
 | FOR LP Exp SEMI Exp SEMI Exp RP Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5,$6,$7,$8,$9));}
 | IFDEF Stmt ENDIF {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
@@ -178,7 +178,7 @@ DefList:
 
 Def:
   Specifier DecList SEMI {asprintf(&$$,"Def (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| Specifier DecList error {syntax_error("semicolon \';\'",@$.first_line);}
+| Specifier DecList error {syntax_error("semicolon \';\'",@2.last_line);}
 
 DecList:
   Dec {asprintf(&$$,"DecList (%d)\n%s\n", @$.first_line, concat_shift($1));}
@@ -207,15 +207,15 @@ Exp:
 | Exp MUL Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
 | Exp DIV Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
 | LP Exp RP {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| LP Exp error {syntax_error("closing parenthesis \')\'",@$.first_line);}
+| LP Exp error {syntax_error("closing parenthesis \')\'",@2.last_line);}
 | MINUS Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
 | NOT Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
 | ID LP Args RP {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
-| ID LP Args error {syntax_error("closing parenthesis \')\'",@$.first_line);}
+| ID LP Args error {syntax_error("closing parenthesis \')\'",@3.last_line);}
 | ID LP RP {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| ID LP error {syntax_error("closing parenthesis \')\'",@$.first_line);}
+| ID LP error {syntax_error("closing parenthesis \')\'",@2.last_line);}
 | Exp LB Exp RB {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
-| Exp LB Exp error {syntax_error("closing bracket \']\'",@$.first_line);}
+| Exp LB Exp error {syntax_error("closing bracket \']\'",@3.last_line);}
 | Exp DOT ID {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
 | ID {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
 | INT {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}

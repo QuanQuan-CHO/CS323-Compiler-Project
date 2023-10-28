@@ -1,3 +1,4 @@
+SHELL=/bin/bash
 CC=g++
 FLEX=flex
 BISON=bison
@@ -17,37 +18,32 @@ lexer: syntax.tab.* lex.yy.c  # For debugging lex.l
 
 .PHONY: test clean
 test: splc
-	@bin/splc test/test4.spl > test/test4.out
-	@bin/splc test/test1.spl > test/test1.myout
-	diff test/test1.out test/test1.myout
-	@bin/splc test/test2.spl > test/test2.myout
-	diff test/test2.out test/test2.myout
-	@bin/splc test/test3.spl > test/test3.myout
-	diff test/test3.out test/test3.myout
+	@echo -e '\nStep1: Test base cases'
+	for i in {01..12}; do \
+		bin/splc test-base/test_1_r$$i.spl > test-base/test_1_r$$i.myout; \
+		diff test-base/test_1_r$$i.myout test-base/test_1_r$$i.out; \
+		if (($$? != 0)); then \
+			echo "-----error case: test_1_r$$i.spl-----"; exit 1; \
+		fi; \
+	done
 
-	@bin/splc test-base/test_1_r01.spl > test-base/test_1_r01.myout
-	diff test-base/test_1_r01.myout test-base/test_1_r01.out
-	@bin/splc test-base/test_1_r02.spl > test-base/test_1_r02.myout
-	diff test-base/test_1_r02.myout test-base/test_1_r02.out
-	@bin/splc test-base/test_1_r03.spl > test-base/test_1_r03.myout
-	diff test-base/test_1_r03.myout test-base/test_1_r03.out
-	@bin/splc test-base/test_1_r04.spl > test-base/test_1_r04.myout
-	diff test-base/test_1_r04.myout test-base/test_1_r04.out
-	@bin/splc test-base/test_1_r05.spl > test-base/test_1_r05.myout
-	diff test-base/test_1_r05.myout test-base/test_1_r05.out
-	@bin/splc test-base/test_1_r06.spl > test-base/test_1_r06.myout
-	diff test-base/test_1_r06.myout test-base/test_1_r06.out
-	@bin/splc test-base/test_1_r07.spl > test-base/test_1_r07.myout
-	diff test-base/test_1_r07.myout test-base/test_1_r07.out
-	@bin/splc test-base/test_1_r08.spl > test-base/test_1_r08.myout
-	diff test-base/test_1_r08.myout test-base/test_1_r08.out
-	@bin/splc test-base/test_1_r09.spl > test-base/test_1_r09.myout
-	diff test-base/test_1_r09.myout test-base/test_1_r09.out
-	@bin/splc test-base/test_1_r10.spl > test-base/test_1_r10.myout
-	diff test-base/test_1_r10.myout test-base/test_1_r10.out
-	@bin/splc test-base/test_1_r11.spl > test-base/test_1_r11.myout
-	diff test-base/test_1_r11.myout test-base/test_1_r11.out
-	@bin/splc test-base/test_1_r12.spl > test-base/test_1_r12.myout
-	diff test-base/test_1_r12.myout test-base/test_1_r12.out
+	@echo -e '\nStep2: Test self-written cases'
+	for i in {1..5}; do \
+		bin/splc test/test_12111611_$$i.spl > test/test_12111611_$$i.myout; \
+		diff test/test_12111611_$$i.myout test/test_12111611_$$i.out; \
+		if (($$? != 0)); then \
+			echo "-----error case: test_12111611_r$$i.spl-----"; exit 1; \
+		fi; \
+	done
+
+	@echo -e '\nStep3: Test extra cases'
+	for i in {1..3}; do \
+		bin/splc test-ex/test_$$i.spl > test-ex/test_$$i.myout; \
+		diff test-ex/test_$$i.myout test-ex/test_$$i.out; \
+		if (($$? != 0)); then \
+			echo "-----error case: test_$$i.spl-----"; exit 1; \
+		fi; \
+	done
+
 clean:
 	@rm -rf lex.yy.c syntax.tab.c syntax.tab.h lexer bin **/*.myout

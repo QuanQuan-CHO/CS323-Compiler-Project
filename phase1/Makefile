@@ -17,13 +17,13 @@ lexer: syntax.tab.* lex.yy.c  # For debugging lex.l
 
 .PHONY: test clean
 test: splc
-	@bin/splc extratest/test4.spl > extratest/test4.out
-	@bin/splc extratest/test1.spl > extratest/test1.myout
-	diff extratest/test1.out extratest/test1.myout
-	@bin/splc extratest/test2.spl > extratest/test2.myout
-	diff extratest/test2.out extratest/test2.myout
-	@bin/splc extratest/test3.spl > extratest/test3.myout
-	diff extratest/test3.out extratest/test3.myout
+	@bin/splc test/test4.spl > test/test4.out
+	@bin/splc test/test1.spl > test/test1.myout
+	diff test/test1.out test/test1.myout
+	@bin/splc test/test2.spl > test/test2.myout
+	diff test/test2.out test/test2.myout
+	@bin/splc test/test3.spl > test/test3.myout
+	diff test/test3.out test/test3.myout
 
 	@bin/splc test-base/test_1_r01.spl > test-base/test_1_r01.myout
 	diff test-base/test_1_r01.myout test-base/test_1_r01.out

@@ -1,10 +1,6 @@
 #include <stdio.h>
 
-/*
-Please disable ASLR by sudo sysctl -w kernel.randomize_va_space=0
-*/
-
-void win() {  // at 0x08048456
+void win() {
     puts("Excellent, now let's go hack the world");
 }
 void vuln() {

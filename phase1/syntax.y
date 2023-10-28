@@ -121,7 +121,8 @@ VarDec:
   ID {asprintf(&$$,"VarDec (%d)\n%s\n", @$.first_line, concat_shift($1));}
 | VarDec LB INT RB {asprintf(&$$,"VarDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
 | VarDec LB INT error {syntax_error("closing bracket \']\'",@3.last_line);}
-
+| VarDec INT RB {syntax_error("closing bracket \'[\'",@3.last_line);}
+| VarDec error INT RB {syntax_error("closing bracket \'[\'",@3.last_line);}
 FunDec:
   ID LP VarList RP {asprintf(&$$,"FunDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
 | ID LP VarList error {syntax_error("closing parenthesis \')\'",@3.last_line);}

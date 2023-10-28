@@ -25,7 +25,7 @@
 %}
 
 %option yylineno
-%option debug
+
 
 valid_decimal_int 0|[1-9][0-9]*
 id [_a-zA-Z][_0-9a-zA-Z]*

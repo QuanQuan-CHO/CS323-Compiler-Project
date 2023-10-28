@@ -2,7 +2,7 @@ struct struct_1
 {
   int num;
   char value;
-  float res 10];
+  float res[10];
 };
 int test_struct(int num)
 {

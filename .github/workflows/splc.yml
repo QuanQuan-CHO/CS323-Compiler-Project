@@ -13,12 +13,12 @@ jobs:
     env:
       TZ: Asia/Shanghai
     steps:
-      - name: 1. git checkout...
+      - name: 1. Git checkout...
         uses: actions/checkout@v3
 
-      - name: 2. install link library for Flex & Bison
+      - name: 2. Install link library for Flex & Bison
         run: sudo apt install libfl-dev libbison-dev
 
-      - name: 3. make splc
+      - name: 3. Compile splc and run test cases
         working-directory: phase1
-        run: make splc
+        run: make test

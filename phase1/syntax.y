@@ -43,9 +43,11 @@
 %token TYPE INT CHAR FLOAT STRUCT ID
 %token IF WHILE RETURN /*control flow word*/
 %token COMMA
-%token FOR
-%token DEFINE FOLLOW_DEFINE MAYFOLLOW_DEFINE
+
+%token FOR 
+%token IFDEF MACROELSE ENDIF
 %token INCLUDE INFILE
+%token DEFINE MAYFOLLOW_DEFINE FOLLOW_DEFINE
 
 %right ASSIGN
 %left OR
@@ -62,8 +64,12 @@
 %%
 
 /* HIGH-LEVEL DEFINITION specifies the top-level syntax for a SPL program, including global variable declarations and function definitions.*/
+RES:
+  Program {if(!has_error){printf("%s", $1);}}
+
+
 Program:
-  ExtDefList {if(!has_error){printf("Program (%d)\n%s", @$.first_line, concat_shift($1));}}
+  ExtDefList {asprintf(&$$,"Program (%d)\n%s", @$.first_line, concat_shift($1));}
 
 ExtDefList:
   %empty {$$=strdup("");}
@@ -135,7 +141,12 @@ Stmt:
 | IF LP Exp error Stmt {syntax_error("closing parenthesis \')\'",@$.first_line);}
 | WHILE LP Exp RP Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
 | WHILE LP Exp error Stmt {syntax_error("closing parenthesis \')\'",@$.first_line);}
+
 | FOR LP Exp SEMI Exp SEMI Exp RP Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5,$6,$7,$8,$9));}
+| IFDEF Stmt ENDIF {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+| IFDEF Stmt MACROELSE Stmt ENDIF {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
+
+
 
 /* LOCAL DEFINITION includes the declaration and assignment of local variables. */
 DefList:

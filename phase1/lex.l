@@ -16,7 +16,8 @@
     extern bool has_error; //Has lexical or syntax error
 
     #include "syntax.tab.h"
-
+    #include <string.h>
+    #include <regex>
     void lexical_error(char* unknown_lexeme, int lineno){
         has_error=true;
         printf("Error type A at Line %d: unknown lexeme %s\n", lineno, unknown_lexeme);
@@ -36,6 +37,11 @@ id [_a-zA-Z][_0-9a-zA-Z]*
 
 "//".* {}
 "/*"((("*"[^/])?)|[^*])*"*/"  {}
+"#define" {yylval=strdup("DEFINE\n"); return DEFINE;}
+"#include" {yylval=strdup("INCLUDE\n"); return INCLUDE;}
+"#ifdef" {yylval=strdup("IFDEF\n"); return IFDEF;}
+"#else" {yylval=strdup("MACROELSE\n"); return MACROELSE;}
+"#endif" {yylval=strdup("ENDIF\n"); return ENDIF;}
 int|float|char {asprintf(&yylval,"TYPE: %s\n",yytext); return TYPE;}
 for {yylval=strdup("FOR\n"); return FOR;}
 struct {yylval=strdup("STRUCT\n"); return STRUCT;}
@@ -81,5 +87,19 @@ return {yylval=strdup("RETURN\n"); return RETURN;}
 "." {yylval=strdup("DOT\n"); return DOT;}
 \n {yycolno=1;}
 [ \t]+ /*ignore word splits*/
+
+\<[^" "\n]*\> |  \"[^" "\n]*\"  {yylval = strndup(yytext + 1, strlen(yytext) - 2); return INFILE;}
+
+" "*[^" "\n]* {string inputString(yytext); 
+              regex pattern("\\s*");
+              yylval=strdup(yytext); 
+              regex_replace(inputString, pattern, "");
+              return FOLLOW_DEFINE;}
+," "*[^" "\n]* {string inputString(yytext); 
+                regex pattern(",\\s*");
+                yylval=strdup(yytext); 
+                regex_replace(inputString, pattern, "");
+                return MAYFOLLOW_DEFINE;}
+
 . {lexical_error(yytext, yylineno);}
 %%

@@ -1,11 +1,36 @@
-struct class{
-	int pair[114514];
-	float k[0]=0x0;
-	int _3333_=ic[kkk];
+int mihoyo1(int a, int b, int c) 
+{
+  int d = 0
+  if(d < a)
+    d = a
+  
+  if(d > b){
+    d = b;
+  }
+  else{
+    d = c;
+  }
+  return d
+  }
+  int mihoyo2() 
+{
+    int a = 0xff;
+    while(a < 10{
+        a = a * 2;
+    }
+    
+    if (a != 'a'{
+        return 3;
+    }
+    return a;
 }
-;char ccpc(int cy,char ababab){
-	int cy = '@';
-	char iii = '-';
-	int vector = string;
-	class.pa.x.yyy.t.tt.t.t.t.t.s = 233;
+int mihoyo3() 
+{
+    float right_float = 1.234;
+    int wrong_int_1 = 0x023456;
+    int wrong_int_2 = 023456;
+    int right_int = 23456;
+    char right_char = 'c';
+    char wrong_char = 'wrong_char';
+    char wrong_char = '\xuu';
 }

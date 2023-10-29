@@ -1,21 +1,12 @@
-int poor(){
-	(mercy = mercy) || (on)*me;
-	set&&fire = 2!=history+0;
-}
-char I(){
-	int m = 'yuanshen qidong';
-	I = ' '+m == crying + as + a +fool;
-	Tall * stories >= (on[the] - page);
-	-Short.glories_on 5the faint;
-	{I / m && close - enough='\n'=to >=touch;}
-	{
-		int but - I = never || cared + for +love;
-		{
-			It - 's' < a > church && of - burnt * romances;
-			and = I = 'm' /(-2 -4 -got||to -pray(
-			
-				it [s] = a, solo(song), and + it[s] || only (for, the=brave));{
-			}
-		}
-	}
+struct MyStruct {int x; char y; float z;};
+struct MyStruct s;
+int main() {
+    // Variable declarations
+    int a = 10, b = 20, c = 30;
+    
+    // Combine variable declaration, assignment, and operation
+    s.x = a * b;
+    s.y = 'A' + (c - 10);
+    s.z = s.x / 2.0;
+	s.x = s.z = s.y + 1;
 }

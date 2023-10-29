@@ -38,12 +38,12 @@ id [_a-zA-Z][_0-9a-zA-Z]*
 "#endif" {yylval=strdup("ENDIF\n"); return ENDIF;}
 <macro>{
     "," {yylval=strdup("COMMA\n"); return COMMA;}
-    "<" {return LT;}
-    ">" {return GT;}
-    \"  {return DQUOT;}
+    "<" {yylval=strdup("LT\n"); return LT;}
+    ">" {yylval=strdup("GT\n"); return GT;}
+    \"  {yylval=strdup("DQUOT\n"); return DQUOT;}
     \n  {BEGIN(INITIAL);}
     [ \t]+ /*ignore word splits*/
-    [^," "<>"\n]+ {asprintf(&yylval,"%s\n",yytext); return MACRO;}
+    [^," "<>"\n]+ {asprintf(&yylval,"MACRO: %s\n",yytext); return MACRO;}
 }
 int|float|char {asprintf(&yylval,"TYPE: %s\n",yytext); return TYPE;}
 for {yylval=strdup("FOR\n"); return FOR;}

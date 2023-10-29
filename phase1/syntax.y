@@ -7,7 +7,7 @@
 
     extern int yylineno;
     bool has_error=false; //Has lexical or syntax error
-    void yyerror(const char*);
+    void yyerror(const char*){}
     
     //concat the strings and shift two spaces
     template<typename... Args>
@@ -34,8 +34,6 @@
 
     //TODO: Optimize by macro
 %}
-%locations
-%define parse.error verbose
 
 %nonassoc LOWER_ELSE
 %nonassoc ELSE
@@ -64,29 +62,23 @@
 %%
 
 /* HIGH-LEVEL DEFINITION specifies the top-level syntax for a SPL program, including global variable declarations and function definitions.*/
-RES:
-  Program {if(!has_error){printf("%s", $1);}}
-| MACROStmt Program {
-  if(!has_error){printf("%s", $1);}
-  if(!has_error){printf("%s", $2);}
-}
-MACROStmt:
-  INCLUDEStmt {$$=$1;}
-| DEFINEStmt {$$=$1;}
-| DEFINEStmt MACROStmt {asprintf(&$$,"%s%s", $1,$2);}
-| INCLUDEStmt MACROStmt {asprintf(&$$,"%s%s", $1,$2);}
-
-
-INCLUDEStmt:
-  INCLUDE LT MACRO GT {asprintf(&$$,"INCLUDE (%d)\n%s", @1.first_line ,concat_shift($3));}
-| INCLUDE DQUOT MACRO DQUOT {asprintf(&$$,"INCLUDE (%d)\n%s", @1.first_line ,concat_shift($3));}
-
-DEFINEStmt:
-  DEFINE MACRO MACRO {asprintf(&$$,"DEFINE (%d)\n%s", @1.first_line ,concat_shift($2,$3));}
-| DEFINEStmt COMMA MACRO MACRO {asprintf(&$$,"%sDEFINE (%d)\n%s",$1, @1.first_line ,concat_shift($3,$4));}
-
 Program:
-  ExtDefList {asprintf(&$$,"Program (%d)\n%s", @$.first_line, concat_shift($1));}
+  ExtDefList {if(!has_error){printf("Program (%d)\n%s", @$.first_line, concat_shift($1));}}
+| MacroStmt ExtDefList {if(!has_error){printf("Program (%d)\n%s", @$.first_line, concat_shift($1,$2));}}
+
+MacroStmt:
+  IncludeStmt {asprintf(&$$,"MacroStmt (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| DefineStmt {asprintf(&$$,"MacroStmt (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| DefineStmt MacroStmt {asprintf(&$$,"MacroStmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
+| IncludeStmt MacroStmt {asprintf(&$$,"MacroStmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
+
+IncludeStmt:
+  INCLUDE LT MACRO GT {asprintf(&$$,"IncludeStmt (%d)\n%s", @$.first_line, concat_shift($1,$2,$3,$4));}
+| INCLUDE DQUOT MACRO DQUOT {asprintf(&$$,"IncludeStmt (%d)\n%s", @$.first_line, concat_shift($1,$2,$3,$4));}
+
+DefineStmt:
+  DEFINE MACRO MACRO {asprintf(&$$,"DefineStmt (%d)\n%s", @$.first_line, concat_shift($1,$2,$3));}
+| DefineStmt COMMA MACRO MACRO {asprintf(&$$,"DefineStmt (%d)\n%s", @$.first_line, concat_shift($1,$2,$3));}
 
 ExtDefList:
   %empty {$$=strdup("");}
@@ -94,9 +86,9 @@ ExtDefList:
 
 ExtDef:
   Specifier ExtDecList SEMI {asprintf(&$$,"ExtDef (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| Specifier ExtDecList error {syntax_error("semicolon \';\'",@2.last_line);}
+| Specifier ExtDecList error {syntax_error("semicolon \';\'", @2.last_line);}
 | Specifier SEMI {asprintf(&$$,"ExtDef (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
-| Specifier error {syntax_error("semicolon \';\'",@1.last_line);}
+| Specifier error {syntax_error("semicolon \';\'", @1.last_line);}
 | Specifier FunDec CompSt {asprintf(&$$,"ExtDef (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
 
 ExtDecList:
@@ -122,6 +114,7 @@ VarDec:
 | VarDec LB INT RB {asprintf(&$$,"VarDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
 | VarDec LB INT error {syntax_error("closing bracket \']\'",@3.last_line);}
 | VarDec INT RB {syntax_error("closing bracket \'[\'",@3.last_line);}
+
 FunDec:
   ID LP VarList RP {asprintf(&$$,"FunDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
 | ID LP VarList error {syntax_error("closing parenthesis \')\'",@3.last_line);}
@@ -165,11 +158,10 @@ Stmt:
 | IF LP Exp error Stmt {syntax_error("closing parenthesis \')\'",@3.last_line);}
 | WHILE LP Exp RP Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
 | WHILE LP Exp error Stmt {syntax_error("closing parenthesis \')\'",@3.last_line);}
-
 | FOR LP Exp SEMI Exp SEMI Exp RP Stmt {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5,$6,$7,$8,$9));}
+/*the two production below is about Macro*/
 | IFDEF Stmt ENDIF {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| IFDEF MACRO Stmt MACROELSE Stmt ENDIF {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
-
+| IFDEF MACRO Stmt MACROELSE Stmt ENDIF {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5,$6));}
 
 
 /* LOCAL DEFINITION includes the declaration and assignment of local variables. */
@@ -235,23 +227,21 @@ Args:
 
 %%
 
-void yyerror(const char* s) {}
-
 int main(int argc, char **argv){
     char *file_path;
     if(argc < 2){
         fprintf(stderr, "Usage: %s <file_path>\n", argv[0]);
-        return EXIT_FAIL;
+        return 1;
     } else if(argc == 2){
         file_path = argv[1];
         if(!(yyin = fopen(file_path, "r"))){
             perror(argv[1]);
-            return EXIT_FAIL;
+            return 1;
         }
         yyparse();
-        return EXIT_OK;
+        return 0;
     } else{
         fputs("Too many arguments! Expected: 2.\n", stderr);
-        return EXIT_FAIL;
+        return 1;
     }
 }

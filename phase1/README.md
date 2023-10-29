@@ -64,7 +64,7 @@ In the `syntax.y` file
     ID LP VarList RP {asprintf(&$$,"FunDec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
   ```
   
-  The function uses Variadic Template and Fold Expressions in C++17, so we should compile the `splc` use option `-std=c++17` in g++
+  The function uses Variadic Template and Fold Expressions in C++17, so we should use g++ option `-std=c++17` to compile the `splc`
   
   ```c++
   //concat the strings and shift two spaces
@@ -170,14 +170,14 @@ Enter the `<macro>` state after a special beginning is recognized to distinguish
 "#ifdef" {yylval=strdup("IFDEF\n"); BEGIN(macro); return IFDEF;}
 "#else" {yylval=strdup("MACROELSE\n"); return MACROELSE;}
 "#endif" {yylval=strdup("ENDIF\n"); return ENDIF;}
-<macro>{
-	"," {yylval=strdup("COMMA\n"); return COMMA;}
-	"<" {return LT;}
-	">" {return GT;}
-	// \" {return DQUOT;}
-	\n {BEGIN(INITIAL);}
-    [ \t]+ /* ignore word splits */{}
-	// [^," "<>"\n]+ {asprintf (&yylval ,"%s\n",yytext); return MACRO;}
+<macro>{ 
+    "," {yylval=strdup("COMMA\n"); return COMMA;}
+    "<" {yylval=strdup("LT\n"); return LT;}
+    ">" {yylval=strdup("GT\n"); return GT;}
+    \"  {yylval=strdup("DQUOT\n"); return DQUOT;}
+    \n {BEGIN(INITIAL);}
+    [ \t]+ /* ignore word splits */
+    [^," "<>"\n]+ {asprintf(&yylval,"MACRO: %s\n",yytext); return MACRO;}
 }
 ```
 
@@ -187,28 +187,28 @@ In the SPL file, we can define multiple macros on a single line separated by com
 
 ```c
 /*in syntax.y*/
-RES:
-  Program {if(!has_error){printf("%s", $1);}}
-| MACROStmt Program {if(!has_error){printf("%s", $1);}}
+Program:
+  ExtDefList {if(!has_error){printf("Program (%d)\n%s", @$.first_line, concat_shift($1));}}
+| MacroStmt ExtDefList {if(!has_error){printf("Program (%d)\n%s", @$.first_line, concat_shift($1,$2));}}
 
-MACROStmt:
-  INCLUDEStmt {$$=$1;}
-| DEFINEStmt {$$=$1;}
-| DEFINEStmt MACROStmt {asprintf(&$$,"%s%s", $1,$2);}
-| INCLUDEStmt MACROStmt {asprintf(&$$,"%s%s", $1,$2);}
+MacroStmt:
+  IncludeStmt {asprintf(&$$,"MacroStmt (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| DefineStmt {asprintf(&$$,"MacroStmt (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| DefineStmt MacroStmt {asprintf(&$$,"MacroStmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
+| IncludeStmt MacroStmt {asprintf(&$$,"MacroStmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
 
-INCLUDEStmt:
-  INCLUDE LT MACRO GT {asprintf(&$$,"INCLUDE (%d)\n%s", @1.first_line ,concat_shift($3));}
-| INCLUDE DQUOT MACRO DQUOT {asprintf(&$$,"INCLUDE (%d)\n%s", @1.first_line ,concat_shift($3));}
+IncludeStmt:
+  INCLUDE LT MACRO GT {asprintf(&$$,"IncludeStmt (%d)\n%s", @$.first_line, concat_shift($1,$2,$3,$4));}
+| INCLUDE DQUOT MACRO DQUOT {asprintf(&$$,"IncludeStmt (%d)\n%s", @$.first_line, concat_shift($1,$2,$3,$4));}
 
-DEFINEStmt:
-  DEFINE MACRO MACRO {asprintf(&$$,"DEFINE (%d)\n%s", @1.first_line ,concat_shift($2,$3));}
-| DEFINEStmt COMMA MACRO MACRO {asprintf(&$$,"%sDEFINE (%d)\n%s",$1, @1.first_line ,concat_shift($3,$4));}
+DefineStmt:
+  DEFINE MACRO MACRO {asprintf(&$$,"DefineStmt (%d)\n%s", @$.first_line, concat_shift($1,$2,$3));}
+| DefineStmt COMMA MACRO MACRO {asprintf(&$$,"DefineStmt (%d)\n%s", @$.first_line, concat_shift($1,$2,$3));}
 
 Stmt:
 ...
 | IFDEF Stmt ENDIF {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| IFDEF MACRO Stmt MACROELSE Stmt ENDIF {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5));}
+| IFDEF MACRO Stmt MACROELSE Stmt ENDIF {asprintf(&$$,"Stmt (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4,$5,$6));}
 ```
 
 

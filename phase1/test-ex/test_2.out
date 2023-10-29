@@ -61,7 +61,7 @@ Program (1)
                       LP
                       Args (4)
                         Exp (4)
-                          CHAR: 'now it is %d \n'
+                          CHAR: 'i'
                         COMMA
                         Args (4)
                           Exp (4)

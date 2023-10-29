@@ -1,132 +1,132 @@
-Program (2)
-  ExtDefList (2)
-    ExtDef (2)
-      Specifier (2)
-        StructSpecifier (2)
+Program (1)
+  ExtDefList (1)
+    ExtDef (1)
+      Specifier (1)
+        StructSpecifier (1)
           STRUCT
           ID: class
           LC
-          DefList (3)
-            Def (3)
-              Specifier (3)
+          DefList (2)
+            Def (2)
+              Specifier (2)
                 TYPE: int
-              DecList (3)
-                Dec (3)
-                  VarDec (3)
-                    VarDec (3)
+              DecList (2)
+                Dec (2)
+                  VarDec (2)
+                    VarDec (2)
                       ID: pair
                     LB
                     INT: 114514
                     RB
               SEMI
-            DefList (4)
-              Def (4)
-                Specifier (4)
+            DefList (3)
+              Def (3)
+                Specifier (3)
                   TYPE: float
-                DecList (4)
-                  Dec (4)
-                    VarDec (4)
-                      VarDec (4)
+                DecList (3)
+                  Dec (3)
+                    VarDec (3)
+                      VarDec (3)
                         ID: k
                       LB
                       INT: 0
                       RB
                     ASSIGN
-                    Exp (4)
+                    Exp (3)
                       INT: 0
                 SEMI
-              DefList (5)
-                Def (5)
-                  Specifier (5)
+              DefList (4)
+                Def (4)
+                  Specifier (4)
                     TYPE: int
-                  DecList (5)
-                    Dec (5)
-                      VarDec (5)
+                  DecList (4)
+                    Dec (4)
+                      VarDec (4)
                         ID: _3333_
                       ASSIGN
-                      Exp (5)
-                        Exp (5)
+                      Exp (4)
+                        Exp (4)
                           ID: ic
                         LB
-                        Exp (5)
+                        Exp (4)
                           ID: kkk
                         RB
                   SEMI
           RC
       SEMI
-    ExtDefList (7)
-      ExtDef (7)
-        Specifier (7)
+    ExtDefList (6)
+      ExtDef (6)
+        Specifier (6)
           TYPE: char
-        FunDec (7)
+        FunDec (6)
           ID: ccpc
           LP
-          VarList (7)
-            ParamDec (7)
-              Specifier (7)
+          VarList (6)
+            ParamDec (6)
+              Specifier (6)
                 TYPE: int
-              VarDec (7)
+              VarDec (6)
                 ID: cy
             COMMA
-            VarList (7)
-              ParamDec (7)
-                Specifier (7)
+            VarList (6)
+              ParamDec (6)
+                Specifier (6)
                   TYPE: char
-                VarDec (7)
+                VarDec (6)
                   ID: ababab
           RP
-        CompSt (7)
+        CompSt (6)
           LC
-          DefList (8)
-            Def (8)
-              Specifier (8)
+          DefList (7)
+            Def (7)
+              Specifier (7)
                 TYPE: int
-              DecList (8)
-                Dec (8)
-                  VarDec (8)
+              DecList (7)
+                Dec (7)
+                  VarDec (7)
                     ID: cy
                   ASSIGN
-                  Exp (8)
+                  Exp (7)
                     CHAR: '@'
               SEMI
-            DefList (9)
-              Def (9)
-                Specifier (9)
+            DefList (8)
+              Def (8)
+                Specifier (8)
                   TYPE: char
-                DecList (9)
-                  Dec (9)
-                    VarDec (9)
+                DecList (8)
+                  Dec (8)
+                    VarDec (8)
                       ID: iii
                     ASSIGN
-                    Exp (9)
+                    Exp (8)
                       CHAR: '-'
                 SEMI
-              DefList (10)
-                Def (10)
-                  Specifier (10)
+              DefList (9)
+                Def (9)
+                  Specifier (9)
                     TYPE: int
-                  DecList (10)
-                    Dec (10)
-                      VarDec (10)
+                  DecList (9)
+                    Dec (9)
+                      VarDec (9)
                         ID: vector
                       ASSIGN
-                      Exp (10)
+                      Exp (9)
                         ID: string
                   SEMI
-          StmtList (11)
-            Stmt (11)
-              Exp (11)
-                Exp (11)
-                  Exp (11)
-                    Exp (11)
-                      Exp (11)
-                        Exp (11)
-                          Exp (11)
-                            Exp (11)
-                              Exp (11)
-                                Exp (11)
-                                  Exp (11)
-                                    Exp (11)
+          StmtList (10)
+            Stmt (10)
+              Exp (10)
+                Exp (10)
+                  Exp (10)
+                    Exp (10)
+                      Exp (10)
+                        Exp (10)
+                          Exp (10)
+                            Exp (10)
+                              Exp (10)
+                                Exp (10)
+                                  Exp (10)
+                                    Exp (10)
                                       ID: class
                                     DOT
                                     ID: pa
@@ -149,7 +149,7 @@ Program (2)
                   DOT
                   ID: s
                 ASSIGN
-                Exp (11)
+                Exp (10)
                   INT: 233
               SEMI
           RC

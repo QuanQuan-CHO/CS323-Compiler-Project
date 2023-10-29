@@ -1,0 +1,170 @@
+Program (1)
+  ExtDefList (1)
+    ExtDef (1)
+      Specifier (1)
+        StructSpecifier (1)
+          STRUCT
+          ID: MyStruct
+          LC
+          DefList (1)
+            Def (1)
+              Specifier (1)
+                TYPE: int
+              DecList (1)
+                Dec (1)
+                  VarDec (1)
+                    ID: x
+              SEMI
+            DefList (1)
+              Def (1)
+                Specifier (1)
+                  TYPE: char
+                DecList (1)
+                  Dec (1)
+                    VarDec (1)
+                      ID: y
+                SEMI
+              DefList (1)
+                Def (1)
+                  Specifier (1)
+                    TYPE: float
+                  DecList (1)
+                    Dec (1)
+                      VarDec (1)
+                        ID: z
+                  SEMI
+          RC
+      SEMI
+    ExtDefList (2)
+      ExtDef (2)
+        Specifier (2)
+          StructSpecifier (2)
+            STRUCT
+            ID: MyStruct
+        ExtDecList (2)
+          VarDec (2)
+            ID: s
+        SEMI
+      ExtDefList (3)
+        ExtDef (3)
+          Specifier (3)
+            TYPE: int
+          FunDec (3)
+            ID: main
+            LP
+            RP
+          CompSt (3)
+            LC
+            DefList (5)
+              Def (5)
+                Specifier (5)
+                  TYPE: int
+                DecList (5)
+                  Dec (5)
+                    VarDec (5)
+                      ID: a
+                    ASSIGN
+                    Exp (5)
+                      INT: 10
+                  COMMA
+                  DecList (5)
+                    Dec (5)
+                      VarDec (5)
+                        ID: b
+                      ASSIGN
+                      Exp (5)
+                        INT: 20
+                    COMMA
+                    DecList (5)
+                      Dec (5)
+                        VarDec (5)
+                          ID: c
+                        ASSIGN
+                        Exp (5)
+                          INT: 30
+                SEMI
+            StmtList (8)
+              Stmt (8)
+                Exp (8)
+                  Exp (8)
+                    Exp (8)
+                      ID: s
+                    DOT
+                    ID: x
+                  ASSIGN
+                  Exp (8)
+                    Exp (8)
+                      ID: a
+                    MUL
+                    Exp (8)
+                      ID: b
+                SEMI
+              StmtList (9)
+                Stmt (9)
+                  Exp (9)
+                    Exp (9)
+                      Exp (9)
+                        ID: s
+                      DOT
+                      ID: y
+                    ASSIGN
+                    Exp (9)
+                      Exp (9)
+                        CHAR: 'A'
+                      PLUS
+                      Exp (9)
+                        LP
+                        Exp (9)
+                          Exp (9)
+                            ID: c
+                          MINUS
+                          Exp (9)
+                            INT: 10
+                        RP
+                  SEMI
+                StmtList (10)
+                  Stmt (10)
+                    Exp (10)
+                      Exp (10)
+                        Exp (10)
+                          ID: s
+                        DOT
+                        ID: z
+                      ASSIGN
+                      Exp (10)
+                        Exp (10)
+                          Exp (10)
+                            ID: s
+                          DOT
+                          ID: x
+                        DIV
+                        Exp (10)
+                          FLOAT: 2.0
+                    SEMI
+                  StmtList (11)
+                    Stmt (11)
+                      Exp (11)
+                        Exp (11)
+                          Exp (11)
+                            ID: s
+                          DOT
+                          ID: x
+                        ASSIGN
+                        Exp (11)
+                          Exp (11)
+                            Exp (11)
+                              ID: s
+                            DOT
+                            ID: z
+                          ASSIGN
+                          Exp (11)
+                            Exp (11)
+                              Exp (11)
+                                ID: s
+                              DOT
+                              ID: y
+                            PLUS
+                            Exp (11)
+                              INT: 1
+                      SEMI
+            RC

@@ -1,0 +1,12 @@
+struct MyStruct {int x; char y; float z;};
+struct MyStruct s;
+int main() {
+    // Variable declarations
+    int a = 10, b = 20, c = 30;
+    
+    // Combine variable declaration, assignment, and operation
+    s.x = a * b;
+    s.y = 'A' + (c - 10);
+    s.z = s.x / 2.0;
+	s.x = s.z = s.y + 1;
+}

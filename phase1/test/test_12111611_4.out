@@ -3,5 +3,7 @@ Error type B at Line 5: Missing semicolon ';'
 Error type B at Line 13: Missing semicolon ';'
 Error type B at Line 18: Missing closing parenthesis ')'
 Error type B at Line 22: Missing closing parenthesis ')'
+Error type A at Line 30: unknown lexeme 0x023456
+Error type A at Line 31: unknown lexeme 023456
 Error type A at Line 34: unknown lexeme 'wrong_char'
 Error type A at Line 35: unknown lexeme '\xuu'

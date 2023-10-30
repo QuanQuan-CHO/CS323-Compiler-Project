@@ -207,6 +207,12 @@ Exp:
 | Exp MINUS Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
 | Exp MUL Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
 | Exp DIV Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
+
+| Exp PLUS error {syntax_error("Exp after +",@3.last_line);}
+| Exp MINUS error {syntax_error("Exp after -",@3.last_line);}
+| Exp MUL error {syntax_error("Exp after *",@3.last_line);}
+| Exp DIV error {syntax_error("Exp after /",@3.last_line);}
+
 | LP Exp RP {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
 | LP Exp error {syntax_error("closing parenthesis \')\'",@2.last_line);}
 | MINUS Exp {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}

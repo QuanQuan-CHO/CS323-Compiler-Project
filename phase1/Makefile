@@ -43,7 +43,7 @@ test: splc
 		if (($$? != 0)); then \
 			echo "-----error case: test_$$i.spl-----"; exit 1; \
 		fi; \
-	done \
+	done
 	@echo "----------test success----------"
 
 clean:

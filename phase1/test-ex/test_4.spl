@@ -1,0 +1,5 @@
+int main(){
+    string s1="Genshin Impact";
+    string s2="Genshin\"Impact";
+    
+}

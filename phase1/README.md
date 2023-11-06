@@ -149,15 +149,14 @@ To make the code more intuitive, we’ve attached test samples and results that 
 
 
 
-### Single- and multi-line comment
+### Comment and String syntax
 
 ```c
 /*in lex.l*/
-"//".*
-"/*"((("*"[^/])?)|[^*])*"*/"
+"//".* /*ignore single-line comment*/
+"/*"(\*[^/]|[^*])*"*/" /*ignore multi-line comment*/
+\"(\\\"|[^\"])*\" {asprintf(&yylval,"STRING: %s\n",yytext); return STRING;}
 ```
-
-
 
 ### Macro preprocessor and file inclusion
 

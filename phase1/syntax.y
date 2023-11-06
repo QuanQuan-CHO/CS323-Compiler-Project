@@ -38,7 +38,7 @@
 %nonassoc LOWER_ELSE
 %nonassoc ELSE
 
-%token TYPE INT CHAR FLOAT STRUCT ID
+%token TYPE INT CHAR FLOAT STRING STRUCT ID
 %token IF WHILE RETURN /*control flow word*/
 %token COMMA
 
@@ -220,6 +220,7 @@ Exp:
 | INT {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
 | FLOAT {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
 | CHAR {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| STRING {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
 
 Args:
   Exp COMMA Args {asprintf(&$$,"Args (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}

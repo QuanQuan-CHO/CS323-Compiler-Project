@@ -31,6 +31,7 @@ id [_a-zA-Z][_0-9a-zA-Z]*
     /*TODO: handle string*/
 "//".* /*ignore single-line comment*/
 "/*"(\*[^/]|[^*])*"*/" /*ignore multi-line comment*/
+\"(\\\"|[^\"])*\" {asprintf(&yylval,"STRING: %s\n",yytext); return STRING;}
 "#define" {yylval=strdup("DEFINE\n"); BEGIN(macro); return DEFINE;}
 "#include" {yylval=strdup("INCLUDE\n"); BEGIN(macro); return INCLUDE;}
 "#ifdef" {yylval=strdup("IFDEF\n"); BEGIN(macro); return IFDEF;}
@@ -45,7 +46,7 @@ id [_a-zA-Z][_0-9a-zA-Z]*
     [ \t]+ /*ignore word splits*/
     [^," "<>"\n]+ {asprintf(&yylval,"MACRO: %s\n",yytext); return MACRO;}
 }
-int|float|char {asprintf(&yylval,"TYPE: %s\n",yytext); return TYPE;}
+int|float|char|string {asprintf(&yylval,"TYPE: %s\n",yytext); return TYPE;}
 for {yylval=strdup("FOR\n"); return FOR;}
 struct {yylval=strdup("STRUCT\n"); return STRUCT;}
 if {yylval=strdup("IF\n"); return IF;}

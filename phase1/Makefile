@@ -37,7 +37,7 @@ test: splc
 	done
 
 	@echo -e '\nStep3: Test extra cases'
-	for i in {1..3}; do \
+	for i in {1..4}; do \
 		bin/splc test-ex/test_$$i.spl > test-ex/test_$$i.myout; \
 		diff test-ex/test_$$i.myout test-ex/test_$$i.out; \
 		if (($$? != 0)); then \

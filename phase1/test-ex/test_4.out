@@ -1,0 +1,36 @@
+Program (1)
+  ExtDefList (1)
+    ExtDef (1)
+      Specifier (1)
+        TYPE: int
+      FunDec (1)
+        ID: main
+        LP
+        RP
+      CompSt (1)
+        LC
+        DefList (2)
+          Def (2)
+            Specifier (2)
+              TYPE: string
+            DecList (2)
+              Dec (2)
+                VarDec (2)
+                  ID: s1
+                ASSIGN
+                Exp (2)
+                  STRING: "Genshin Impact"
+            SEMI
+          DefList (3)
+            Def (3)
+              Specifier (3)
+                TYPE: string
+              DecList (3)
+                Dec (3)
+                  VarDec (3)
+                    ID: s2
+                  ASSIGN
+                  Exp (3)
+                    STRING: "Genshin\"Impact"
+              SEMI
+        RC

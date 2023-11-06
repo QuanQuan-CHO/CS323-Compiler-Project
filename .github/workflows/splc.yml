@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'phase1/**'
+      - 'phase2/**'
 jobs:
   test-splc:
     name: test splc
@@ -20,5 +20,5 @@ jobs:
         run: sudo apt install libfl-dev libbison-dev
 
       - name: 3. Compile splc and run test cases
-        working-directory: phase1
+        working-directory: phase2
         run: make test

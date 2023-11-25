@@ -82,7 +82,13 @@ return {yylval=strdup("RETURN\n"); return RETURN;}
 "}" {yylval=strdup("RC\n"); return RC;}
 ({valid_decimal_int})\.[0-9]+ {asprintf(&yylval,"FLOAT: %s\n",yytext); return FLOAT;}
 ({valid_decimal_int})\.[\.0-9]+ {LEXICAL_ERROR; return FLOAT;} /*Invalid float(with multiple dot): not matched by the above valid FLOAT regex will fail to this regex*/
-{valid_decimal_int} {asprintf(&yylval,"INT: %s\n",yytext); return INT;/* not include minus number */}
+{valid_decimal_int} { /* not include minus number */
+    long integer = strtol(yytext,&yytext,10);
+    if(integer>=INT32_MIN && integer<=INT32_MAX){
+        asprintf(&yylval,"INT: %s\n", yytext);
+    }else{LEXICAL_ERROR;}
+    return INT;
+}
 0[xX](0|[1-9a-fA-F][0-9a-fA-F]*) {asprintf(&yylval,"INT: %lu\n",strtol(yytext,&yytext,16)); return INT;} /* valid_hex_int should be converted to decimal form */
 0[0-9]+|0[xX]0[0-9a-fA-F]+ {LEXICAL_ERROR; return INT;} /* invalid decimal and hex INT: starting with 0 */
 [0-9]+{id} {LEXICAL_ERROR; return ID;}

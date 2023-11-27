@@ -213,7 +213,7 @@ Exp:
 | Exp LB Exp RB {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
 | Exp LB Exp error {syntax_error("closing bracket \']\'",@3.last_line);}
 | Exp DOT ID {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| ID {;}
+| ID {}
 | INT {&$$="int";}
 | FLOAT {&$$="float";}
 | CHAR {&$$="char";}

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.10.28)  27 NOV 2023 21:00
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.10.28)  28 NOV 2023 01:29
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -212,7 +212,48 @@ File: pdftex.def 2022/09/22 v1.2b Graphics/color driver for pdftex
 \Gin@req@width=\dimen174
 ) (/usr/local/texlive/2023/texmf-dist/tex/latex/base/textcomp.sty
 Package: textcomp 2020/02/02 v2.0n Standard LaTeX package
-) (/usr/local/texlive/2023/texmf-dist/tex/latex/xcolor/xcolor.sty
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/booktabs/booktabs.sty
+Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
+\heavyrulewidth=\dimen175
+\lightrulewidth=\dimen176
+\cmidrulewidth=\dimen177
+\belowrulesep=\dimen178
+\belowbottomsep=\dimen179
+\aboverulesep=\dimen180
+\abovetopsep=\dimen181
+\cmidrulesep=\dimen182
+\cmidrulekern=\dimen183
+\defaultaddspace=\dimen184
+\@cmidla=\count282
+\@cmidlb=\count283
+\@aboverulesep=\dimen185
+\@belowrulesep=\dimen186
+\@thisruleclass=\count284
+\@lastruleclass=\count285
+\@thisrulewidth=\dimen187
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/listings/listings.sty
+\lst@mode=\count286
+\lst@gtempboxa=\box55
+\lst@token=\toks23
+\lst@length=\count287
+\lst@currlwidth=\dimen188
+\lst@column=\count288
+\lst@pos=\count289
+\lst@lostspace=\dimen189
+\lst@width=\dimen190
+\lst@newlines=\count290
+\lst@lineno=\count291
+\lst@maxwidth=\dimen191
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/listings/lstmisc.sty
+File: lstmisc.sty 2023/02/27 1.9 (Carsten Heinz)
+\c@lstnumber=\count292
+\lst@skipnumbers=\count293
+\lst@framebox=\box56
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/listings/listings.cfg
+File: listings.cfg 2023/02/27 1.9 listings configuration
+))
+Package: listings 2023/02/27 1.9 (Carsten Heinz)
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/xcolor/xcolor.sty
 Package: xcolor 2022/06/12 v2.14 LaTeX color extensions (UK)
  (/usr/local/texlive/2023/texmf-dist/tex/latex/graphics-cfg/color.cfg
 File: color.cfg 2016/01/02 v1.6 sample color configuration
@@ -230,55 +271,56 @@ Package xcolor Info: Model `Gray' substituted by `gray' on input line 1375.
 Package xcolor Info: Model `wave' substituted by `hsb' on input line 1376.
 ) (/usr/local/texlive/2023/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2023-01-16 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count282
-\l__pdf_internal_box=\box55
+\l__color_backend_stack_int=\count294
+\l__pdf_internal_box=\box57
 ) (./Report.aux)
 \openout1 = `Report.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 15.
+LaTeX Font Info:    ... okay on input line 15.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 15.
+LaTeX Font Info:    ... okay on input line 15.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 15.
+LaTeX Font Info:    ... okay on input line 15.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 15.
+LaTeX Font Info:    ... okay on input line 15.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 15.
+LaTeX Font Info:    ... okay on input line 15.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 15.
+LaTeX Font Info:    ... okay on input line 15.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 15.
+LaTeX Font Info:    ... okay on input line 15.
 
 -- Lines per column: 56 (exact).
 (/usr/local/texlive/2023/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count283
-\scratchdimen=\dimen175
-\scratchbox=\box56
-\nofMPsegments=\count284
-\nofMParguments=\count285
-\everyMPshowfont=\toks23
-\MPscratchCnt=\count286
-\MPscratchDim=\dimen176
-\MPnumerator=\count287
-\makeMPintoPDFobject=\count288
-\everyMPtoPDFconversion=\toks24
+\scratchcounter=\count295
+\scratchdimen=\dimen192
+\scratchbox=\box58
+\nofMPsegments=\count296
+\nofMParguments=\count297
+\everyMPshowfont=\toks24
+\MPscratchCnt=\count298
+\MPscratchDim=\dimen193
+\MPnumerator=\count299
+\makeMPintoPDFobject=\count300
+\everyMPtoPDFconversion=\toks25
 ) (/usr/local/texlive/2023/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 485.
  (/usr/local/texlive/2023/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
-LaTeX Font Info:    Trying to load font information for U+msa on input line 36.
+\c@lstlisting=\count301
+LaTeX Font Info:    Trying to load font information for U+msa on input line 38.
  (/usr/local/texlive/2023/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 36.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 38.
  (/usr/local/texlive/2023/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-LaTeX Font Info:    Calculating math sizes for size <11> on input line 36.
+LaTeX Font Info:    Calculating math sizes for size <11> on input line 38.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
@@ -289,8 +331,90 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 <pictures/GCCoverview.png, id=10, 664.4825pt x 875.27pt>
 File: pictures/GCCoverview.png Graphic file (type png)
 <use pictures/GCCoverview.png>
-Package pdftex.def Info: pictures/GCCoverview.png  used on input line 74.
+Package pdftex.def Info: pictures/GCCoverview.png  used on input line 76.
 (pdftex.def)             Requested size: 239.39923pt x 315.33736pt.
+<pictures/o1.png, id=12, 251.94125pt x 635.37375pt>
+File: pictures/o1.png Graphic file (type png)
+<use pictures/o1.png>
+Package pdftex.def Info: pictures/o1.png  used on input line 108.
+(pdftex.def)             Requested size: 100.79846pt x 254.20316pt.
+ [2 <./pictures/GCCoverview.png>]
+<pictures/o2.png, id=18, 404.51125pt x 564.1075pt>
+File: pictures/o2.png Graphic file (type png)
+<use pictures/o2.png>
+Package pdftex.def Info: pictures/o2.png  used on input line 126.
+(pdftex.def)             Requested size: 176.39923pt x 245.99591pt.
+<pictures/gcc_sample_code.png, id=19, 563.10374pt x 294.09875pt>
+File: pictures/gcc_sample_code.png Graphic file (type png)
+<use pictures/gcc_sample_code.png>
+Package pdftex.def Info: pictures/gcc_sample_code.png  used on input line 143.
+(pdftex.def)             Requested size: 226.79846pt x 118.45415pt.
+ [3 <./pictures/o1.png> <./pictures/o2.png>]
+<pictures/GCCarchi.png, id=25, 813.0375pt x 345.29pt>
+File: pictures/GCCarchi.png Graphic file (type png)
+<use pictures/GCCarchi.png>
+Package pdftex.def Info: pictures/GCCarchi.png  used on input line 169.
+(pdftex.def)             Requested size: 214.20154pt x 90.96927pt.
+<pictures/GCCsize.png, id=26, 809.0225pt x 224.84pt>
+File: pictures/GCCsize.png Graphic file (type png)
+<use pictures/GCCsize.png>
+Package pdftex.def Info: pictures/GCCsize.png  used on input line 178.
+(pdftex.def)             Requested size: 214.20154pt x 59.52742pt.
+<pictures/SIMD.png, id=27, 591.20876pt x 308.15125pt>
+File: pictures/SIMD.png Graphic file (type png)
+<use pictures/SIMD.png>
+Package pdftex.def Info: pictures/SIMD.png  used on input line 199.
+(pdftex.def)             Requested size: 201.60077pt x 105.07565pt.
+ [4 <./pictures/gcc_sample_code.png> <./pictures/GCCarchi.png> <./pictures/GCCsize.png> <./pictures/SIMD.png>]
+<pictures/SIMD_code.png, id=35, 624.3325pt x 338.26375pt>
+File: pictures/SIMD_code.png Graphic file (type png)
+<use pictures/SIMD_code.png>
+Package pdftex.def Info: pictures/SIMD_code.png  used on input line 212.
+(pdftex.def)             Requested size: 239.39923pt x 129.70288pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 227--228
+[]\OT1/ptm/m/n/8 GNU Com-piler Col-lec-tion. (2017). Op-ti-mize Op-tions.
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 227--228
+\OT1/ptm/m/n/8 GNU Com-piler Col-lec-tion Doc-u-men-ta-tion. Re-trieved from
+ []
+
+
+Underfull \hbox (badness 5274) in paragraph at lines 228--229
+[]\OT1/ptm/m/n/8 Bharatiya, P. (2023, Novem-ber 1). Max-i-miz-ing C++ Pro-gram
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 228--229
+\OT1/ptm/m/n/8 Per-for-mance: A Com-pre-hen-sive Guide to GCC Com-piler
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 228--229
+\OT1/ptm/m/n/8 Op-ti-miza-tion. Data In-tel-li-gence. Re-trieved from https://data-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 228--229
+\OT1/ptm/m/n/8 intelligence.hashnode.dev/maximizing-c-program-performance-a-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 230--231
+[]\OT1/ptm/m/n/8 Qingyang CHEN. (2023, Novem-ber 9). Re-trieved from
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 231--232
+[]\OT1/ptm/m/n/8 GNU Com-piler Col-lec-tion. Vec-tor Ex-ten-sions. GNU
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 231--232
+\OT1/ptm/m/n/8 Com-piler Col-lec-tion Doc-u-men-ta-tion. Re-trieved from
+ []
 
 
 ** Conference Paper **
@@ -303,20 +427,20 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[2 <./pictures/GCCoverview.png>] (./Report.aux) ) 
+[5 <./pictures/SIMD_code.png>] (./Report.aux) ) 
 Here is how much of TeX's memory you used:
- 4221 strings out of 476025
- 66318 string characters out of 5790016
+ 5741 strings out of 476025
+ 88921 string characters out of 5790016
  1865388 words of memory out of 5000000
- 24637 multiletter control sequences out of 15000+600000
- 551404 words of font info for 111 fonts, out of 8000000 for 9000
+ 26134 multiletter control sequences out of 15000+600000
+ 554182 words of font info for 118 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 57i,11n,62p,913b,304s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/local/texlive/2023/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on Report.pdf (2 pages, 293918 bytes).
+ 57i,11n,62p,913b,306s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on Report.pdf (5 pages, 1147142 bytes).
 PDF statistics:
- 35 PDF objects out of 1000 (max. 8388607)
- 20 compressed objects within 1 object stream
+ 78 PDF objects out of 1000 (max. 8388607)
+ 38 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 6 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 41 words of extra memory for PDF output out of 10000 (max. 10000000)
 

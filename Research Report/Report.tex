@@ -75,14 +75,14 @@ In GCC, there are three main parts: front end, middle end and back end. Source c
 \centering
 \includegraphics [width=0.95\linewidth]{pictures/GCCoverview.png}
 \caption{An Overview of GCC\cite{b1}}
-\label{fig}
+\label{fig1}
 \end{figure}
 
 Figure 1 shows a bird's eye view of the compiler. Notably, the various phases are orchestrated by the Call Graph and Pass managers. The call graph manager constructs a call graph for the compilation unit, determining the order in which each function should be processed. Additionally, it facilitates inter-procedural optimizations (IPO), such as inlining. On the other hand, the pass manager oversees the sequencing of individual transformations and manages pre and post cleanup actions required by each pass.
 
 The source code is organized in three major groups: core, runtime and support. In what follows all directory names are assumed to be relative to the root directory where GCC sources live.\cite{b1}
 
-\subsection{Optimization}
+\subsection{Optimization Level}
 Typically, optimizations provided by GCC can be divided into three degrees. Some optimizations make the assembly code shorter, while others speed up the code, which potentially is enlarged.
 
 The O1 optimization level in GCC represents a moderate level of compiler optimization designed to enhance program performance while maintaining a relatively swift compilation process. The primary focus is on applying fundamental optimizations to the code. The O1 optimization level strikes a balance between improving program performance and minimizing compilation time, making it suitable for scenarios where moderate optimization is desired without significantly impacting build times. Here are some key aspects of O1 optimization:
@@ -106,10 +106,9 @@ While not the primary focus, O1 aims to keep the generated code relatively compa
 \begin{figure}[htbp]
 \centering
 \includegraphics [width=0.4\linewidth]{pictures/o1.png}
-\caption{O1 optimization flags\cite{b2}}
-\label{fig}
+\caption{O1 Optimization Flags\cite{b2}}
+\label{fig2}
 \end{figure}
-
 
 The O2 optimization level in GCC encompasses a set of advanced compiler optimizations aimed at substantially improving program performance. Building upon the optimizations introduced in O1, O2 introduces more sophisticated techniques. It is characterized by a more aggressive set of optimizations, making it suitable for scenarios where achieving higher performance is a priority, even at the cost of slightly longer compilation times. Below is a detailed description, combining the objectives and impacts:
 \begin{itemize}
@@ -125,8 +124,8 @@ The O2 optimization level in GCC encompasses a set of advanced compiler optimiza
 \begin{figure}[htbp]
 \centering
 \includegraphics [width=0.7\linewidth]{pictures/o2.png}
-\caption{O2 optimization flags\cite{b2}}
-\label{fig}
+\caption{O2 Optimization Flags\cite{b2}}
+\label{fig3}
 \end{figure}
 
 The O3 optimization level in GCC represents the highest degree of compiler optimization, aimed at maximizing program performance, even if it results in longer compilation times. Building upon the optimizations introduced in O2, O3 incorporates more sophisticated and time-consuming techniques.
@@ -142,12 +141,11 @@ To illustrate the impact of GCC compiler optimization levels, we'll use a C code
 \begin{figure}[htbp]
 \centering
 \includegraphics [width=0.9\linewidth]{pictures/gcc_sample_code.png}
-\caption{C Code Example\cite{b3}}
-\label{fig}
+\caption{C Code Example that Performs Numerical Computations\cite{b3}}
+\label{fig4}
 \end{figure}
 
 Running on the same computer, the statistics are shown in Table 1. The "Real" time is the actual wall-clock time it took to execute the program. The "User" time represents the CPU time consumed by the program. The "Sys" time indicates system-related CPU time.\cite{b3}
-
 
 \begin{table}
 	\caption{Running Time}
@@ -164,14 +162,73 @@ Running on the same computer, the statistics are shown in Table 1. The "Real" ti
 	\end{center}
 \end{table}
 
+Specifying the target architecture also can yield meaningful benefits. The -march option of gcc allows the CPU type to be specified. The default architecture is i386. GCC runs on all other i386/x86 architectures, but it can result in degraded performance on more recent processors. Let's now look at an example of how performance can be improved by focusing on the actual target. Build a simple test application that performs a bubble sort over 10,000 elements. The elements in the array have been reversed to force the worst-case scenario.\cite{b4}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics [width=0.85\linewidth]{pictures/GCCarchi.png}
+\caption{Effects of Architecture Specification on a Simple Application\cite{b4}}
+\label{fig5}
+\end{figure}
+
+By specifying the architecture, in this case a 633MHz Celeron, the compiler can generate instructions for the particular target as well as enable other optimizations available only to that target. As shown in Figure 5, by specifying the architecture we see a time benefit of 237ms (23\% improvement). Although it shows an improvement in speed, the drawback is that the image is slightly larger. Using the size command, we can identify the sizes of the various sections of the image.\cite{b4}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics [width=0.85\linewidth]{pictures/GCCsize.png}
+\caption{Size Change of the Application\cite{b4}}
+\label{fig6}
+\end{figure}
+
+Here the instruction size (text section) of the image increased by 28 bytes. But in this example, it's a small price to pay for the speed benefit.\cite{b4}
+
 In conclusion, optimizing your code with GCC is not just a luxury but a necessity in today's demanding software landscape. A profound understanding of the diverse optimization levels and their judicious application can elevate your code to the status of an efficient, high-performing masterpiece.
 
 However, a word of caution is essential. Optimization is akin to a double-edged sword. While it has the potential to deliver remarkable performance gains, it should not come at the expense of the readability and maintainability of your code. Striking the delicate balance between optimization and code quality is an art that every developer must master.
+
+\subsection{Vectorization}
+
+Vectorization in GCC refers to the process of transforming scalar operations within code into vector operations, a technique particularly pertinent to SIMD (Single Instruction, Multiple Data) architectures where a single instruction can concurrently operate on multiple data elements.
+
+The objective of vectorization is to enhance parallelism and harness the capabilities of contemporary processors equipped with vector units. These vector units facilitate the simultaneous execution of a single instruction on multiple data elements, thereby amplifying throughput and overall performance.
+
+In Figure 7, the compiler on the left is capable of computing only one pair of scalar multiplications at a time. Consequently, the multiplication of four pairs of numbers requires four separate operations. Conversely, the compiler on the right possesses the capability to concurrently process four numbers, enabling the completion of the multiplication of four pairs of numbers in a single operation.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics [width=0.8\linewidth]{pictures/SIMD.png}
+\caption{A comparison between scalar and SIMD operation\cite{b5}}
+\label{fig7}
+\end{figure}
+
+In modern computing, SIMD processing units or GPUs are primarily employed for vector processing. High-end CPUs commonly integrate specialized instruction sets for SIMD operations, such as Intel's SSE and AVX. The SIMD processing capability of CPUs operates in a parallel fashion within a single core. The parallel paradigm in multicore processing is referred to as MIMD (multiple instruction multiple data). The distinction lies in SIMD's execution in a lockstep manner, where all ALU units share a single program counter (PC). In contrast, MIMD involves independent execution across cores, each with its own PC.
+
+In GCC, using vector instructions through built-in functions is available. On some targets, the instruction set contains SIMD vector instructions which operate on multiple values contained in one large register at the same time.\cite{b6}
+
+Assuming our SIMD processor can handle $4$ double numbers at once, take an addition of two arrays as an example. Inside the loop in line 14, it loads four single-precision floating-point values from the array $a$ into a Neon vector $va$. Then in adds the loaded vector $va$ element-wise to the cumulative sum vector $vsum$. It accumulates the sum as the loop progresses. After the loop, it uses Neon intrinsics to perform pairwise addition on the lower and higher lanes of the cumulative sum vector $vsum$, resulting in a 2-element vector $sum_lane$. Finally it completes the reduction by adding the two elements of the 2-element vector $sum_lane$. The result is a single-precision floating-point value representing the sum of the vectorized elements.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics [width=0.95\linewidth]{pictures/SIMD_code.png}
+\caption{SIMD Code Example}
+\label{fig8}
+\end{figure}
+
+When the array size is $100000000$, the serial time and vectorized time is $0.3656$ seconds and $0.1772$ seconds (Apple M2), respectively, which indicates a crucial speedup.
+
+In the context of parallelized numerical accumulation, it is essential to recognize that the order of summation may change due to parallel processing. To achieve parallelism, associativity, the property that allows rearrangement of operands without altering the result (e.g., $a+b+c+d=(a+b)+(c+d))$, becomes crucial. This property ensures that parallel addition remains consistent even with a different summation order.
+
+However, when dealing with floating-point operations involving multiplication or addition, achieving strict associativity can be challenging. Floating-point arithmetic, subject to rounding errors, may not strictly adhere to associativity, especially when parallelized. Consequently, to facilitate parallel floating-point operations, specialized compiler options such as `--ffast-math' in GCC are often employed. These options relax strict adherence to IEEE standard compliance and allow for more aggressive optimizations.
+
+Maintaining numerical stability in the face of reordering operations for parallelism is a fundamental concern. Rounding errors, inherent in floating-point calculations, can accumulate differently depending on the order of operations. Achieving both parallelism and numerical stability requires a delicate balance. The use of appropriate compiler flags, careful algorithm design, and consideration of numerical stability principles are essential in minimizing the impact of rounding errors and ensuring reliable parallel computations.
 
 \begin{thebibliography}{00}
 	\bibitem{b1} Novillo, D. (2006, September). GCC an architectural overview, current status, and future directions. In Proceedings of the linux symposium (Vol. 2, p. 185).
 	\bibitem{b2} GNU Compiler Collection. (2017). Optimize Options. GNU Compiler Collection Documentation. Retrieved from https://gcc.gnu.org/onlinedocs/gcc-7.2.0/gcc/Optimize-Options.html
 	\bibitem{b3} Bharatiya, P. (2023, November 1). Maximizing C++ Program Performance: A Comprehensive Guide to GCC Compiler Optimization. Data Intelligence. Retrieved from https://data-intelligence.hashnode.dev/maximizing-c-program-performance-a-comprehensive-guide-to-gcc-compiler-optimization
+	\bibitem{b4} Jones, M. T. (2005). Optimization in GCC. Linux journal, 2005(131), 11.
+	\bibitem{b5} Qingyang CHEN. (2023, November 9). Retrieved from https://zhuanlan.zhihu.com/p/337756824
+	\bibitem{b6} GNU Compiler Collection. Vector Extensions. GNU Compiler Collection Documentation. Retrieved from https://gcc.gnu.org/onlinedocs/gcc/Vector-Extensions.html
 \end{thebibliography}
 
 

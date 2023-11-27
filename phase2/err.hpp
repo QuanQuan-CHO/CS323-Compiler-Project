@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <queue>
 #include <stdarg.h>
+#include <string.h>
 using namespace std;
 
 typedef enum errtype{
@@ -32,59 +33,42 @@ typedef enum act{
     usarr,
     usstruct
 } act;
-void err(errtype errt);
-void check_redef (rec r,errtype e);
-void check_def(rec r,errtype e);
-void check_eqtype(rec r,errtype e);
-void check_eqtype(rec r,errtype e);
-void check_rval(rec r,errtype e);
-void check_fun(rec r,errtype e);
-void check_int(rec r,errtype e);
-void check_arg(rec r,errtype e);
-void check_arr(rec r,errtype e);
-void check_struct(rec r,errtype e);
-void check_struct_has(rec r,errtype e);
+void err(errtype e,int line,char* id="",int exp=0,int actual=0);
+void check_redef (std::unordered_map<char*,char*> map, rec r,errtype e);
+void check_def(std::unordered_map<char*,char*> map, rec r,errtype e);
+void check_eqtype(std::unordered_map<char*,char*> map, rec r,errtype e);
+void check_eqtype(std::unordered_map<char*,char*> map,rec r,errtype e);
+void check_rval(std::unordered_map<char*,char*> map, rec r,errtype e);
+void check_fun(std::unordered_map<char*,char*> map, rec r,errtype e);
+void check_int(std::unordered_map<char*,char*> map,rec r,errtype e);
+void check_arg(std::unordered_map<char*,char*> map, rec r,errtype e);
+void check_arr(std::unordered_map<char*,char*> map, rec r,errtype e);
+void check_struct(std::unordered_map<char*,char*> map, rec r,errtype e);
+void check_struct_has(std::unordered_map<char*,char*> map, rec r,errtype e);
+std::unordered_map<char*,char*> initialmap={
+    {"struct","struct"},
+    {"int","int"},
+    {"float","float"},
+    {"char","char"},
+    {"string","string"}
+};
 
-void check(rec r){
-    if (r.a==defvar){
-        check_redef(r,varredef);
-    }else if (r.a==defstruct)
-    {   
-        check_redef(r,structredef);
-    }else if (r.a==deffun)
-    {
-        check_redef(r,funredef);
-        check_eqtype(r,returnunmatch);
+std::unordered_map<char*, char*> createNewMap() {
+    std::unordered_map<char*, char*> newMap;
 
-    }else if (r.a==usassign)
-    {   
-    //    check_def(r,varnodef);
-       check_eqtype(r,equnmatch);
-       check_rval(r,rvalleft);
-    }else if (r.a==usfun)
-    {
-    //    check_def(r,funnodef);
-       check_fun(r,notafun);
-       check_arg(r,argunmatch);
-    }else if (r.a==usarr)
-    {
-        // check_def(r,varnodef);
-        check_arr(r,notanarr);
-        check_int(r,indexnoint);
-    }else if (r.a==usstruct)
-    {   
-        // check_def(r,varnodef);
-        check_struct(r,dotnostuct);
-        check_struct_has(r,structnohas);
+    for (const auto& pair : initialmap) {
+        newMap[pair.first] = pair.second;
     }
-    
-    
-    
+
+    return newMap;
 }
+
 class rec{
 public:
    act a;
    queue<char*> ids;
    char* id;
-   std::unordered_map<std::string, std::string> map;
+   char* val;
+   char* right;
+   int line;
 };

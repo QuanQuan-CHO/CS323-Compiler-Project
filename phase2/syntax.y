@@ -4,7 +4,7 @@
     #define YYSTYPE char* //Define the type of `yylval`
 
     #include "lex.yy.c"
-    #include "symbol.hpp"
+
     extern int yylineno;
     bool has_error=false; //Has lexical or syntax error
     void yyerror(const char*){}
@@ -23,13 +23,16 @@
             asprintf(&result,"%s  %s\n",result,line);
             line=strtok(NULL,"\n");
         }
+
         return result;
     }
+
     void syntax_error(const char* missing_token, int lineno){
         has_error=true;
         printf("Error type B at Line %d: Missing %s\n", lineno, missing_token);
     }
 
+    //TODO: Optimize by macro
 %}
 
 %nonassoc LOWER_ELSE
@@ -86,7 +89,7 @@ ExtDef:
 | Specifier ExtDecList error {syntax_error("semicolon \';\'", @2.last_line);}
 | Specifier SEMI {asprintf(&$$,"ExtDef (%d)\n%s\n", @$.first_line, concat_shift($1,$2));}
 | Specifier error {syntax_error("semicolon \';\'", @1.last_line);}
-| Specifier FunDec CompSt {asprintf(&$$,"ExtDef (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));} //compst comp with specifier
+| Specifier FunDec CompSt {asprintf(&$$,"ExtDef (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
 
 ExtDecList:
   VarDec {asprintf(&$$,"ExtDecList (%d)\n%s\n", @$.first_line, concat_shift($1));}
@@ -168,7 +171,7 @@ DefList: /*To prevent shift/reduce conflict, replace DefList-->%empty with DefLi
 
 Def:
   Specifier DecList SEMI {asprintf(&$$,"Def (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| Specifier DecList error {syntax_error("semicolon \';\'",@2.last_line);} //assign with typelist one by one
+| Specifier DecList error {syntax_error("semicolon \';\'",@2.last_line);}
 
 DecList:
   Dec {asprintf(&$$,"DecList (%d)\n%s\n", @$.first_line, concat_shift($1));}
@@ -176,7 +179,7 @@ DecList:
 
 Dec:
   VarDec {asprintf(&$$,"Dec (%d)\n%s\n", @$.first_line, concat_shift($1));}
-| VarDec ASSIGN Exp {asprintf(&$$,"Dec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));} //assign exp type
+| VarDec ASSIGN Exp {asprintf(&$$,"Dec (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
 | VarDec ASSIGN error /* e.g. int a = $, only report lexical error */
 
 
@@ -213,11 +216,11 @@ Exp:
 | Exp LB Exp RB {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3,$4));}
 | Exp LB Exp error {syntax_error("closing bracket \']\'",@3.last_line);}
 | Exp DOT ID {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}
-| ID {}
-| INT {&$$="int";}
-| FLOAT {&$$="float";}
-| CHAR {&$$="char";}
-| STRING {&$$="string";}
+| ID {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| INT {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| FLOAT {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| CHAR {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
+| STRING {asprintf(&$$,"Exp (%d)\n%s\n", @$.first_line, concat_shift($1));}
 
 Args:
   Exp COMMA Args {asprintf(&$$,"Args (%d)\n%s\n", @$.first_line, concat_shift($1,$2,$3));}

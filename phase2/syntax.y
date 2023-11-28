@@ -8,7 +8,6 @@
         has_error=true;
         printf("Error type B at Line %d: Missing %s\n", lineno, missing_token);
     }
-    
 %}
 
 %union{
@@ -39,6 +38,11 @@
 %left <rec_ptr> LP RP LB RB
 
 %token <rec_ptr> SEMI LC RC /*punctuation word*/
+/* Non terminal */
+%type <rec_ptr> Program ExtDefList ExtDef ExtDecList
+%type <rec_ptr> Specifier StructSpecifier 
+%type <rec_ptr> VarDec FunDec VarList ParamDec CompSt StmtList
+%type <rec_ptr> Stmt DefList Def DecList Dec Exp Args
 %%
 
 Program:
@@ -90,104 +94,104 @@ VarDec:
 | VarDec INT RB {syntax_error("closing bracket \'[\'",@3.last_line);}
 
 FunDec:
-  ID LP VarList RP {}
+  ID LP VarList RP {rec* cfun=new rec(deffun);cfun->link(1,$1); $$=new rec(noact);$$->link(2,cfun,$3);}
 | ID LP VarList error {syntax_error("closing parenthesis \')\'",@3.last_line);}
-| ID LP RP {}
+| ID LP RP {$$=new rec(deffun);$$->link(1,$1);}
 | ID LP error {syntax_error("closing parenthesis \')\'",@2.last_line);}
 
 VarList:
-  ParamDec COMMA VarList {}
-| ParamDec {}
+  ParamDec COMMA VarList {$3->link(1,$3);$$=$3;}
+| ParamDec {$$=new rec(noact);$$->link(1,$1);}
 
 ParamDec:
-  Specifier VarDec {}
+  Specifier VarDec {$$=new rec(defvar);$$->link(2,$1,$2);}
 
 CompSt:
-  LC DefList StmtList RC {}
+  LC DefList StmtList RC {$$=new rec(noact);$$->link(2,$2,$3);}
 | LC DefList StmtList error {syntax_error("closing curly brace \'}\'",@3.last_line);}
-| LC DefList RC {}
+| LC DefList RC {$$=$2;}
 | LC DefList error {syntax_error("closing curly brace \'}\'",@2.last_line);}
-| LC StmtList RC {}
+| LC StmtList RC {$$=$2;}
 | LC StmtList error {syntax_error("closing curly brace \'}\'",@2.last_line);}
 | LC DefList StmtList DefList error {syntax_error("specifier",@3.first_line);}
 
 StmtList:
-  Stmt {}
-| Stmt StmtList {}
+  Stmt {$$=new rec(noact);$$->link(1,$1);}
+| Stmt StmtList {$2->link(1,$1);$$=$2;}
 
 Stmt:
-  Exp SEMI {}
+  Exp SEMI {$$=$1;}
 | Exp error {syntax_error("semicolon \';\'",@1.last_line);}
-| CompSt {}
-| RETURN Exp SEMI {}
+| CompSt {$$=new rec(noact);}
+| RETURN Exp SEMI {$$=new rec(noact);$$->link(1,$2);}
 | RETURN Exp error {syntax_error("semicolon \';\'",@2.last_line);}
 | RETURN error SEMI {}
-| IF LP Exp RP Stmt %prec LOWER_ELSE {}
-| IF LP Exp RP Stmt ELSE Stmt {}
+| IF LP Exp RP Stmt %prec LOWER_ELSE {$$=new rec(noact);$$->link(2,$3,$5);}
+| IF LP Exp RP Stmt ELSE Stmt {$$=new rec(noact);$$->link(3,$3,$5,$7);}
 | IF LP Exp error Stmt {syntax_error("closing parenthesis \')\'",@3.last_line);}
-| WHILE LP Exp RP Stmt {}
+| WHILE LP Exp RP Stmt {$$=new rec(noact);$$->link(2,$3,$5);}
 | WHILE LP Exp error Stmt {syntax_error("closing parenthesis \')\'",@3.last_line);}
-| FOR LP Exp SEMI Exp SEMI Exp RP Stmt {}
-| IFDEF Stmt ENDIF {}
-| IFDEF MACRO Stmt MACROELSE Stmt ENDIF {}
+| FOR LP Exp SEMI Exp SEMI Exp RP Stmt {$$=new rec(noact);$$->link(4,$3,$5,$7,$9);}
+| IFDEF Stmt ENDIF {$$=$2;}
+| IFDEF MACRO Stmt MACROELSE Stmt ENDIF {$$=new rec(noact);$$->link(2,$3,$5);}
 
 DefList:
-  Def {}
-| Def DefList {}
+  Def {$$=new rec(noact);$$->link(1,$1);}
+| Def DefList {$2->link(1,$1);$$=$2;}
 
 Def:
-  Specifier DecList SEMI {}
+  Specifier DecList SEMI {$$=new rec(defvar);$$->link(2,$1,$2);}
 | Specifier DecList error {syntax_error("semicolon \';\'",@2.last_line);}
 
 DecList:
-  Dec {}
-| Dec COMMA DecList {}
+  Dec {$$=new rec(noact);$$->link(1,$1);}
+| Dec COMMA DecList {$3->link(1,$1); $$=$3;}
 
 Dec:
-  VarDec {}
-| VarDec ASSIGN Exp {}
+  VarDec {$$=$1;}
+| VarDec ASSIGN Exp {$$=new rec(usassign);$$->link(3,$1,$2,$3);}
 | VarDec ASSIGN error {}
 
 Exp:
-  Exp ASSIGN Exp {}
-| Exp AND Exp {}
-| Exp OR Exp {}
-| Exp LT Exp {}
-| Exp LE Exp {}
-| Exp GT Exp {}
-| Exp GE Exp {}
-| Exp NE Exp {}
-| Exp EQ Exp {}
-| Exp PLUS Exp {}
-| Exp MINUS Exp {}
-| Exp MUL Exp {}
-| Exp DIV Exp {}
+  Exp ASSIGN Exp {$$=new rec(usassign);$$->link(3,$1,$2,$3);}
+| Exp AND Exp {$$=new rec(usop);$$->link(3,$1,$2,$3);}
+| Exp OR Exp {$$=new rec(usop);$$->link(3,$1,$2,$3);}
+| Exp LT Exp {$$=new rec(usop);$$->link(3,$1,$2,$3);}
+| Exp LE Exp {$$=new rec(usop);$$->link(3,$1,$2,$3);}
+| Exp GT Exp {$$=new rec(usop);$$->link(3,$1,$2,$3);}
+| Exp GE Exp {$$=new rec(usop);$$->link(3,$1,$2,$3);}
+| Exp NE Exp {$$=new rec(usop);$$->link(3,$1,$2,$3);}
+| Exp EQ Exp {$$=new rec(usop);$$->link(3,$1,$2,$3);}
+| Exp PLUS Exp {$$=new rec(usop);$$->link(3,$1,$2,$3);}
+| Exp MINUS Exp {$$=new rec(usop);$$->link(3,$1,$2,$3);}
+| Exp MUL Exp {$$=new rec(usop);$$->link(3,$1,$2,$3);}
+| Exp DIV Exp {$$=new rec(usop);$$->link(3,$1,$2,$3);}
 
 | Exp PLUS error {syntax_error("Exp after +",@3.last_line);}
 | Exp MINUS error {syntax_error("Exp after -",@3.last_line);}
 | Exp MUL error {syntax_error("Exp after *",@3.last_line);}
 | Exp DIV error {syntax_error("Exp after /",@3.last_line);}
 
-| LP Exp RP {}
+| LP Exp RP {$$=$1;}
 | LP Exp error {syntax_error("closing parenthesis \')\'",@2.last_line);}
-| MINUS Exp {}
-| NOT Exp {}
-| ID LP Args RP {}
+| MINUS Exp {$$=new rec(usop);$$->link(2,$1,$2);}
+| NOT Exp {$$=new rec(usop);$$->link(2,$1,$2);}
+| ID LP Args RP {$$=new rec(usfun);$$->link(2,$1,$3);}
 | ID LP Args error {syntax_error("closing parenthesis \')\'",@3.last_line);}
-| ID LP RP {}
+| ID LP RP {$$=new rec(usfun);$$->link(1,$1);}
 | ID LP error {syntax_error("closing parenthesis \')\'",@2.last_line);}
-| Exp LB Exp RB {}
+| Exp LB Exp RB {$$=new rec(usarr);$$->link(2,$1,$3);}
 | Exp LB Exp error {syntax_error("closing bracket \']\'",@3.last_line);}
-| Exp DOT ID {}
-| ID {}
-| INT {}
-| FLOAT {}
-| CHAR {}
-| STRING {}
+| Exp DOT ID {$$=new rec(usstruct);$$->link(2,$1,$3);}
+| ID {$$=$1;}
+| INT {$$=$1;}
+| FLOAT {$$=$1;}
+| CHAR {$$=$1;}
+| STRING {$$=$1;}
 
 Args:
-  Exp COMMA Args {$$=new rec($3);}
-| Exp {$$=new rec($1);}
+  Exp COMMA Args {$3->link(1,$1); $$=$3;}
+| Exp {$$=new rec(noact);$$->link(1,$1);}
 
 %%
 

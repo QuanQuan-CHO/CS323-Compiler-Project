@@ -44,35 +44,35 @@ id [_a-zA-Z][_0-9a-zA-Z]*
     [ \t]+ /*ignore word splits*/
     [^," "<>"\n]+ { return MACRO;}
 }
-int {yylval.rec_ptr->t=intvar;return TYPE;}
-float {yylval.rec_ptr->t=floatvar; return TYPE;}
-char {yylval.rec_ptr->t=charvar; return TYPE;}
+int {yylval.rec_ptr= new rec(intvar,yytext);;return TYPE;}
+float {yylval.rec_ptr= new rec(floatvar,yytext);; return TYPE;}
+char {yylval.rec_ptr= new rec(charvar,yytext);; return TYPE;}
 for { return FOR;}
-struct { return STRUCT;}
+struct {yylval.rec_ptr= new rec(structvar,yytext); return STRUCT;}
 if { return IF;}
 else { return ELSE;}
 while { return WHILE;}
 return { return RETURN;}
     /* Because CHAR is 2 Byte, only 1 or 2 hex char is allowed */
-'([^']|\\[xX](0|[1-9a-fA-F][0-9a-fA-F]?))' {yylval.rec_ptr->t=charval; return CHAR;}
-'[^']*' {LEXICAL_ERROR; return CHAR;} /*Invalid CHAR: not matched by the above valid CHAR regex will fail to this regex*/
+'([^']|\\[xX](0|[1-9a-fA-F][0-9a-fA-F]?))' {yylval.rec_ptr= new rec(charval,yytext); return CHAR;}
+
 ";" {return SEMI;}
 "," {return COMMA;}
-"==" { return EQ;}
-"<=" { return LE;}
-">=" { return GE;}
-"!=" { return NE;}
-"=" { return ASSIGN;}
-"!" { return NOT;}
-"<" { return LT;}
-">" { return GT;}
-"+" { return PLUS;}
-"-" { return MINUS;}
-"*" { return MUL;}
-"/" { return DIV;}
-"&&" { return AND;}
+"==" {yylval.rec_ptr= new rec(biop,yytext); return EQ;}
+"<=" {yylval.rec_ptr= new rec(biop,yytext); return LE;}
+">=" {yylval.rec_ptr= new rec(biop,yytext); return GE;}
+"!=" {yylval.rec_ptr= new rec(biop,yytext); return NE;}
+"=" {yylval.rec_ptr= new rec(biop,yytext); return ASSIGN;}
+"!" {yylval.rec_ptr= new rec(siop,yytext); return NOT;}
+"<" {yylval.rec_ptr= new rec(biop,yytext); return LT;}
+">" {yylval.rec_ptr= new rec(biop,yytext); return GT;}
+"+" {yylval.rec_ptr= new rec(biop,yytext); return PLUS;}
+"-" {yylval.rec_ptr= new rec(biop,yytext); return MINUS;}
+"*" {yylval.rec_ptr= new rec(biop,yytext); return MUL;}
+"/" {yylval.rec_ptr= new rec(biop,yytext); return DIV;}
+"&&" {yylval.rec_ptr= new rec(biop,yytext); return AND;}
 "&" {LEXICAL_ERROR; return AND;} //treat & as AND to prevent the syntax error later
-"||" { return OR;}
+"||" {yylval.rec_ptr= new rec(biop,yytext); return OR;}
 "|" {LEXICAL_ERROR; return OR;} //treat | as OR to prevent the syntax error later
 "(" { return LP;}
 ")" { return RP;}
@@ -80,22 +80,22 @@ return { return RETURN;}
 "]" { return RB;}
 "{" { return LC;}
 "}" { return RC;}
-({valid_decimal_int})\.[0-9]+ { return FLOAT;}
-({valid_decimal_int})\.[\.0-9]+ {LEXICAL_ERROR; return FLOAT;} /*Invalid float(with multiple dot): not matched by the above valid FLOAT regex will fail to this regex*/
+({valid_decimal_int})\.[0-9]+ {yylval.rec_ptr= new rec(floatval,yytext); return FLOAT;}
+
 {valid_decimal_int} { /* not include minus number */
     long integer = strtol(yytext,&yytext,10);
     if(integer>=INT32_MIN && integer<=INT32_MAX){
-        
-    }else{LEXICAL_ERROR;}
+        yylval.rec_ptr= new rec(intval,yytext);
+    }
     return INT;
 }
-0[xX](0|[1-9a-fA-F][0-9a-fA-F]*) { return INT;} /* valid_hex_int should be converted to decimal form */
+0[xX](0|[1-9a-fA-F][0-9a-fA-F]*) {yylval.rec_ptr= new rec(var,yytext); return INT;} /* valid_hex_int should be converted to decimal form */
 0[0-9]+|0[xX]0[0-9a-fA-F]+ {LEXICAL_ERROR; return INT;} /* invalid decimal and hex INT: starting with 0 */
 [0-9]+{id} {LEXICAL_ERROR; return ID;}
-{id} {yylval= new rec(var,yytext); return ID;}
-"." {yylval=new rec(var); return DOT;}
+{id} {yylval.rec_ptr= new rec(var,yytext); return ID;}
+"." {yylval.rec_ptr=new rec(var,yytext); return DOT;}
 \n {yycolno=1;}
 [ \r\t]+ /*ignore word splits*/
-. {yymore(); LEXICAL_ERROR;}
+. {yymore(); }
 
 %%

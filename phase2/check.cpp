@@ -1,8 +1,21 @@
 #include "err.hpp"
+std::unordered_map<std::string,std::string> initialmap={
+    {"struct","struct"},
+    {"int","int"},
+    {"float","float"},
+    {"char","char"},
+    {"string","string"}
+};
+  std::unordered_map<std::string,std::string> createNewMap() {
+    std::unordered_map<std::string,std::string> newMap;
 
-rec::rec(type nodetype, int line_num) : t(nodetype), line_num(line_num){}
-rec::rec(type t):t(t){};
-rec::rec(type t,string name):t(t),name(name){};
+    for (const auto& pair : initialmap) {
+        newMap[pair.first] = pair.second;
+    }
+
+    return newMap;
+}
+
 
 // rec::rec(rec* r):t(r->t),line_num(r->line_num),name(r->name),recs(r->recs){};
 

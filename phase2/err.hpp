@@ -35,19 +35,22 @@ enum errtype{
     intvar,
     floatvar,
     charvar,
-    var
+    structvar,
+    var,
+    symbol
 };
 
-// typedef enum act{
-//     defvar,
-//     defstruct,
-//     deffun,
-//     usfun,
-//     usop,
-//     usassign,
-//     usarr,
-//     usstruct
-// } act;
+enum act{
+    defvar,
+    defstruct,
+    deffun,
+    usfun,
+    usop,
+    usassign,
+    usarr,
+    usstruct,
+    noact
+};
 // void err(errtype e,int line,char* id="",int exp=0,int actual=0);
 // void check_redef (std::unordered_map<char*,char*> map, rec r,errtype e);
 // void check_def(std::unordered_map<char*,char*> map, rec r,errtype e);
@@ -59,23 +62,6 @@ enum errtype{
 // void check_arr(std::unordered_map<char*,char*> map, rec r,errtype e);
 // void check_struct(std::unordered_map<char*,char*> map, rec r,errtype e);
 // void check_struct_has(std::unordered_map<char*,char*> map, rec r,errtype e);
-std::unordered_map<std::string,std::string> initialmap={
-    {"struct","struct"},
-    {"int","int"},
-    {"float","float"},
-    {"char","char"},
-    {"string","string"}
-};
-
-std::unordered_map<std::string,std::string> createNewMap() {
-    std::unordered_map<std::string,std::string> newMap;
-
-    for (const auto& pair : initialmap) {
-        newMap[pair.first] = pair.second;
-    }
-
-    return newMap;
-}
 
 class rec{
 public:
@@ -83,7 +69,10 @@ public:
    queue<rec*> recs;
    int line_num;
    string name;
+   act a;
+   void link(int nodes_num, ...);
    explicit rec(type nodetype, int line_num);
-   explicit rec(type t,string name);
+   explicit rec(type t,char* name);
    explicit rec(type t);
+   explicit rec(act a);
 };

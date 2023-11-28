@@ -1,6 +1,18 @@
   #include "err.hpp"
-
-   void err(errtype e,int line,string id="",int exp=0,int actual=0){
+rec::rec(type nodetype, int line_num) : t(nodetype), line_num(line_num){}
+rec::rec(type t):t(t){};
+rec::rec(type t,char* name):t(t),name(string(name)){};
+rec::rec(act a):a(a){};
+void rec::link(int nodes_num, ...){
+        va_list nodes;
+        va_start(nodes, nodes_num);
+        for (int i = 0; i < nodes_num; i++)
+    {   rec *node = (rec *)va_arg(nodes, rec*);
+        this->recs.push(node);
+    }
+    va_end(nodes);
+    }
+    void err(errtype e,int line,string id="",int exp=0,int actual=0){
     if (e==varnodef){
             cout<<"Error type 1 at Line "<<line<<": "<<id<<" is used without a definition"<<endl;
         }else if (e==funnodef){

@@ -28,7 +28,6 @@ valid_decimal_int 0|[1-9][0-9]*
 id [_a-zA-Z][_0-9a-zA-Z]*
 
 %%
-    /*TODO: handle string*/
 "//".* /*ignore single-line comment*/
 "/*"(\*[^/]|[^*])*"*/" /*ignore multi-line comment*/
 \"(\\\"|[^\"])*\" {asprintf(&yylval,"STRING: %s\n",yytext); return STRING;}

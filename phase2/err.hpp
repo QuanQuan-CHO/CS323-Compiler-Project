@@ -47,6 +47,7 @@ enum act{
     usarr,
     usstruct,
     noact,
+    deffun,
 };
 // void err(errtype e,int line,char* id="",int exp=0,int actual=0);
 // void check_redef (std::unordered_map<char*,char*> map, rec r,errtype e);
@@ -67,6 +68,7 @@ public:
    int line_num;
    string name;
    act a;
+   rec* val;
    bool arr=false;
    bool fun=false;
    void link(int nodes_num, ...);

@@ -72,20 +72,20 @@ ExtDef:
 | Specifier ExtDecList error {syntax_error("semicolon \';\'", @2.last_line);}
 | Specifier SEMI {}
 | Specifier error {syntax_error("semicolon \';\'", @1.last_line);}
-| Specifier FunDec CompSt {}
+| Specifier FunDec CompSt {$2->val=$1;}//progress
 
 ExtDecList:
-  VarDec {}
-| VarDec COMMA ExtDecList {}
+  VarDec {$$=new rec(noact);$$->link(1,$1);}
+| VarDec COMMA ExtDecList {$3->link(1,$1);$$=$3;}
 
 Specifier:
-  TYPE {}
-| StructSpecifier {}
+  TYPE {$$=$1;}
+| StructSpecifier {$$=$1;}
 
 StructSpecifier:
   STRUCT ID LC DefList RC {$$=new rec(noact); rec* dstr=new rec(def); $2->t=structvar; dstr->link(1,$2); $$->link(2,dstr,$4);}
 | STRUCT ID LC DefList error {syntax_error("closing curly brace \'}\'",@4.last_line);}
-| STRUCT ID {}
+| STRUCT ID {$2->t=structvar;$$=$2;}
 
 VarDec:
   ID {$$=$1;}
@@ -95,13 +95,13 @@ VarDec:
 | VarDec LB error RB {} //throw err
 
 FunDec:
-  ID LP VarList RP {rec* cfun=new rec(def); $2->fun=true; cfun->link(1,$2); $$=new rec(noact);$$->link(2,cfun,$3);}
+  ID LP VarList RP {rec* cfun=new rec(def); $1->fun=true; cfun->link(1,$1); $$=new rec(noact);$$->link(2,cfun,$3);}
 | ID LP VarList error {syntax_error("closing parenthesis \')\'",@3.last_line);}
-| ID LP RP {$$=new rec(def);$2->fun=true; $$->link(1,$2);}
+| ID LP RP {$$=new rec(def);$1->fun=true; $$->link(1,$1);}
 | ID LP error {syntax_error("closing parenthesis \')\'",@2.last_line);}
 
 VarList:
-  ParamDec COMMA VarList {$3->link(1,$3);$$=$3;}
+  ParamDec COMMA VarList {$3->link(1,$1);$$=$3;}
 | ParamDec {$$=new rec(noact);$$->link(1,$1);}
 
 ParamDec:
@@ -124,7 +124,7 @@ Stmt:
   Exp SEMI {$$=$1;}
 | Exp error {syntax_error("semicolon \';\'",@1.last_line);}
 | CompSt {$$=new rec(noact);}
-| RETURN Exp SEMI {$$=new rec(noact);$$->link(1,$2);}
+| RETURN Exp SEMI {$$=new rec(noact);$$->link(1,$2);$$->val=$2;$$->t=var;}
 | RETURN Exp error {syntax_error("semicolon \';\'",@2.last_line);}
 | RETURN error SEMI {}
 | IF LP Exp RP Stmt %prec LOWER_ELSE {$$=new rec(noact);$$->link(2,$3,$5);}

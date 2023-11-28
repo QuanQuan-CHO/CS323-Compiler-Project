@@ -37,19 +37,16 @@ enum errtype{
     charvar,
     structvar,
     var,
-    symbol
 };
 
 enum act{
-    defvar,
-    defstruct,
-    deffun,
+    def,
     usfun,
     usop,
     usassign,
     usarr,
     usstruct,
-    noact
+    noact,
 };
 // void err(errtype e,int line,char* id="",int exp=0,int actual=0);
 // void check_redef (std::unordered_map<char*,char*> map, rec r,errtype e);
@@ -70,9 +67,12 @@ public:
    int line_num;
    string name;
    act a;
+   bool arr=false;
+   bool fun=false;
    void link(int nodes_num, ...);
    explicit rec(type nodetype, int line_num);
    explicit rec(type t,char* name);
    explicit rec(type t);
    explicit rec(act a);
 };
+void set_type(type t,queue<rec*> recs);

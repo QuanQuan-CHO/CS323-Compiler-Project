@@ -83,20 +83,21 @@ Specifier:
 | StructSpecifier {}
 
 StructSpecifier:
-  STRUCT ID LC DefList RC {}
+  STRUCT ID LC DefList RC {$$=new rec(noact); rec* dstr=new rec(def); $2->t=structvar; dstr->link(1,$2); $$->link(2,dstr,$4);}
 | STRUCT ID LC DefList error {syntax_error("closing curly brace \'}\'",@4.last_line);}
 | STRUCT ID {}
 
 VarDec:
-  ID {}
-| VarDec LB INT RB {}
+  ID {$$=$1;}
+| VarDec LB INT RB {$1->arr=true;$$=$1;} //arr declare
 | VarDec LB INT error {syntax_error("closing bracket \']\'",@3.last_line);}
 | VarDec INT RB {syntax_error("closing bracket \'[\'",@3.last_line);}
+| VarDec LB error RB {} //throw err
 
 FunDec:
-  ID LP VarList RP {rec* cfun=new rec(deffun);cfun->link(1,$1); $$=new rec(noact);$$->link(2,cfun,$3);}
+  ID LP VarList RP {rec* cfun=new rec(def); $2->fun=true; cfun->link(1,$2); $$=new rec(noact);$$->link(2,cfun,$3);}
 | ID LP VarList error {syntax_error("closing parenthesis \')\'",@3.last_line);}
-| ID LP RP {$$=new rec(deffun);$$->link(1,$1);}
+| ID LP RP {$$=new rec(def);$2->fun=true; $$->link(1,$2);}
 | ID LP error {syntax_error("closing parenthesis \')\'",@2.last_line);}
 
 VarList:
@@ -104,7 +105,7 @@ VarList:
 | ParamDec {$$=new rec(noact);$$->link(1,$1);}
 
 ParamDec:
-  Specifier VarDec {$$=new rec(defvar);$$->link(2,$1,$2);}
+  Specifier VarDec {$$=new rec(def);$2->t=$1->t; $$->link(1,$2);}
 
 CompSt:
   LC DefList StmtList RC {$$=new rec(noact);$$->link(2,$2,$3);}
@@ -140,7 +141,7 @@ DefList:
 | Def DefList {$2->link(1,$1);$$=$2;}
 
 Def:
-  Specifier DecList SEMI {$$=new rec(defvar);$$->link(2,$1,$2);}
+  Specifier DecList SEMI {$$=new rec(def);set_type($1->t,$2->recs);} //def muti var
 | Specifier DecList error {syntax_error("semicolon \';\'",@2.last_line);}
 
 DecList:
@@ -149,11 +150,11 @@ DecList:
 
 Dec:
   VarDec {$$=$1;}
-| VarDec ASSIGN Exp {$$=new rec(usassign);$$->link(3,$1,$2,$3);}
+| VarDec ASSIGN Exp {$$=new rec(usassign);$$->link(2,$1,$3);}
 | VarDec ASSIGN error {}
 
 Exp:
-  Exp ASSIGN Exp {$$=new rec(usassign);$$->link(3,$1,$2,$3);}
+  Exp ASSIGN Exp {$$=new rec(usassign);$$->link(2,$1,$3);}
 | Exp AND Exp {$$=new rec(usop);$$->link(3,$1,$2,$3);}
 | Exp OR Exp {$$=new rec(usop);$$->link(3,$1,$2,$3);}
 | Exp LT Exp {$$=new rec(usop);$$->link(3,$1,$2,$3);}

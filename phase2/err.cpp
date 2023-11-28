@@ -12,6 +12,14 @@ void rec::link(int nodes_num, ...){
     }
     va_end(nodes);
     }
+void set_type(type t,queue<rec*> recs){
+    while (!recs.empty())
+    {
+        rec* r=recs.front();
+        r->t=t;
+    }
+    
+}
     void err(errtype e,int line,string id="",int exp=0,int actual=0){
     if (e==varnodef){
             cout<<"Error type 1 at Line "<<line<<": "<<id<<" is used without a definition"<<endl;

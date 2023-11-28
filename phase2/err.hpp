@@ -5,7 +5,7 @@
 #include <string.h>
 using namespace std;
 
-typedef enum errtype{
+enum errtype{
     varnodef,
     funnodef,
     varredef,
@@ -21,31 +21,45 @@ typedef enum errtype{
     dotnostuct,
     structnohas,
     structredef
-} errtype;
+};
 
-typedef enum act{
-    defvar,
-    defstruct,
-    deffun,
-    usfun,
-    usop,
-    usassign,
-    usarr,
-    usstruct
-} act;
-void err(errtype e,int line,char* id="",int exp=0,int actual=0);
-void check_redef (std::unordered_map<char*,char*> map, rec r,errtype e);
-void check_def(std::unordered_map<char*,char*> map, rec r,errtype e);
-void check_eqtype(std::unordered_map<char*,char*> map, rec r,errtype e);
-void check_eqtype(std::unordered_map<char*,char*> map,rec r,errtype e);
-void check_rval(std::unordered_map<char*,char*> map, rec r,errtype e);
-void check_fun(std::unordered_map<char*,char*> map, rec r,errtype e);
-void check_int(std::unordered_map<char*,char*> map,rec r,errtype e);
-void check_arg(std::unordered_map<char*,char*> map, rec r,errtype e);
-void check_arr(std::unordered_map<char*,char*> map, rec r,errtype e);
-void check_struct(std::unordered_map<char*,char*> map, rec r,errtype e);
-void check_struct_has(std::unordered_map<char*,char*> map, rec r,errtype e);
-std::unordered_map<char*,char*> initialmap={
+ enum type{
+    intval,
+    charval,
+    floatval,
+    fun,
+    arr,
+    biop,
+    siop,
+    struCt,
+    intvar,
+    floatvar,
+    charvar,
+    var
+};
+
+// typedef enum act{
+//     defvar,
+//     defstruct,
+//     deffun,
+//     usfun,
+//     usop,
+//     usassign,
+//     usarr,
+//     usstruct
+// } act;
+// void err(errtype e,int line,char* id="",int exp=0,int actual=0);
+// void check_redef (std::unordered_map<char*,char*> map, rec r,errtype e);
+// void check_def(std::unordered_map<char*,char*> map, rec r,errtype e);
+// void check_eqtype(std::unordered_map<char*,char*> map, rec r,errtype e);
+// void check_rval(std::unordered_map<char*,char*> map, rec r,errtype e);
+// void check_fun(std::unordered_map<char*,char*> map, rec r,errtype e);
+// void check_int(std::unordered_map<char*,char*> map,rec r,errtype e);
+// void check_arg(std::unordered_map<char*,char*> map, rec r,errtype e);
+// void check_arr(std::unordered_map<char*,char*> map, rec r,errtype e);
+// void check_struct(std::unordered_map<char*,char*> map, rec r,errtype e);
+// void check_struct_has(std::unordered_map<char*,char*> map, rec r,errtype e);
+std::unordered_map<std::string,std::string> initialmap={
     {"struct","struct"},
     {"int","int"},
     {"float","float"},
@@ -53,8 +67,8 @@ std::unordered_map<char*,char*> initialmap={
     {"string","string"}
 };
 
-std::unordered_map<char*, char*> createNewMap() {
-    std::unordered_map<char*, char*> newMap;
+std::unordered_map<std::string,std::string> createNewMap() {
+    std::unordered_map<std::string,std::string> newMap;
 
     for (const auto& pair : initialmap) {
         newMap[pair.first] = pair.second;
@@ -65,10 +79,11 @@ std::unordered_map<char*, char*> createNewMap() {
 
 class rec{
 public:
-   act a;
-   queue<char*> ids;
-   char* id;
-   char* val;
-   char* right;
-   int line;
+   type t;
+   queue<rec*> recs;
+   int line_num;
+   string name;
+   explicit rec(type nodetype, int line_num);
+   explicit rec(type t,string name);
+   explicit rec(type t);
 };

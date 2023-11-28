@@ -1,11 +1,6 @@
   #include "err.hpp"
 
-
-
-
-
-    
-   void err(errtype e,int line,char* id="",int exp=0,int actual=0){
+   void err(errtype e,int line,string id="",int exp=0,int actual=0){
     if (e==varnodef){
             cout<<"Error type 1 at Line "<<line<<": "<<id<<" is used without a definition"<<endl;
         }else if (e==funnodef){

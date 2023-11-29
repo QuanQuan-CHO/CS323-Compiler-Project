@@ -42,7 +42,8 @@ enum errtype{
 enum act{
     def,
     usfun,
-    usop,
+    ussiop,
+    usbiop,
     usassign,
     usarr,
     usstruct,
@@ -61,20 +62,58 @@ enum act{
 // void check_struct(std::unordered_map<char*,char*> map, rec r,errtype e);
 // void check_struct_has(std::unordered_map<char*,char*> map, rec r,errtype e);
 
+// class rec{
+// public:
+//    type t;
+//    queue<rec*> recs;
+//    int line_num;
+//    string name;
+//    act a;
+//    rec* val;//val 不应该出现于rec而应该在返回值中
+//    bool arr=false;
+//    bool fun=false;
+//    void link(int nodes_num, ...);
+//    explicit rec(type nodetype, int line_num);
+//    explicit rec(type t,char* name);
+//    explicit rec(type t);
+//    explicit rec(act a);
+// };
+
+class Arr;
+class Stru;
+class Fun;
 class rec{
 public:
    type t;
-   queue<rec*> recs;
    int line_num;
    string name;
    act a;
-   rec* val;
-   bool arr=false;
-   bool fun=false;
+   bool isarr=false;
+   union 
+   { Arr* arr;
+     Stru* s;
+     rec* val;
+     Fun* f;
+   };
+   queue<rec*> recs;
    void link(int nodes_num, ...);
    explicit rec(type nodetype, int line_num);
    explicit rec(type t,char* name);
    explicit rec(type t);
    explicit rec(act a);
 };
-void set_type(type t,queue<rec*> recs);
+class Arr {
+    rec* ele;
+};
+class Stru{
+    rec* member;
+};
+class Fun{
+    rec* args;
+    rec* retur;
+};
+// void usfun(rec* id,rec* args);
+// void usfun(rec* id);
+// void usarr(rec* id,rec* index);
+// void usstruct(rec*id,rec* mem);
+// void set_type(type t,queue<rec*> recs);

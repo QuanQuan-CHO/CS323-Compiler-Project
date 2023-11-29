@@ -88,13 +88,7 @@ public:
    int line_num;
    string name;
    act a;
-   bool isarr=false;
-   union 
-   { Arr* arr;
-     Stru* s;
-     rec* val;
-     Fun* f;
-   };
+   rec* val;
    queue<rec*> recs;
    void link(int nodes_num, ...);
    explicit rec(type nodetype, int line_num);
@@ -102,16 +96,7 @@ public:
    explicit rec(type t);
    explicit rec(act a);
 };
-class Arr {
-    rec* ele;
-};
-class Stru{
-    rec* member;
-};
-class Fun{
-    rec* args;
-    rec* retur;
-};
+void buildarr(rec* id, rec* len);
 // void usfun(rec* id,rec* args);
 // void usfun(rec* id);
 // void usarr(rec* id,rec* index);

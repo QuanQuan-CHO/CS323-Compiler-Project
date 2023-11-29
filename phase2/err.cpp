@@ -1,8 +1,8 @@
   #include "err.hpp"
-// rec::rec(type nodetype, int line_num) : t(nodetype), line_num(line_num){}
-// rec::rec(type t):t(t){};
-// rec::rec(type t,char* name):t(t),name(string(name)){};
-// rec::rec(act a):a(a){};
+rec::rec(type nodetype, int line_num) : t(nodetype), line_num(line_num){}
+rec::rec(type t):t(t){};
+rec::rec(type t,char* name):t(t),name(string(name)){};
+rec::rec(act a):a(a){};
 void rec::link(int nodes_num, ...){
         va_list nodes;
         va_start(nodes, nodes_num);
@@ -12,6 +12,9 @@ void rec::link(int nodes_num, ...){
     }
     va_end(nodes);
     }
+void buildarr(rec* id, rec* len){
+    
+}
 // void set_type(type t,queue<rec*> recs){
 //     while (!recs.empty())
 //     {

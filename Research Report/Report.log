@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.10.28)  1 DEC 2023 18:23
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.10.28)  1 DEC 2023 19:41
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -321,9 +321,6 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 38.
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 LaTeX Font Info:    Calculating math sizes for size <11> on input line 38.
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
  [1{/usr/local/texlive/2023/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/base/8r.enc}
 
 
@@ -331,102 +328,102 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 <pictures/GCCoverview.png, id=10, 664.4825pt x 875.27pt>
 File: pictures/GCCoverview.png Graphic file (type png)
 <use pictures/GCCoverview.png>
-Package pdftex.def Info: pictures/GCCoverview.png  used on input line 76.
+Package pdftex.def Info: pictures/GCCoverview.png  used on input line 72.
 (pdftex.def)             Requested size: 239.39923pt x 315.33736pt.
 <pictures/o1.png, id=12, 251.94125pt x 635.37375pt>
 File: pictures/o1.png Graphic file (type png)
 <use pictures/o1.png>
-Package pdftex.def Info: pictures/o1.png  used on input line 108.
+Package pdftex.def Info: pictures/o1.png  used on input line 104.
 (pdftex.def)             Requested size: 100.79846pt x 254.20316pt.
  [2 <./pictures/GCCoverview.png>]
 <pictures/o2.png, id=18, 404.51125pt x 564.1075pt>
 File: pictures/o2.png Graphic file (type png)
 <use pictures/o2.png>
-Package pdftex.def Info: pictures/o2.png  used on input line 126.
+Package pdftex.def Info: pictures/o2.png  used on input line 122.
 (pdftex.def)             Requested size: 176.39923pt x 245.99591pt.
 <pictures/gcc_sample_code.png, id=19, 563.10374pt x 294.09875pt>
 File: pictures/gcc_sample_code.png Graphic file (type png)
 <use pictures/gcc_sample_code.png>
-Package pdftex.def Info: pictures/gcc_sample_code.png  used on input line 143.
+Package pdftex.def Info: pictures/gcc_sample_code.png  used on input line 139.
 (pdftex.def)             Requested size: 226.79846pt x 118.45415pt.
- [3 <./pictures/o1.png> <./pictures/o2.png>]
-<pictures/GCCarchi.png, id=25, 813.0375pt x 345.29pt>
+ [3 <./pictures/o1.png> <./pictures/o2.png> <./pictures/gcc_sample_code.png>]
+<pictures/GCCarchi.png, id=26, 813.0375pt x 345.29pt>
 File: pictures/GCCarchi.png Graphic file (type png)
 <use pictures/GCCarchi.png>
-Package pdftex.def Info: pictures/GCCarchi.png  used on input line 169.
+Package pdftex.def Info: pictures/GCCarchi.png  used on input line 165.
 (pdftex.def)             Requested size: 214.20154pt x 90.96927pt.
-<pictures/GCCsize.png, id=26, 809.0225pt x 224.84pt>
+<pictures/GCCsize.png, id=27, 809.0225pt x 224.84pt>
 File: pictures/GCCsize.png Graphic file (type png)
 <use pictures/GCCsize.png>
-Package pdftex.def Info: pictures/GCCsize.png  used on input line 178.
+Package pdftex.def Info: pictures/GCCsize.png  used on input line 174.
 (pdftex.def)             Requested size: 214.20154pt x 59.52742pt.
-<pictures/SIMD.png, id=27, 591.20876pt x 308.15125pt>
+<pictures/SIMD.png, id=28, 591.20876pt x 308.15125pt>
 File: pictures/SIMD.png Graphic file (type png)
 <use pictures/SIMD.png>
-Package pdftex.def Info: pictures/SIMD.png  used on input line 199.
+Package pdftex.def Info: pictures/SIMD.png  used on input line 195.
 (pdftex.def)             Requested size: 201.60077pt x 105.07565pt.
- [4 <./pictures/gcc_sample_code.png> <./pictures/GCCarchi.png> <./pictures/GCCsize.png> <./pictures/SIMD.png>]
-<pictures/SIMD_code.png, id=35, 624.3325pt x 338.26375pt>
+ [4 <./pictures/GCCarchi.png> <./pictures/GCCsize.png> <./pictures/SIMD.png>]
+<pictures/SIMD_code.png, id=37, 624.3325pt x 338.26375pt>
 File: pictures/SIMD_code.png Graphic file (type png)
 <use pictures/SIMD_code.png>
-Package pdftex.def Info: pictures/SIMD_code.png  used on input line 212.
+Package pdftex.def Info: pictures/SIMD_code.png  used on input line 208.
 (pdftex.def)             Requested size: 239.39923pt x 129.70288pt.
-<pictures/plain.png, id=36, 782.925pt x 58.2175pt>
+<pictures/plain.png, id=38, 782.925pt x 58.2175pt>
 File: pictures/plain.png Graphic file (type png)
 <use pictures/plain.png>
-Package pdftex.def Info: pictures/plain.png  used on input line 231.
+Package pdftex.def Info: pictures/plain.png  used on input line 227.
 (pdftex.def)             Requested size: 239.39923pt x 17.80116pt.
  [5 <./pictures/SIMD_code.png> <./pictures/plain.png>]
 <pictures/i++.png, id=47, 722.7pt x 444.66125pt>
 File: pictures/i++.png Graphic file (type png)
 <use pictures/i++.png>
-Package pdftex.def Info: pictures/i++.png  used on input line 302.
+Package pdftex.def Info: pictures/i++.png  used on input line 300.
 (pdftex.def)             Requested size: 239.39923pt x 147.29503pt.
-LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 307.
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 305.
  (/usr/local/texlive/2023/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
-) [6 <./pictures/i++.png>]
-Underfull \hbox (badness 10000) in paragraph at lines 324--325
+) [6]
+Underfull \hbox (badness 10000) in paragraph at lines 322--323
 []\OT1/ptm/m/n/8 GNU Com-piler Col-lec-tion. (2017). Op-ti-mize Op-tions.
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 324--325
+Underfull \hbox (badness 10000) in paragraph at lines 322--323
 \OT1/ptm/m/n/8 GNU Com-piler Col-lec-tion Doc-u-men-ta-tion. Re-trieved from
  []
 
 
-Underfull \hbox (badness 5274) in paragraph at lines 325--326
+Underfull \hbox (badness 5274) in paragraph at lines 323--324
 []\OT1/ptm/m/n/8 Bharatiya, P. (2023, Novem-ber 1). Max-i-miz-ing C++ Pro-gram
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 325--326
+Underfull \hbox (badness 10000) in paragraph at lines 323--324
 \OT1/ptm/m/n/8 Per-for-mance: A Com-pre-hen-sive Guide to GCC Com-piler
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 325--326
+Underfull \hbox (badness 10000) in paragraph at lines 323--324
 \OT1/ptm/m/n/8 Op-ti-miza-tion. Data In-tel-li-gence. Re-trieved from https://data-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 325--326
+Underfull \hbox (badness 10000) in paragraph at lines 323--324
 \OT1/ptm/m/n/8 intelligence.hashnode.dev/maximizing-c-program-performance-a-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 327--328
+Underfull \hbox (badness 10000) in paragraph at lines 325--326
 []\OT1/ptm/m/n/8 Qingyang CHEN. (2023, Novem-ber 9). Re-trieved from
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 328--329
+Underfull \hbox (badness 10000) in paragraph at lines 326--327
 []\OT1/ptm/m/n/8 GNU Com-piler Col-lec-tion. Vec-tor Ex-ten-sions. GNU
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 328--329
+Underfull \hbox (badness 10000) in paragraph at lines 326--327
 \OT1/ptm/m/n/8 Com-piler Col-lec-tion Doc-u-men-ta-tion. Re-trieved from
  []
 
@@ -441,19 +438,17 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[7
-
-] (./Report.aux) ) 
+[7 <./pictures/i++.png>] (./Report.aux) ) 
 Here is how much of TeX's memory you used:
  5782 strings out of 476025
  89588 string characters out of 5790016
- 1870388 words of memory out of 5000000
+ 1872388 words of memory out of 5000000
  26169 multiletter control sequences out of 15000+600000
  554496 words of font info for 119 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  57i,11n,62p,1048b,306s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on Report.pdf (7 pages, 1386669 bytes).
+Output written on Report.pdf (7 pages, 1388163 bytes).
 PDF statistics:
  120 PDF objects out of 1000 (max. 8388607)
  62 compressed objects within 1 object stream

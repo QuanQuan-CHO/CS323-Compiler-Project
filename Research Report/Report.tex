@@ -38,7 +38,7 @@ Shenzhen, China \\
 \maketitle
 
 \begin{abstract}
-The landscape of open-source compilers is diverse and dynamic, with several prominent players contributing significantly to the field. This research delves into a comprehensive analysis and comparison of five prominent open-source compilers: GCC, Clang, LLVM, Codon, and Ark Compiler (also known as FangZhou). The study aims to elucidate the distinctions among these compilers, focusing on aspects such as architecture, optimization techniques, language support, and overall performance. Additionally, a crucial facet of this investigation involves an in-depth examination of the runtime speed differences exhibited by these compilers. By providing a detailed comparison, this research equips developers and enthusiasts with valuable insights to make informed decisions regarding compiler selection for diverse programming needs.
+The landscape of open-source compilers is diverse and dynamic, with several prominent players contributing significantly to the field. This research delves into a comprehensive analysis and comparison of several prominent open-source compilers: GCC, Clang and LLVM. The study aims to elucidate the distinctions among these compilers, focusing on aspects such as architecture, optimization techniques, language support, and overall performance. Additionally, a crucial facet of this investigation involves an in-depth examination of the runtime speed differences exhibited by these compilers. By providing a detailed comparison, this research equips developers and enthusiasts with valuable insights to make informed decisions regarding compiler selection for diverse programming needs.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -50,17 +50,13 @@ Traditional compilers are typically divided into three main components: the fron
 
 These three components collaborate to form the complete workflow of a compiler. The frontend understands the structure and syntax of the source code, creating an intermediate representation. The optimizer improves program performance and efficiency through a series of optimization techniques. Finally, the backend translates the optimized intermediate code into machine code relevant to the hardware platform, enabling the computer to execute the program.
 
-As the demand for efficient and high-performance compilers continues to rise, the open-source community has witnessed the emergence and evolution of several notable compiler projects. In this research, we explore and compare five such compilers that have made significant contributions to the field: GCC, Clang, LLVM, Codon, and Ark Compiler.
+As the demand for efficient and high-performance compilers continues to rise, the open-source community has witnessed the emergence and evolution of several notable compiler projects. In this research, we explore and compare several such compilers that have made significant contributions to the field: GCC, Clang and LLVM.
 
 GCC (GNU Compiler Collection), stands as one of the most venerable and widely-used open-source compilers, supporting an extensive range of programming languages and platforms. Its robust architecture and comprehensive feature set have solidified its position as a cornerstone in the development community.
 
 LLVM (Low-Level Virtual Machine), serves as a standalone compiler infrastructure, providing a foundation for various language front ends. Its innovative design, featuring an intermediate representation (IR) and a wide range of optimization passes, has enabled LLVM to find applications beyond traditional compiler use cases.
 
 Clang, renowned for its emphasis on modularity and user-friendly design, has gained prominence as a compiler front end, often coupled with LLVM as its backend. Its modular architecture and focus on static analysis have made it an attractive choice for developers seeking a versatile and efficient compilation tool.
-
-Codon, as a relatively recent addition to the open-source compiler landscape, brings its own set of features and optimizations. Positioned as a compelling alternative, Codon aims to enhance compilation performance and efficiency, offering a fresh perspective in the realm of open-source compilation.
-
-Ark Compiler, developed by Huawei, specifically targets ARM architectures, with a focus on optimizing performance in the mobile development space. Its unique optimizations and tailored approach make it a noteworthy contender in the context of mobile application compilation.
 
 This research aims to unravel the architectural variances, optimization strategies, language support, and other distinctive features that set these compilers apart. Furthermore, a critical aspect of our investigation involves a meticulous comparison of the runtime speeds exhibited by each compiler. Through this comparative analysis, we seek to empower developers and the broader community with valuable insights, enabling them to make informed decisions when selecting a compiler tailored to their specific requirements.
 
@@ -222,9 +218,9 @@ However, when dealing with floating-point operations involving multiplication or
 
 Maintaining numerical stability in the face of reordering operations for parallelism is a fundamental concern. Rounding errors, inherent in floating-point calculations, can accumulate differently depending on the order of operations. Achieving both parallelism and numerical stability requires a delicate balance. The use of appropriate compiler flags, careful algorithm design, and consideration of numerical stability principles are essential in minimizing the impact of rounding errors and ensuring reliable parallel computations.
 
-Now take one more complex example. That is matrix multiplication, which is widely used in many algorithms. In Matrix.h we define a matrix, simultaneously, in Matrix.c we define how it works. Suppose we have two matrices mtx1 and mtx2, and then set ans equal to $mtx1 \times mtx2$.
+Now take one more complex example. That is matrix multiplication, which is widely used, forming the foundational logic for numerous algorithms. This paper will compare the time consumption of different approaches in matrix operations, with a focus on exploring the efficacy of O3 optimization and elucidating the methodologies potentially employed by O3 optimization.
 
-Just follow the principle of matrix multiplication we can write a plain method. Optimizing cache utilization is critical for enhancing computational efficiency. One effective strategy involves manipulating the loop order to improve cache hit rates, specifically by employing a technique known as loop interchange. By employing loop interchange, the order of traversal is rearranged, typically from $ijk$ to $ikj$.
+In Matrix.h we define a matrix, simultaneously, in Matrix.c we define how it works. Suppose we have two matrices mtx1 and mtx2, and then set ans equal to $mtx1 \times mtx2$. Just follow the principle of matrix multiplication we can write a plain method. Optimizing cache utilization is critical for enhancing computational efficiency. One effective strategy involves manipulating the loop order to improve cache hit rates, specifically by employing a technique known as loop interchange. By employing loop interchange, the order of traversal is rearranged, typically from $ijk$ to $ikj$.
 
 \begin{figure}[htbp]
 \centering
@@ -263,25 +259,27 @@ Additionally, SIMD optimization can be employed. During each computation, a \(4 
 
 If the matrices are sufficiently large, and \(4\) rows or columns cannot fit into the cache, matrix \(A\) can be divided into row vectors, and matrix \(B\) into column vectors. Finally, SSE instructions are utilized to accelerate the multiplication operation. If AVX2.0 is employed, processing \(4\) double-precision floating-point numbers simultaneously is possible, thereby doubling the efficiency.
 
-The time costed by different method is shown in Table III.
+The time costed by different method is shown in Table III (AMD R5-5500U). In the `MatrixMultiplication' directory, execute `Test.cpp' to obtain the corresponding output. Note that the runtime performance during execution may be influenced by factors such as CPU architecture and capabilities, operating system, available system memory, and other related considerations.
 
 \begin{table}
-	\caption{Time Costed by Different Method(to be continue)}
+	\caption{Time Costed by Different Method}
 	\begin{center}
-		\begin{tabular}{c c c}
+		\begin{tabular}{c c c c c}
 			\toprule
-			$N$ &Plain&Two-dimensional array\\
+			$N$ &Plain&Loop interchange & O3 & SIMD\\
 			\hline
-			 $ikj$  &    $n^2$    &    $2n^2+n$  \\  
- $kij$  &   $2n^2$      &   $3n^2$     \\
- $jik$ & $n^{3}+n^2+n$  & $n^3+2n^2$   \\
- $ijk$ &  $n^3+n^2-n$  & $n^{3}+n^2+n$ \\
- $kji$  &   $2n^3$    &    $2n^3+n$    \\
- $jki$ &  $2n^3+n^2$  &   $2n^3+n^2$   \\
+			$16$ & $0$ms & $0$ms & $0$ms & $0$ms\\
+			$128$& $3$ms& $1$ms& $0$ms& $0$ms\\
+			$256$& $1802$ms& $555$ms& $627$ms& $95$ms\\
+			$2000$& $16049$ms& $4347$ms& $4164$ms& $507$ms\\
 			\bottomrule
 		\end{tabular}
 	\end{center}
 \end{table}
+
+From Table III, it can be observed that the runtime after O3 optimization and after swapping loop order are relatively close, and both are significantly higher than the runtime after SIMD optimization. This suggests that O3 optimization may alter the loop order and does not inherently provide SIMD optimization.
+
+In conclusion, GCC provides robust support for automatic vectorization, enabling the compiler to detect and transform segments of code suitable for vectorization at compile time. This automatic vectorization is performed without explicit directives from the programmer, relying on the compiler's analysis of data dependencies and loop structures to identify vectorizable portions. In fields dealing with large datasets and scientific computing, vectorization plays a crucial role within the GCC compiler.
 
 \subsection{Back-end Optimization Analysis}
 

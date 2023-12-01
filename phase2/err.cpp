@@ -257,7 +257,7 @@ rec* usfun(rec* func,rec* args,map m){
     }
     return new rec(*func->val);
 }
-void err(errtype e, const rec* r,int err=0){
+void err(errtype e, rec* r,int err){
     if (e==varnodef){
             cout<<"Error type 1 at Line "<<r->line_num<<": "<<r->name<<" is used without a definition"<<endl;
         }else if (e==funnodef){

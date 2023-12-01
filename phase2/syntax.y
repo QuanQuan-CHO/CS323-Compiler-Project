@@ -240,7 +240,7 @@ Exp:
 //找到之后找在它的queque中名字与intval名相同的变量，若没有，则创建一个t为该变量的类型的rec，名为intval相同的rec存入
 //该节点val应为第一个变量中名相同的指针
 | Exp LB Exp error {syntax_error("closing bracket \']\'",@3.last_line);}
-| Exp DOT ID {$1->line_num=@3.last_line;$$=usstruct($1,$3,imap);} 
+| Exp DOT ID {$3->line_num=@3.last_line;$$=usstruct($1,$3,imap);} 
 //使用结构体，queue第一个变量名字查找，是否t为structvar，找到之后找在它的struct，struct的含义为一个list，在该list的queue中找名字与ID名相同的变量
 //如果通过，该点的val需要设为ID名相同的变量的指针
 | ID {$1->line_num=@1.last_line;$$=$1;} //ID的名为变量名称

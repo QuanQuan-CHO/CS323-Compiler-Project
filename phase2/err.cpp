@@ -20,13 +20,19 @@ rec::rec(const rec& other) : t(other.t), line_num(other.line_num), name(other.na
         }
     }
 bool check (const rec& first, const rec& second) {
+    // cout<<first.name<<endl<<second.name<<endl;
+    // cout<<first.t<<endl<<second.t<<endl;
     if (&first==&second)
     {
        return true;
     }
+    // cout<<(first.t==intvar||first.t==floatvar)<<(second.t==intvar||second.t==floatvar)<<endl;
+    // if ((first.t==intvar||first.t==floatvar)&&(second.t==intvar||second.t==floatvar))
+    // {
+    //     return true;
+    // } else 
     
-       // 比较 t、line_num、name
-    if (first.t != second.t || first.line_num != second.line_num || first.name != second.name) {
+    if (first.t != second.t || first.name != second.name) {
         return false;
     }
 
@@ -53,7 +59,8 @@ bool check (const rec& first, const rec& second) {
     return true;
     }
 void def (rec* type, rec* node, map& m){
-    
+    // cout<<type->name<<" "<<node->name<<endl;
+    // cout<<type->t<<" "<<node->t<<endl;
     if (node->t==structvar){
         node->val=new rec(*type);
         auto it = m.checkMap.find(node->name);
@@ -136,10 +143,10 @@ void buildarr(rec* id, rec* len){
     }
 
 void eq(rec* first,rec* second,act a,map m){
-    cout<<first->name<<endl<<second->name<<endl;
+   
     if (a==checkreturn){
         if (!check(*(first->val),*(second->val)))
-        {
+        { 
             err(returnunmatch,first);
         }
     }
@@ -164,10 +171,13 @@ void eq(rec* first,rec* second,act a,map m){
         if (first->val==first)
         {
             err(rvalleft,first);
+            return;
         }
-        // cout<<"111"<<endl;
+    
        if (!check(*(first->val),*(second->val)))
-       {    
+       {  
+        // cout<<first->val->name<<" "<<second->name<<endl;
+        // cout<<first->val->t<<" "<<second->t<<endl;
           err(equnmatch,first);
        }else{ 
             if (second->val=second)
@@ -227,8 +237,8 @@ rec* usarr(rec* ar,rec* index=nullptr,map m={}){
     }
     return nullptr;
 }
-rec* usstruct(rec* stru, rec* mem,map m){
-    stru=find(stru->name,m);
+rec* usstruct(rec* struC, rec* mem,map m){
+    rec* stru=find(struC->name,m);
     if (!stru){
         err(varnodef,stru);
     }
@@ -254,7 +264,7 @@ rec* usstruct(rec* stru, rec* mem,map m){
             // cout<<value->t<<endl;
             // cout<<value->name<<endl;
         if (value->name==mem->name)
-        {
+        {   value->line_num=mem->line_num;
             return value;
         }
         }

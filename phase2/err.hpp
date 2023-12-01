@@ -73,7 +73,7 @@ public:
 rec* find(string name, map m);
 void eq(rec* first, rec* second,act a, map m);
 void buildarr (rec* id, rec* len);
-void def (rec* type, rec* node, map m);
+void def (rec* type, rec* node, map& m);
 void err(errtype e, rec* r,int err=0);
 bool check(const rec& first, const rec& second);
 rec* usarr(rec* arr,rec* index, map m);

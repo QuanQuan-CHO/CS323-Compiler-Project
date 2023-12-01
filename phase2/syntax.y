@@ -116,7 +116,9 @@ ParamDec:
    //遍历list的queue，改变其t，并且在map中记录<name,rec>
 
 CompSt:
-  LC DefList StmtList RC {$$=$3;}
+  LC DefList StmtList RC {
+    // map* nmap=new map();nmap->outmap=&imap;imap=*nmap;
+  $$=$3;}
    //所有def stmt的val除了ruturn语句均为空
 | LC DefList RC {}
 | LC DefList error {syntax_error("closing curly brace \'}\'",@2.last_line);}

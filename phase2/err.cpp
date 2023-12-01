@@ -52,7 +52,8 @@ bool check (const rec& first, const rec& second) {
     // 如果以上条件都满足，说明两个对象是深度相等的
     return true;
     }
-void def (rec* type, rec* node, map m){
+void def (rec* type, rec* node, map& m){
+    
     if (node->t==structvar){
         node->val=new rec(*type);
         auto it = m.checkMap.find(node->name);
@@ -216,14 +217,21 @@ rec* usarr(rec* ar,rec* index=nullptr,map m={}){
     return nullptr;
 }
 rec* usstruct(rec* stru, rec* mem,map m){
-    if (!(stru->t==structvar))
-    {
-        err(dotnostuct,stru);
-    }
+   
+    //     cout<<"111"<<endl;
+   
+    // for (auto it = m.checkMap.begin(); it != m.checkMap.end(); ++it) {
+    //     std::cout << "Key: " << it->first << ", Value: " << it->second << std::endl;
+    // }
     stru=find(stru->name,m);
     if (!stru){
         err(varnodef,stru);
     }
+    if (!(stru->t==structvar))
+    {
+        err(dotnostuct,stru);
+    }
+    
     vector<rec*> recs=stru->val->recs;
     for (const auto& value : recs) {
         if (value->name==mem->name)

@@ -87,9 +87,15 @@ Specifier:
 
 StructSpecifier:
   STRUCT ID LC DefList RC {$2->line_num=@2.last_line;$2->t=structvar;$1->val=$4;def($1,$2,imap);$$=$2;}
+  //apple 的类型为structvar val的名为struct val为一个连接结点，连接结点的recs为全部的成员变量
   //结构体的val表示它内部的定义，t表示它是结构体
 | STRUCT ID LC DefList error {syntax_error("closing curly brace \'}\'",@4.last_line);}
-| STRUCT ID {$2->line_num=@2.last_line;$2->t=structvar;def($1,$2,imap);$$=$2;}
+| STRUCT ID {
+  rec* r=find($2->name,imap);
+  if(r){
+    $$=new rec(*r);
+  }else {err(dotnostuct,$2);}
+  }
 
 VarDec:
   ID {$1->line_num=@1.last_line;$$=$1;}
@@ -154,7 +160,7 @@ DefList:
 | Def DefList {$2->link(1,$1);$$=$2;}
 
 Def:
-  Specifier DecList SEMI {def($1,$2,imap);} //def muti var
+  Specifier DecList SEMI {def($1,$2,imap);$$=$2;} //def muti var
   //遍历list的queue，改变其t，并且在map中记录<name,rec>
 | Specifier DecList error {syntax_error("semicolon \';\'",@2.last_line);}
 
@@ -234,7 +240,7 @@ Exp:
 //找到之后找在它的queque中名字与intval名相同的变量，若没有，则创建一个t为该变量的类型的rec，名为intval相同的rec存入
 //该节点val应为第一个变量中名相同的指针
 | Exp LB Exp error {syntax_error("closing bracket \']\'",@3.last_line);}
-| Exp DOT ID {$1->line_num=@3.last_line;usstruct($1,$3,imap);} 
+| Exp DOT ID {$1->line_num=@3.last_line;$$=usstruct($1,$3,imap);} 
 //使用结构体，queue第一个变量名字查找，是否t为structvar，找到之后找在它的struct，struct的含义为一个list，在该list的queue中找名字与ID名相同的变量
 //如果通过，该点的val需要设为ID名相同的变量的指针
 | ID {$1->line_num=@1.last_line;$$=$1;} //ID的名为变量名称

@@ -89,12 +89,15 @@ void def (rec* type, rec* node, map& m){
     }//如果是数组，就把所有的成员值全部设为对应type
     if (node->t==var)
     {
-        node->val=new rec(*type);
         auto it = m.checkMap.find(node->name);
         if (it != m.checkMap.end()) {
             err(varredef,node);
         } else {
+            
             m.checkMap[node->name]=node;
+            node->val=new rec(*type);
+            // cout<<node->name<<endl;
+            // cout<<node->val->name<<endl;
         }
     } //是变量值全设为对应type
     
@@ -133,6 +136,7 @@ void buildarr(rec* id, rec* len){
     }
 
 void eq(rec* first,rec* second,act a,map m){
+    cout<<first->name<<endl<<second->name<<endl;
     if (a==checkreturn){
         if (!check(*(first->val),*(second->val)))
         {
@@ -140,25 +144,32 @@ void eq(rec* first,rec* second,act a,map m){
         }
     }
     if (a==usassign)
-    {  if (first->t==var){
-         if(find(first->name,m)){
+    {  
+    //             cout<<"111"<<endl;
+    // for (auto it = m.checkMap.begin(); it != m.checkMap.end(); ++it) {
+    //     std::cout << "Key: " << it->first << ", Value: " << it->second << std::endl;
+    // }
+        
+        if (first->t==var){
+         if(!find(first->name,m)){
             err(varnodef,first);
          }
     }
     if (second->t==var){
-         if(find(second->name,m)){
+         if(!find(second->name,m)){
             err(varnodef,second);
          }
     }
+    
         if (first->val==first)
         {
             err(rvalleft,first);
         }
-        
+        // cout<<"111"<<endl;
        if (!check(*(first->val),*(second->val)))
-       {
+       {    
           err(equnmatch,first);
-       }else{
+       }else{ 
             if (second->val=second)
             {
                 first->val=second;
@@ -166,7 +177,7 @@ void eq(rec* first,rec* second,act a,map m){
                 first->val=new rec(*(second->val));
             }
        }
-       
+      
     }
     if (a==usbiop)
     {   
@@ -217,26 +228,35 @@ rec* usarr(rec* ar,rec* index=nullptr,map m={}){
     return nullptr;
 }
 rec* usstruct(rec* stru, rec* mem,map m){
-   
-    //     cout<<"111"<<endl;
-   
-    // for (auto it = m.checkMap.begin(); it != m.checkMap.end(); ++it) {
-    //     std::cout << "Key: " << it->first << ", Value: " << it->second << std::endl;
-    // }
     stru=find(stru->name,m);
     if (!stru){
         err(varnodef,stru);
     }
-    if (!(stru->t==structvar))
+    if (!(stru->val->t==structvar))
     {
         err(dotnostuct,stru);
     }
-    
-    vector<rec*> recs=stru->val->recs;
-    for (const auto& value : recs) {
+    //已命名的结构体中的val为struct类型，struct中的val存着一个连接结点，结点中存着成员有关信息
+    rec* apple=stru->val;
+    // cout<<"app"<<apple->t<<endl;
+    // cout<<apple->name<<endl;
+    rec* struc=apple->val;
+    // cout<<"str"<<struc->t<<endl;
+    // cout<<struc->name<<endl;
+    rec* cone=struc->val;
+    // cout<<"con"<<cone->t<<endl;
+    // cout<<cone->name<<endl;
+    vector<rec*> cons=cone->recs;
+    for (const auto& con : cons) {
+        vector<rec*> r=con->recs;
+        for (const auto& value : r)
+        {
+            // cout<<value->t<<endl;
+            // cout<<value->name<<endl;
         if (value->name==mem->name)
         {
             return value;
+        }
         }
     }
     err(structnohas,mem);
@@ -287,7 +307,7 @@ void err(errtype e, rec* r,int err){
             cout<<"Error type 7 at Line "<<r->line_num<<": unmatching operand"<<endl;
         }else if (e==returnunmatch)
         {
-            cout<<"Error type 8 at Line "<<r->line_num<<": incompatiable return type"<<endl;
+            cout<<"Error type 8 at Line "<<r->line_num<<": incompatiable return type \""<<r->name<<"\""<<endl;
         }
         else if (e==argunmatch)
         {
@@ -296,22 +316,22 @@ void err(errtype e, rec* r,int err){
         }
         else if (e==notanarr)
         {
-            cout<<"Error type 10 at Line "<<r->line_num<<": indexing on non-array variable"<<endl;
+            cout<<"Error type 10 at Line "<<r->line_num<<": indexing on non-array variable \""<<r->name<<"\""<<endl;
         }else if (e==notafun)
         {
-            cout<<"Error type 11 at Line "<<r->line_num<<": invoking non-function variable"<<endl;
+            cout<<"Error type 11 at Line "<<r->line_num<<": invoking non-function variable \""<<r->name<<"\""<<endl;
         }else if (e==indexnoint)
         {
-            cout<<"Error type 12 at Line "<<r->line_num<<": indexing by non-integer"<<endl;
+            cout<<"Error type 12 at Line "<<r->line_num<<": indexing by non-integer \""<<r->name<<"\""<<endl;
         }else if (e==dotnostuct)
         {
-            cout<<"Error type 13 at Line "<<r->line_num<<": accessing with non-struct variable"<<endl;
+            cout<<"Error type 13 at Line "<<r->line_num<<": accessing with non-struct variable \""<<r->name<<"\""<<endl;
         }else if (e==structnohas)
         {
-            cout<<"Error type 14 at Line "<<r->line_num<<": accessing an undefined structure member"<<endl;
+            cout<<"Error type 14 at Line "<<r->line_num<<": accessing an undefined structure member \""<<r->name<<"\""<<endl;
         }else if (e=structredef)
         {
-            cout<<"Error type 15 at Line "<<r->line_num<<": redefine the same structure type"<<endl;
+            cout<<"Error type 15 at Line "<<r->line_num<<": redefine the same structure type \""<<r->name<<"\""<<endl;
         } else{
             cout<<"Error type 16 at Line "<<r->line_num<<": err"<<endl;
         }

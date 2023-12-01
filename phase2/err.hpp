@@ -24,9 +24,6 @@ enum errtype{
 };
 
 enum type{
-    intval,
-    charval,
-    floatval,
     fun,
     arr,
     biop,

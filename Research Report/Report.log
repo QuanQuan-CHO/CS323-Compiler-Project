@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.10.28)  28 NOV 2023 01:29
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.10.28)  1 DEC 2023 18:23
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -371,48 +371,62 @@ File: pictures/SIMD_code.png Graphic file (type png)
 <use pictures/SIMD_code.png>
 Package pdftex.def Info: pictures/SIMD_code.png  used on input line 212.
 (pdftex.def)             Requested size: 239.39923pt x 129.70288pt.
-
-Underfull \hbox (badness 10000) in paragraph at lines 227--228
+<pictures/plain.png, id=36, 782.925pt x 58.2175pt>
+File: pictures/plain.png Graphic file (type png)
+<use pictures/plain.png>
+Package pdftex.def Info: pictures/plain.png  used on input line 231.
+(pdftex.def)             Requested size: 239.39923pt x 17.80116pt.
+ [5 <./pictures/SIMD_code.png> <./pictures/plain.png>]
+<pictures/i++.png, id=47, 722.7pt x 444.66125pt>
+File: pictures/i++.png Graphic file (type png)
+<use pictures/i++.png>
+Package pdftex.def Info: pictures/i++.png  used on input line 302.
+(pdftex.def)             Requested size: 239.39923pt x 147.29503pt.
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 307.
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/psnfss/ts1ptm.fd
+File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
+) [6 <./pictures/i++.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 324--325
 []\OT1/ptm/m/n/8 GNU Com-piler Col-lec-tion. (2017). Op-ti-mize Op-tions.
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 227--228
+Underfull \hbox (badness 10000) in paragraph at lines 324--325
 \OT1/ptm/m/n/8 GNU Com-piler Col-lec-tion Doc-u-men-ta-tion. Re-trieved from
  []
 
 
-Underfull \hbox (badness 5274) in paragraph at lines 228--229
+Underfull \hbox (badness 5274) in paragraph at lines 325--326
 []\OT1/ptm/m/n/8 Bharatiya, P. (2023, Novem-ber 1). Max-i-miz-ing C++ Pro-gram
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 228--229
+Underfull \hbox (badness 10000) in paragraph at lines 325--326
 \OT1/ptm/m/n/8 Per-for-mance: A Com-pre-hen-sive Guide to GCC Com-piler
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 228--229
+Underfull \hbox (badness 10000) in paragraph at lines 325--326
 \OT1/ptm/m/n/8 Op-ti-miza-tion. Data In-tel-li-gence. Re-trieved from https://data-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 228--229
+Underfull \hbox (badness 10000) in paragraph at lines 325--326
 \OT1/ptm/m/n/8 intelligence.hashnode.dev/maximizing-c-program-performance-a-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 230--231
+Underfull \hbox (badness 10000) in paragraph at lines 327--328
 []\OT1/ptm/m/n/8 Qingyang CHEN. (2023, Novem-ber 9). Re-trieved from
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 231--232
+Underfull \hbox (badness 10000) in paragraph at lines 328--329
 []\OT1/ptm/m/n/8 GNU Com-piler Col-lec-tion. Vec-tor Ex-ten-sions. GNU
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 231--232
+Underfull \hbox (badness 10000) in paragraph at lines 328--329
 \OT1/ptm/m/n/8 Com-piler Col-lec-tion Doc-u-men-ta-tion. Re-trieved from
  []
 
@@ -427,20 +441,22 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[5 <./pictures/SIMD_code.png>] (./Report.aux) ) 
+[7
+
+] (./Report.aux) ) 
 Here is how much of TeX's memory you used:
- 5741 strings out of 476025
- 88921 string characters out of 5790016
- 1865388 words of memory out of 5000000
- 26134 multiletter control sequences out of 15000+600000
- 554182 words of font info for 118 fonts, out of 8000000 for 9000
+ 5782 strings out of 476025
+ 89588 string characters out of 5790016
+ 1870388 words of memory out of 5000000
+ 26169 multiletter control sequences out of 15000+600000
+ 554496 words of font info for 119 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 57i,11n,62p,913b,306s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on Report.pdf (5 pages, 1147142 bytes).
+ 57i,11n,62p,1048b,306s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on Report.pdf (7 pages, 1386669 bytes).
 PDF statistics:
- 78 PDF objects out of 1000 (max. 8388607)
- 38 compressed objects within 1 object stream
+ 120 PDF objects out of 1000 (max. 8388607)
+ 62 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 41 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 51 words of extra memory for PDF output out of 10000 (max. 10000000)
 

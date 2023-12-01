@@ -222,16 +222,53 @@ However, when dealing with floating-point operations involving multiplication or
 
 Maintaining numerical stability in the face of reordering operations for parallelism is a fundamental concern. Rounding errors, inherent in floating-point calculations, can accumulate differently depending on the order of operations. Achieving both parallelism and numerical stability requires a delicate balance. The use of appropriate compiler flags, careful algorithm design, and consideration of numerical stability principles are essential in minimizing the impact of rounding errors and ensuring reliable parallel computations.
 
+\subsection{Back-end Optimization Analysis}
+
+Register Transfer Language (RTL) is a crucial intermediate representation in the context of compiler construction, serving as a pivotal bridge between high-level source code and low-level machine code within the framework of GCC. The RTL generation, optimization, and assembly code generation processes constitute an intricate series of stages aimed at transforming abstract program structures into efficient machine-executable instructions.
+
+The RTL generation process involves the translation of the abstract syntax tree (AST) derived from the high-level source code into a hardware-oriented, register-transfer-based representation. This step captures the essential data and control flow aspects of the program, representing them in terms of RTL operations and their associated operands. This intermediate form serves as a foundation for subsequent analyses and transformations.
+
+RTL optimization encompasses a suite of techniques geared toward enhancing the performance of the generated code. This involves a myriad of low-level optimizations such as register allocation, instruction scheduling, and dead code elimination. Register allocation seeks to judiciously assign program variables to processor registers, minimizing memory accesses and improving overall execution speed. Instruction scheduling aims to reorder operations to exploit parallelism and reduce pipeline stalls. Additionally, dead code elimination identifies and removes code segments that contribute no discernible impact on program output.
+
+Subsequent to RTL optimization, the compiler proceeds to the generation of assembly code tailored to the target architecture. This involves mapping RTL operations and operands to specific machine instructions, considering the intricacies of the underlying hardware. The assembly code generated at this stage serves as the final output that can be further processed by an assembler to produce machine code executable on the target platform.
+
+The processes of RTL generation, optimization and assembly code generation, should be guided by machine description. The machine descriptions are composed of three files: target machine-description macro definitions file (target.h), machine-description functions support file (target.c) and target machine descriptions file (target.md).\cite{b7}
+
+These descriptions play a pivotal role in the backend stages of the compiler, particularly during the code generation phase. Compiler utilization of machine descriptions ensures the generation of assembly code congruent with the target machine architecture. These descriptions not only furnish the compiler with the requisite information for the production of correct code but also endow the optimizer with insights, facilitating the adept utilization of the target machine's features to enhance code performance.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics [width=0.95\linewidth]{pictures/i++.png}
+\caption{Example Code `i++' Compilation Process\cite{b7}}
+\label{fig9}
+\end{figure}
+
+It deserves to be mentioned that the efficiency of complier should be taken into full account in the porting process. As the pattern of each instruction is matched in order, the more instruction patterns there are, the more slowly the compiling system will be. It is better to combine the similar instructions to one instruction pattern to obtain higher complier efficiency. The priority of instruction matching should be paid attention to at the same time. Take a simple C language sentence `i++' as an example and set the target machine as Minisys2. The result of matching can be `INC \$2', as well as the mode of `add \$2, \$3, 1'. The process of matching `target.md' file is carried out through the order from top to bottom in GCC, so `INC' instruction pattern should be put in the front of `add' instruction pattern in order to test the newly increased “INC” instruction.\cite{b7}
+
+In summation, machine descriptions serve as crucial metadata in the compiler domain, delineating how the compiler interfaces with a specific target architecture, thereby enabling the production of accurate and efficient machine code.
+
+\subsection{Summary of GCC}
+
+GCC plays a pivotal role in the entire process of translating source code into target machine executable code. Its impact extends across critical facets of software development.
+
+The primary function of GCC lies in the transformation of source code, authored in high-level programming languages such as C and C++, into executable code for the target machine. It accommodates various target architectures, enabling developers to create and execute programs on diverse platforms.
+
+As an open-source and widely adopted compiler, GCC has exerted a profound influence on the entire software ecosystem. It affords developers the capability for cross-platform development, fostering software portability. Furthermore, the existence of GCC has propelled advancements in compiler technology, serving as a template for numerous other compiler projects.
+
+GCC incorporates a potent optimizer capable of enhancing the performance of the generated target code during the compilation process. Optimization spans various dimensions, encompassing, but not limited to, constant folding, register allocation, instruction scheduling, and loop optimization. Through these optimization techniques, GCC generates machine code that is not only more efficient but also aligns closely with the underlying hardware capabilities.
+
 \begin{thebibliography}{00}
+
 	\bibitem{b1} Novillo, D. (2006, September). GCC an architectural overview, current status, and future directions. In Proceedings of the linux symposium (Vol. 2, p. 185).
 	\bibitem{b2} GNU Compiler Collection. (2017). Optimize Options. GNU Compiler Collection Documentation. Retrieved from https://gcc.gnu.org/onlinedocs/gcc-7.2.0/gcc/Optimize-Options.html
 	\bibitem{b3} Bharatiya, P. (2023, November 1). Maximizing C++ Program Performance: A Comprehensive Guide to GCC Compiler Optimization. Data Intelligence. Retrieved from https://data-intelligence.hashnode.dev/maximizing-c-program-performance-a-comprehensive-guide-to-gcc-compiler-optimization
 	\bibitem{b4} Jones, M. T. (2005). Optimization in GCC. Linux journal, 2005(131), 11.
 	\bibitem{b5} Qingyang CHEN. (2023, November 9). Retrieved from https://zhuanlan.zhihu.com/p/337756824
 	\bibitem{b6} GNU Compiler Collection. Vector Extensions. GNU Compiler Collection Documentation. Retrieved from https://gcc.gnu.org/onlinedocs/gcc/Vector-Extensions.html
+	\bibitem{b7} Xiaowei, W., Kuixing, W., Quansheng, Y. (2012). Research and Development of Compiler Based on GCC. Recent Advances in Computer Science and Information Engineering: Volume 3, 809-814.
+
 \end{thebibliography}
 
 
-\vspace{12pt}
 \vspace{12pt}
 \end{document}

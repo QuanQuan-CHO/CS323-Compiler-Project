@@ -6,24 +6,24 @@
 using namespace std;
 
 enum errtype{
-    varnodef,
-    funnodef,
-    varredef,
-    funredef,
-    equnmatch,
-    rvalleft,
-    opunmatch,
-    returnunmatch,
-    argunmatch,
-    notanarr,
-    notafun,
-    indexnoint,
-    dotnostuct,
-    structnohas,
-    structredef
+    varnodef,       // a variable is used without a definition
+    funnodef,       // a function is invoked without a definition
+    varredef,       // a variable is redefined in the same scope
+    funredef,       // a function is redefined
+    equnmatch,      // unmatching types appear at both sides of the assignment operator (=)
+    rvalleft,       // rvalue appears on the left-hand side of the assignment operator
+    opunmatch,      // unmatching operands, such as adding an integer to a structure variable
+    returnunmatch,  // a function’s return value type mismatches the declared type
+    argunmatch,     // a function’s arguments mismatch the declared parameters (either types or numbers, or both)
+    notanarr,       //applying indexing operator ([…]) on non-array type variables
+    notafun,        //applying function invocation operator (foo(…)) on non-function names
+    indexnoint,     //array indexing with a non-integer type expression
+    dotnostuct,     //accessing members of a non-structure variable (i.e., misuse the dot operator)
+    structnohas,    //accessing an undefined structure member
+    structredef     //redefine the same structure type
 };
 
- enum type{
+enum type{
     intval,
     charval,
     floatval,

@@ -410,7 +410,73 @@ Figure 16 shows how Clang driver works. The orange portion in this diagram not o
 \label{fig16}
 \end{figure}
 
-The role of Parse is option parsing. It is responsible for parsing the command-line options provided by the user into individual parameters and placing them into instances of the Arg class. Suppose we have a file named `a.c' containing only one line, which is `int main()\{\}'. In terminal, as an example, use `clang -\#\#\# a.c -I/CS323/2023F' to compile it. The result is shown in Figure 17.
+Firstly, the role of Parse is option parsing. It is responsible for parsing the command-line options provided by the user into individual parameters and placing them into instances of the Arg class. Suppose we have a file named `a.c' containing only one line, which is `int main()\{\}'. In terminal, as an example, use `clang -\#\#\# a.c -I/CS323/2023F' to compile it. The result is shown in Figure 17.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics [width=1\linewidth]{pictures/DriverTerminal.png}
+\caption{Parsing Output}
+\label{fig17}
+\end{figure}
+
+It is noteworthy to focus on the two areas outlined by the red boxes in the diagram, as they represent the information passed to the compiler—specifically, the source file `a.c' that we intend to compile and the option `-I/CS323/2023F'.
+
+In the first red box, we observe that the compiler splits `-I/CS323/2023F' into `-I' and `/CS323/2023F'. The `-I' option here is supported by Clang and, internally, is represented by OPT\_\_I, belonging to the Option class. Clang utilizes a Domain-Specific Language (DSL) specifically for handling options, storing them as .td files, processing them with table-gen to convert them into C++ code, and finally compiling them together with other C++ code. The value `/CS323/2023F' represents what -I receives as an argument. Here, we can see that the Driver layer handles this, parsing the `-I/CS323/2023F' we provide.
+
+However, in comparison to `-I/CS323/2023F', the Driver processes the passed file a.c more extensively, indicated by `-x c a.c' in the second red box. The -x option in Clang specifies the compilation language required for the source code file. When Clang Driver recognizes a.c as a C language file, it appends the value c to the -x option, signifying the compilation of a C language file. How does Clang Driver know that this is a C language file? In essence, Clang Driver is rather simplistic; it determines this based on the file extension .c. Therefore, we can use -x c++ a.c to compile in C++ mode. If you have observed the compilation with clang and clang++, you would notice that clang++ is essentially clang, with defaults set for C++ compilation, hence all related options are geared towards C++. By the way, it's not a good idea using `clang a.cpp' or `clang x c++ a.cpp', which will cause several link errors. It's OK to use `clang a.cpp -lc++' instead, while clang++ is a better solution for cpp code.
+
+Secondly, the role of the Pipeline is to construct different Compiler Actions based on specific compilation options.
+
+Use `clang -ccc-print-phases a.c' to print the result after pipelining, which is shown in Figure 18.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics [width=0.9\linewidth]{pictures/Pipeline.png}
+\caption{Pipeline Output}
+\label{fig18}
+\end{figure}
+
+Here, we can observe a familiar process, such as using the preprocessor for preprocessing and then employing the compiler for compilation, and so on, with their respective outcomes. For instance, the preprocessed value is labeled as cpp-output. It's crucial to note that here, cpp doesn't refer to C++, but rather to the result of C language preprocessing. If it were C++, the output would be C++-cpp-output. This distinction is prone to confusion in the Clang codebase, where the former corresponds to .i files, and the latter to .ii files. Within the Clang Pipeline process, most actions correspond to actual occurrences, such as preprocessing and compilation. However, there are two distinctive actions: InputAction and BindArchAction. The former aids in facilitating actual actions, such as providing input files during preprocessing. BindArchAction is used to bind machine architecture with InputAction, as demonstrated in this example, where it is applied to Arm64. Because BindArchAction can bind input to different machine architectures, a common application is to concurrently create a library that supports both 32-bit and 64-bit architectures.
+
+Thirdly, the role of Bind is to facilitate the selection of Tool and Filename.
+
+When we create a series of Actions, Bind's role is to provide us with specific Tools to execute this sequence of actual operations. During actual execution, these operations take place as individual subprocesses. For example, if there is an Assemble Action, Assembler is responsible for performing the assembly work. But which Assembler to choose, the embedded one, GNU's or others, is determined by Bind. The selection of the Tool is handled by the ToolChain, where each architecture, platform, and operating system has its own ToolChain. Bind interacts with the ToolChain, and the ToolChain is responsible for choosing the specific Tool to complete a series of Actions. As for Filename, note that each Action may interact with another Action, and sometimes, one Action is the input for another. In such cases, we should focus on what form the input takes, inter-process communication, a pipeline, or a file, among other possibilities (actual Tools run as subprocesses, and various inter-process communication methods are detailed in operating system textbooks). If a file is used, Filename determines the kind of filename ultimately used.
+
+Use `clang -ccc-print-bindings a.c' to print the result after binding, which is shown in Figure 19.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics [width=0.9\linewidth]{pictures/Binding.png}
+\caption{Bind Output}
+\label{fig19}
+\end{figure}
+
+It can be observed that the compiler chosen is clang, and the linker selected is darwin::Linker. It seems that the assembly process and assembler are absent. In reality, on the Mac platform, Clang utilizes an integrated assembler, namely integrated-as. After generating LLVM IR, it calls the integrated assembler, directly producing the .o file. The advantage of this approach is the reduction of overhead associated with generating assembly files and invoking the target assembler. The option `-fno-integrated-as' can be used to instruct clang not to use the integrated assembler.
+
+Fourthly, The role of Translate is to handle the translation of tool options and parameters.
+
+This step involves mapping relevant parameters to tools on various platforms, closely integrated with the Bind process. Use `clang a.c -shared -v' to print the result of creating a dynamic library using the -shared option, which is shown in Figure 20. Note that the output may be different in other systems, for example, Ubuntu Linux.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics [width=1\linewidth]{pictures/Translate.png}
+\caption{Translate Output}
+\label{fig20}
+\end{figure}
+
+Fifthly, the role of Execute is to carry out the entire compilation process.
+
+Use `clang a.c -ftime-report' to interact with it. Part of the output is shown in Figure 21.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics [width=1\linewidth]{pictures/Execute.png}
+\caption{Execute Output}
+\label{fig21}
+\end{figure}
+
+Additionally, clang-cl is an alternative command-line interface to Clang, designed for compatibility with the Visual C++ compiler, cl.exe. To enable clang-cl to find system headers, libraries, and the linker when run from the command-line, it should be executed inside a Visual Studio Native Tools Command Prompt or a regular Command Prompt where the environment has been set up using e.g. vcvarsall.bat. clang-cl can also be used from inside Visual Studio by selecting the LLVM Platform Toolset. The toolset is not part of the installer, but may be installed separately from the Visual Studio Marketplace. To use the toolset, select a project in Solution Explorer, open its Property Page (Alt+F7), and in the “General” section of “Configuration Properties” change “Platform Toolset” to LLVM. Doing so enables an additional Property Page for selecting the clang-cl executable to use for builds.\cite{b13}
+
 
 \begin{thebibliography}{00}
 
@@ -426,6 +492,7 @@ The role of Parse is option parsing. It is responsible for parsing the command-l
 	\bibitem{b10} LLVM. (2023). GlobalValue Class Reference. Retrieved from https://llvm.org/doxygen/classllvm\_1\_1GlobalValue.html
 	\bibitem{b11} LLVM. (2023). LLVM Language Reference. Retrieved from https://llvm.org/docs/LangRef.html
 	\bibitem{b12} Blue. (2017). https://zhuanlan.zhihu.com/p/22974869
+	\bibitem{b13} LLVM Project. (2023). Clang User's Manual. LLVM. https://clang.llvm.org/docs/UsersManual.html\#clang-cl
 
 
 \end{thebibliography}

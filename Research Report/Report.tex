@@ -38,11 +38,11 @@ Shenzhen, China \\
 \maketitle
 
 \begin{abstract}
-The landscape of open-source compilers is diverse and dynamic, with several prominent players contributing significantly to the field. This research delves into a comprehensive analysis and comparison of several prominent open-source compilers: GCC, Clang and LLVM. The study aims to elucidate the distinctions among these compilers, focusing on aspects such as architecture, optimization techniques, language support, and overall performance. Additionally, a crucial facet of this investigation involves an in-depth examination of the runtime speed differences exhibited by these compilers. By providing a detailed comparison, this research equips developers and enthusiasts with valuable insights to make informed decisions regarding compiler selection for diverse programming needs.
+The landscape of open-source compilers is diverse and dynamic, with several prominent players contributing significantly to the field. This research delves into a comprehensive analysis and comparison of several prominent open-source compilers: GCC, Clang/LLVM. The study aims to elucidate the distinctions among these compilers, focusing on aspects such as architecture, optimization techniques, language support, and overall performance. Additionally, a crucial facet of this investigation involves an in-depth examination of the runtime speed differences exhibited by these compilers. By providing a detailed comparison, this research equips developers and enthusiasts with valuable insights to make informed decisions regarding compiler selection for diverse programming needs.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Compiler, GCC, Clang, LLVM, Codon, Ark Compiler
+Compiler, GCC, Clang, LLVM
 \end{IEEEkeywords}
 
 \section{Introduction}
@@ -299,7 +299,7 @@ These descriptions play a pivotal role in the backend stages of the compiler, pa
 \centering
 \includegraphics [width=0.95\linewidth]{pictures/i++.png}
 \caption{Example Code `i++' Compilation Process\cite{b7}}
-\label{fig999999}
+\label{fig10}
 \end{figure}
 
 It deserves to be mentioned that the efficiency of complier should be taken into full account in the porting process. As the pattern of each instruction is matched in order, the more instruction patterns there are, the more slowly the compiling system will be. It is better to combine the similar instructions to one instruction pattern to obtain higher complier efficiency. The priority of instruction matching should be paid attention to at the same time. Take a simple C language sentence `i++' as an example and set the target machine as Minisys2. The result of matching can be `INC \$2', as well as the mode of `add \$2, \$3, 1'. The process of matching `target.md' file is carried out through the order from top to bottom in GCC, so `INC' instruction pattern should be put in the front of `add' instruction pattern in order to test the newly increased “INC” instruction.\cite{b7}
@@ -316,6 +316,102 @@ As an open-source and widely adopted compiler, GCC has exerted a profound influe
 
 GCC incorporates a potent optimizer capable of enhancing the performance of the generated target code during the compilation process. Optimization spans various dimensions, encompassing, but not limited to, constant folding, register allocation, instruction scheduling, and loop optimization. Through these optimization techniques, GCC generates machine code that is not only more efficient but also aligns closely with the underlying hardware capabilities.
 
+\section{Distinction of Clang/LLVM}
+
+LLVM (Low Level Virtual Machine) is a compiler infrastructure project designed to provide a flexible and extensible compiler framework. It comprises a suite of general-purpose compiler tools, including frontends responsible for source code parsing, optimizers tasked with enhancing intermediate code, and backends responsible for generating target code. The design of LLVM emphasizes modularity and reusability, making it a preferred framework for compiler implementations and optimization tools across various programming languages.
+
+Clang is an open-source, cross-platform compiler for the C, C++, Objective-C, and Objective-C++ programming languages. It is part of the LLVM project and is designed to offer a high-performance, modular, and extensible compiler frontend. The design of Clang emphasizes code clarity and readability, making it a preferred compiler for many developers and projects.
+
+\subsection{Introduction}
+
+Figure 11 illustrates the basic architecture of Clang/LLVM. Initially, the frontend for LLVM was GCC. Subsequently, Apple aspired to develop its own Clang to replace GCC. However, currently, GCC with Dragon Egg can still generate LLVM IR, serving as a viable alternative to Clang. Moreover, it is possible to develop custom frontends, which, when combined with the LLVM backend, enable the creation of compilers for custom programming languages.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics [width=0.95\linewidth]{pictures/ClangLLVMoverview.png}
+\caption{Architecture of Clang/LLVM\cite{b8}}
+\label{fig11}
+\end{figure}
+
+In LLVM, Intermediate Representation (IR) exists in three forms.
+
+The first is a human-readable IR, akin to assembly code, albeit positioned between high-level languages and assembly. This representation is designed for human consumption, and its disk file suffix is .ll.
+
+The second form is an unreadable binary IR, known as bitcode, with a disk file suffix of .bc.
+
+The third representation is a memory format, exclusively stored in memory, devoid of any file format or suffix. This format contributes to LLVM's swift compilation, distinct from GCC, which generates intermediate process files at the conclusion of each stage. LLVM's intermediate data at various compilation stages is in the form of this third representation of IR.
+
+In LLVM IR, a compilation unit (i.e., a .c file) represents a Module. Within a Module, there are Global Values, primarily comprising Global Variables and Functions. A Function encompasses Basic Blocks, and each Basic Block contains instructions, such as "add". Therefore, the hierarchical relationship can be conceptualized as Module - Function - Basic Block - Instructions. Some APIs of LLVM IR might be referred like Figure 12.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics [width=0.95\linewidth]{pictures/LLVMInheritanceDiagram.png}
+\caption{Inheritance Diagram for llvm::GlobalValue\cite{b10}}
+\label{fig12}
+\end{figure}
+
+All three representations are entirely equivalent. While Clang/LLVM tools do not generate these files by default (typically unnecessary for non-compiler developers), they can be specified using parameters in the toolchain. Conversion between the first two file types can be facilitated using llvm-as and llvm-dis.
+
+Notably, there is an LLVM IR linker in the process, distinct from the linker in GCC. To achieve link-time optimization, LLVM, after generating IR for individual code units in the frontend (Clang), links the entire project's IR while concurrently performing link-time optimizations.
+
+The LLVM backend constitutes the genuine backend of LLVM, also referred to as the LLVM core. It encompasses compilation, assembly, and linking processes, ultimately producing assembly files or target code. It is important to differentiate the LLVM compiler here from the compiler in GCC; in LLVM, the LLVM compiler exclusively compiles LLVM IR.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics [width=0.95\linewidth]{pictures/ClangProcedure.png}
+\caption{Procedure of Clang/LLVM\cite{b9}}
+\label{fig13}
+\end{figure}
+
+Figure 13 illustrates the procedure a C code will go through in Clang/LLVM. Firstly, we have C source code program files, which then undergo the Clang frontend (or the deprecated llvm-gcc frontend, used prior to the advent of Clang, capable of generating LLVM IR). Subsequently, LLVM IR is produced. In this context, LLVM IR is identified by the .bc extension, representing a serialized data format utilized for storage on disk. However, LLVM IR also boasts another remarkable feature in the form of a human-readable format, typically denoted by the .ll extension. Figure 14 is an example of the human-readable format for a simple C language Hello World program:
+
+\begin{figure}[htbp]
+\centering
+\includegraphics [width=0.95\linewidth]{pictures/helloworld.png}
+\caption{Hello-world Human-readable Format}
+\label{fig14}
+\end{figure}
+
+Use `clang a.c -S -emit-llvm' to generate .ll file, which is shown in Figure 15. It's useful to obtain information of more instructions referring to LLVM Language Reference Manual\cite{b11}.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics [width=0.95\linewidth]{pictures/llFile.png}
+\caption{Content of .ll File\cite{b9}}
+\label{fig15}
+\end{figure}
+
+After the completion of the generation of the .bc file, if optimizations such as O2 are applied, there is an additional optimization phase known as unit-level optimization. This phase encompasses approximately 40 optimization passes, including dead code elimination, inlining, and others. Despite the optimizations, the output remains in the .bc file format. Subsequently, the process proceeds to the llvm-link stage. During the llvm-link stage, the primary objective is to merge multiple .bc files into a single .bc file while simultaneously performing link-time optimizations, which will be explained later.
+
+After the llvm-link stage, we obtain a new .bc file, prompting another round of optimization. This is necessary because llvm-link might introduce structural changes to the IR, potentially making it more amenable to optimization. Subsequent to this step, the final optimized .bc file is obtained, marking the formal entry into the code generation phase.
+
+In Figure 13, only llc, representing the path for machine code generation, is illustrated. However, LLVM also supports an additional process, namely lli, which involves interpreting the LLVM IR. Although this paper won't delve into this here, the focus remains on machine code generation. The role of llc is to compile LLVM IR into an assembly file (.s). Roughly, LLVM IR can be treated as a programming language, and after passing through the llc compiler, an assembly file is produced. Analogous to the generation of LLVM IR from a C program through Clang, the generation of an assembly file is achieved.
+
+Following the creation of the assembly file, the system assembler, such as GNU's as, is invoked to generate the object file (.o). Attentive readers might notice another path involving llvm-mc, a direct route to generating the object file. However, this path is not universally followed on all platforms, and the key lies in LLVM's integrated assembler, denoted by `-fintegrated-as'. Using the integrated assembler, one can go from MCLowering to MCInst and then employ MCStreamers to generate the .o directly, or alternatively, generate the .s file. \cite{b9}
+
+Once the .o file has been generated, the remaining process is relatively straightforward. It involves the linker linking relevant libraries and combining them with the object file to produce the executable file with extensions like .out or .exe.
+
+In summary, the Clang/LLVM workflow initiates from source code, undergoes multiple stages of transformation, optimization, and linking, ultimately yielding an executable file. The modular and extensible nature of this workflow positions it as a robust tool widely utilized in compiler and toolchain development.
+
+\subsection{Clang Driver}
+
+The driver of a compiler is a program that controls and coordinates the entire compilation process. It receives compilation options and source code files provided by the user, and is responsible for invoking various components of the compiler, such as the preprocessor, compiler proper, assembler, and linker, to generate the final executable or object file. The compiler's driver plays an organizational and managerial role during the compilation process, ensuring that each compilation phase is invoked in the correct order with the appropriate parameters.
+
+In practical engineering, the term `driver' pertains to concrete issues rather than theoretical aspects of compilation. Questions such as how to set compiler options, what interfaces to provide to users, and how to utilize these interfaces are considerations in the development of compiler products, falling outside the typical scope covered in compiler theory textbooks.
+
+However, the `driver' constitutes a crucial component in actual compilers, serving as a direct interface for programmer-users and significantly influencing user experience. For instance, when utilizing the GCC compiler and configuring numerous compiler options, if there is a need to port it to other platforms or support additional compilers, it often requires adjustments to compiler options rather than modifications to your code. For example, using `-std=c++11' to enable C++11 features, while on IBM's compiler on AIX, the corresponding option is `-qlanglvl=extended0x', and Microsoft's MSVC on Windows does not recognize the `-std=c++11 option.
+
+Figure 16 shows how Clang driver works. The orange portion in this diagram not only symbolizes the mentioned input/output in the top-left corner of the image but also represents the specific data structures within the Clang Driver, such as the ArgList as you observed. The green section not only stands for Driver Functions but also signifies the concrete execution flow within the Driver. The blue-purple segment encompasses some significant auxiliary classes.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics [width=0.9\linewidth]{pictures/ClangDriver.png}
+\caption{Clang Driver\cite{b12}}
+\label{fig16}
+\end{figure}
+
+The role of Parse is option parsing. It is responsible for parsing the command-line options provided by the user into individual parameters and placing them into instances of the Arg class. Suppose we have a file named `a.c' containing only one line, which is `int main()\{\}'. In terminal, as an example, use `clang -\#\#\# a.c -I/CS323/2023F' to compile it. The result is shown in Figure 17.
+
 \begin{thebibliography}{00}
 
 	\bibitem{b1} Novillo, D. (2006, September). GCC an architectural overview, current status, and future directions. In Proceedings of the linux symposium (Vol. 2, p. 185).
@@ -325,9 +421,14 @@ GCC incorporates a potent optimizer capable of enhancing the performance of the 
 	\bibitem{b5} Qingyang CHEN. (2023, November 9). Retrieved from https://zhuanlan.zhihu.com/p/337756824
 	\bibitem{b6} GNU Compiler Collection. Vector Extensions. GNU Compiler Collection Documentation. Retrieved from https://gcc.gnu.org/onlinedocs/gcc/Vector-Extensions.html
 	\bibitem{b7} Xiaowei, W., Kuixing, W., Quansheng, Y. (2012). Research and Development of Compiler Based on GCC. Recent Advances in Computer Science and Information Engineering: Volume 3, 809-814.
+	\bibitem{b8} P2Tree. (2019). https://blog.csdn.net/SiberiaBear/article/details/103111028
+	\bibitem{b9} Blue. (2016). https://zhuanlan.zhihu.com/p/21889573
+	\bibitem{b10} LLVM. (2023). GlobalValue Class Reference. Retrieved from https://llvm.org/doxygen/classllvm\_1\_1GlobalValue.html
+	\bibitem{b11} LLVM. (2023). LLVM Language Reference. Retrieved from https://llvm.org/docs/LangRef.html
+	\bibitem{b12} Blue. (2017). https://zhuanlan.zhihu.com/p/22974869
+
 
 \end{thebibliography}
-
 
 \vspace{12pt}
 \end{document}

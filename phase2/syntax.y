@@ -47,7 +47,7 @@
 %%
 
 Program:
-  ExtDefList {if(!has_error){printf("Program (%d)\n", @$.first_line);}}
+  ExtDefList {}
 | MacroStmt ExtDefList {if(!has_error){printf("Program (%d)\n", @$.first_line);}}
 
 MacroStmt:
@@ -128,7 +128,7 @@ CompSt:
    //所有def stmt的val除了ruturn语句均为空
 | LC DefList RC {}
 | LC DefList error {syntax_error("closing curly brace \'}\'",@2.last_line);}
-| LC StmtList RC {$$=$2;}
+| LC StmtList RC {}
 | LC DefList StmtList error {syntax_error("closing curly brace \'}\'",@3.last_line);}
 | LC DefList StmtList DefList error {syntax_error("specifier",@3.first_line);}
 
@@ -137,23 +137,23 @@ StmtList:
 | Stmt StmtList {$2->link(1,$1);$$=$2;}
 
 Stmt:
-  Exp SEMI {}
+  Exp SEMI {$$=nullptr;}
   //该节点val为null
   //assign和noact 的val均为nullptr
 | Exp error {syntax_error("semicolon \';\'",@1.last_line);}
-| CompSt {}
+| CompSt {$$=nullptr;}
 | RETURN Exp SEMI {$$=$2;}
 //此节点得到的是exp的val
 | RETURN Exp error {syntax_error("semicolon \';\'",@2.last_line);}
-| RETURN error SEMI {}
-| IF LP Exp RP Stmt %prec LOWER_ELSE {$$=new rec(noact);$$->link(2,$3,$5);}
-| IF LP Exp RP Stmt ELSE Stmt {}
+| RETURN error SEMI {$$=nullptr;}
+| IF LP Exp RP Stmt %prec LOWER_ELSE {$$=nullptr;}
+| IF LP Exp RP Stmt ELSE Stmt {$$=nullptr;}
 | IF LP Exp error Stmt {syntax_error("closing parenthesis \')\'",@3.last_line);}
-| WHILE LP Exp RP Stmt {}
+| WHILE LP Exp RP Stmt {$$=nullptr;}
 | WHILE LP Exp error Stmt {syntax_error("closing parenthesis \')\'",@3.last_line);}
-| FOR LP Exp SEMI Exp SEMI Exp RP Stmt {}
-| IFDEF Stmt ENDIF {}
-| IFDEF MACRO Stmt MACROELSE Stmt ENDIF {}
+| FOR LP Exp SEMI Exp SEMI Exp RP Stmt {$$=nullptr;}
+| IFDEF Stmt ENDIF {$$=nullptr;}
+| IFDEF MACRO Stmt MACROELSE Stmt ENDIF {$$=nullptr;}
 
 DefList:
   Def {$$=new rec(noact);$$->link(1,$1);}

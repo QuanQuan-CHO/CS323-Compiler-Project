@@ -26,13 +26,19 @@ bool check (const rec& first, const rec& second) {
     {
        return true;
     }
+    
     // cout<<(first.t==intvar||first.t==floatvar)<<(second.t==intvar||second.t==floatvar)<<endl;
     // if ((first.t==intvar||first.t==floatvar)&&(second.t==intvar||second.t==floatvar))
     // {
     //     return true;
     // } else 
+
+    if (((first.t==second.t)&&(first.t!=structvar)))
+    {   
+       return true;
+    }
     
-    if (first.t != second.t || first.name != second.name) {
+    if (((first.t != second.t) || (first.name != second.name))) {
         return false;
     }
 
@@ -56,6 +62,7 @@ bool check (const rec& first, const rec& second) {
         }
     }
     // 如果以上条件都满足，说明两个对象是深度相等的
+    
     return true;
     }
 void def (rec* type, rec* node, map& m){
@@ -114,14 +121,16 @@ void def (rec* type, rec* node, map& m){
         def(type,element,m);
     }
     }//批量定义变量
-
+    // cout<<"def finish"<<endl;
 }
 void rec:: link(int nodes_num, ...){
         va_list nodes;
         va_start(nodes, nodes_num);
         for (int i = 0; i < nodes_num; i++)
-    {   rec *node = (rec *)va_arg(nodes, rec*);
-        this->recs.push_back(node);
+    {   
+        rec *node = (rec *)va_arg(nodes, rec*);
+        // cout<<node->name<<" "<<node->t<<endl;
+            this->recs.push_back(node);
     }
     va_end(nodes);
     }
@@ -143,16 +152,24 @@ void buildarr(rec* id, rec* len){
     }
 
 void eq(rec* first,rec* second,act a,map m){
-   
+    // cout<<"eq start"<<endl;
+    
     if (a==checkreturn){
-        if (!check(*(first->val),*(second->val)))
-        { 
-            err(returnunmatch,first);
-        }
+        vector<rec*> recs=second->recs;
+        for (const auto& rec : recs) {
+            if (rec!=nullptr)
+            {
+                // cout<<rec->val->name<<endl;
+                // cout<<rec->val->t<<endl;
+                if (!check(*(first->val),*(rec->val)))
+                {err(returnunmatch,rec);
+                }         
+            }
+    }
     }
     if (a==usassign)
     {  
-    //             cout<<"111"<<endl;
+   
     // for (auto it = m.checkMap.begin(); it != m.checkMap.end(); ++it) {
     //     std::cout << "Key: " << it->first << ", Value: " << it->second << std::endl;
     // }

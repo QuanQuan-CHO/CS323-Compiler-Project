@@ -83,9 +83,10 @@ return { return RETURN;}
 ({valid_decimal_int})\.[0-9]+ {yylval.rec_ptr= new rec(floatvar,yytext); return FLOAT;}
 
 {valid_decimal_int} { /* not include minus number */
+yylval.rec_ptr= new rec(intvar,yytext);
     long integer = strtol(yytext,&yytext,10);
     if(integer>=INT32_MIN && integer<=INT32_MAX){
-        yylval.rec_ptr= new rec(intvar,yytext);
+        
     }
     return INT;
 }

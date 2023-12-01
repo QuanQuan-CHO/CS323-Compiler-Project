@@ -477,6 +477,35 @@ Use `clang a.c -ftime-report' to interact with it. Part of the output is shown i
 
 Additionally, clang-cl is an alternative command-line interface to Clang, designed for compatibility with the Visual C++ compiler, cl.exe. To enable clang-cl to find system headers, libraries, and the linker when run from the command-line, it should be executed inside a Visual Studio Native Tools Command Prompt or a regular Command Prompt where the environment has been set up using e.g. vcvarsall.bat. clang-cl can also be used from inside Visual Studio by selecting the LLVM Platform Toolset. The toolset is not part of the installer, but may be installed separately from the Visual Studio Marketplace. To use the toolset, select a project in Solution Explorer, open its Property Page (Alt+F7), and in the “General” section of “Configuration Properties” change “Platform Toolset” to LLVM. Doing so enables an additional Property Page for selecting the clang-cl executable to use for builds.\cite{b13}
 
+\subsection{Summary of Clang/LLVM}
+
+Clang/LLVM is a powerful and versatile compiler infrastructure that encompasses various functionalities crucial for modern software development.
+
+Clang serves as a frontend compiler that supports a diverse range of programming languages, including C, C++, and Objective-C. It also provides robust and user-friendly diagnostics, offering detailed error and warning messages to aid developers in identifying and addressing code issues effectively.
+
+The modular architecture of LLVM facilitates extensibility and ease of integration with new features and optimizations, making it adaptable to evolving compiler requirements. LLVM incorporates a sophisticated optimization framework that employs a wide range of techniques, including constant folding, loop optimizations, and inlining, to enhance the performance of generated code. Its code generation is target-independent, enabling developers to write portable code that can be optimized and executed on diverse hardware architectures.
+
+Clang/LLVM stands as a versatile and efficient compiler infrastructure that not only delivers high-quality code generation but also offers a comprehensive set of tools and features to support modern software development practices.
+
+\section{Comparison between GCC and Clang/LLVM}
+
+The comparison between GCC and Clang/LLVM compilers involves assessing various aspects of their design, performance, and diagnostics. Both compilers are widely utilized in the software development community, each exhibiting strengths and considerations that merit examination.
+
+\subsection{Design}
+
+The GCC compiler takes source code as input and produces assembly code as output. This process is akin to the Clang phase in LLVM, including the IR linker and the assembly code generation part of the LLVM compiler. It's worth noting that Clang, in a streamlined process, doesn't generate assembly files, as it exclusively operates within an intermediate representation, treating the generation of assembly code and object files as parallel components.
+
+The GCC assembler takes assembly code as input and generates object files as output. This functionality is analogous to LLVM's llvm-mc tool. While Clang, in its default workflow, bypasses this tool, it leverages the same libraries for descending and emitting assembly instructions.
+
+The GCC linker, with object files as input, produces the final executable file. This corresponds to the Linker component in LLVM. Although LLVM has its linker (lld, released but still in development), the Clang driver currently invokes the system linker. Users have the flexibility to opt for the system linker or choose to use GCC's ld.
+
+\subsection{Performance}
+
+The goal is to evaluate the performance of the GCC and LLVM/clang compilers support for the RISC-V target and their ability to optimize for the architecture. The performance will be evaluated from executing CoreMark and Dhrystone which are both popular industry standard benchmarks for evaluating performance on embedded processors. They will be run on both the GCC and LLVM/clang compilers on different optimization levels and compared in performance per clock to the ARM architecture which is in comparison to RISC-V more mature yet the most similar widely used CPU architecture. As the result, -O2 and -O3 optimization levels on GCC performed very well, while LLVM/clang on the other hand crashed when trying to compile our CoreMark benchmark and on Dhrystone.\cite{b14}
+
+\subsection{Diagnostics}
+
+
 
 \begin{thebibliography}{00}
 
@@ -493,6 +522,7 @@ Additionally, clang-cl is an alternative command-line interface to Clang, design
 	\bibitem{b11} LLVM. (2023). LLVM Language Reference. Retrieved from https://llvm.org/docs/LangRef.html
 	\bibitem{b12} Blue. (2017). https://zhuanlan.zhihu.com/p/22974869
 	\bibitem{b13} LLVM Project. (2023). Clang User's Manual. LLVM. https://clang.llvm.org/docs/UsersManual.html\#clang-cl
+	\bibitem{b14} Bjäreholt, J. (2017). RISC-V Compiler Performance: A Comparison between GCC and LLVM/clang.
 
 
 \end{thebibliography}

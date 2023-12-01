@@ -505,7 +505,7 @@ The goal is to evaluate the performance of the GCC and LLVM/clang compilers supp
 
 \subsection{Diagnostics}
 
-Compile the five .c files in the Diagnostics Programs folder using both GCC and Clang compilers, and compare which compiler produces more reasonable error messages. Note that the version of GCC is gcc-13.2.0 while the version of Clang is clang-15.0.0. The results are shown in Figure 22 and Figure 23. The commands we use are `gcc -fsyntax-only -Wformat filename.c' and `clang -fsyntax-only -Wformat filename.c', respectively.
+Compile the five .c files\cite{b15} in the Diagnostics Programs folder using both GCC and Clang compilers, and compare which compiler produces more reasonable error messages. Note that the version of GCC is gcc-13.2.0 while the version of Clang is clang-15.0.0. The results are shown in Figure 22 and Figure 23. The commands we use are `gcc -fsyntax-only -Wformat filename.c' and `clang -fsyntax-only -Wformat filename.c', respectively.
 
 \begin{figure}[htbp]
 \centering
@@ -552,6 +552,7 @@ Through our comparative analysis, we have unraveled architectural variances, opt
 	\bibitem{b12} Blue. (2017). https://zhuanlan.zhihu.com/p/22974869
 	\bibitem{b13} LLVM Project. (2023). Clang User's Manual. LLVM. https://clang.llvm.org/docs/UsersManual.html\#clang-cl
 	\bibitem{b14} Bjäreholt, J. (2017). RISC-V Compiler Performance: A Comparison between GCC and LLVM/clang.
+	\bibitem{b15} GNU Project. (n.d.). ClangDiagnosticsComparison - GCC Wiki. GCC - GNU Project - Free Software Foundation (FSF). https://gcc.gnu.org/wiki/ClangDiagnosticsComparison
 
 
 \end{thebibliography}

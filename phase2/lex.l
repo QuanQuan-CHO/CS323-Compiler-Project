@@ -54,7 +54,7 @@ else { return ELSE;}
 while { return WHILE;}
 return { return RETURN;}
     /* Because CHAR is 2 Byte, only 1 or 2 hex char is allowed */
-'([^']|\\[xX](0|[1-9a-fA-F][0-9a-fA-F]?))' {yylval.rec_ptr= new rec(charval,yytext); return CHAR;}
+'([^']|\\[xX](0|[1-9a-fA-F][0-9a-fA-F]?))' {yylval.rec_ptr= new rec(charvar,yytext); return CHAR;}
 
 ";" {return SEMI;}
 "," {return COMMA;}
@@ -80,16 +80,16 @@ return { return RETURN;}
 "]" { return RB;}
 "{" { return LC;}
 "}" { return RC;}
-({valid_decimal_int})\.[0-9]+ {yylval.rec_ptr= new rec(floatval,yytext); return FLOAT;}
+({valid_decimal_int})\.[0-9]+ {yylval.rec_ptr= new rec(floatvar,yytext); return FLOAT;}
 
 {valid_decimal_int} { /* not include minus number */
     long integer = strtol(yytext,&yytext,10);
     if(integer>=INT32_MIN && integer<=INT32_MAX){
-        yylval.rec_ptr= new rec(intval,yytext);
+        yylval.rec_ptr= new rec(intvar,yytext);
     }
     return INT;
 }
-0[xX](0|[1-9a-fA-F][0-9a-fA-F]*) {yylval.rec_ptr= new rec(var,yytext); return INT;} /* valid_hex_int should be converted to decimal form */
+0[xX](0|[1-9a-fA-F][0-9a-fA-F]*) {yylval.rec_ptr= new rec(intvar,yytext); return INT;} /* valid_hex_int should be converted to decimal form */
 0[0-9]+|0[xX]0[0-9a-fA-F]+ {LEXICAL_ERROR; return INT;} /* invalid decimal and hex INT: starting with 0 */
 [0-9]+{id} {LEXICAL_ERROR; return ID;}
 {id} {yylval.rec_ptr= new rec(var,yytext); return ID;}

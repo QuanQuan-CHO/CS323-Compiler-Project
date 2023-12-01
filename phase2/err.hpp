@@ -24,61 +24,31 @@ enum errtype{
 };
 
  enum type{
-    intval,
-    charval,
-    floatval,
     fun,
     arr,
     biop,
     siop,
-    struCt,
     intvar,
     floatvar,
     charvar,
     structvar,
     var,
+    noact
 };
 
 enum act{
-    def,
-    usfun,
     ussiop,
     usbiop,
     usassign,
-    usarr,
-    usstruct,
-    noact,
-    deffun,
+    checkreturn,
 };
-// void err(errtype e,int line,char* id="",int exp=0,int actual=0);
-// void check_redef (std::unordered_map<char*,char*> map, rec r,errtype e);
-// void check_def(std::unordered_map<char*,char*> map, rec r,errtype e);
-// void check_eqtype(std::unordered_map<char*,char*> map, rec r,errtype e);
-// void check_rval(std::unordered_map<char*,char*> map, rec r,errtype e);
-// void check_fun(std::unordered_map<char*,char*> map, rec r,errtype e);
-// void check_int(std::unordered_map<char*,char*> map,rec r,errtype e);
-// void check_arg(std::unordered_map<char*,char*> map, rec r,errtype e);
-// void check_arr(std::unordered_map<char*,char*> map, rec r,errtype e);
-// void check_struct(std::unordered_map<char*,char*> map, rec r,errtype e);
-// void check_struct_has(std::unordered_map<char*,char*> map, rec r,errtype e);
 
-// class rec{
-// public:
-//    type t;
-//    queue<rec*> recs;
-//    int line_num;
-//    string name;
-//    act a;
-//    rec* val;//val 不应该出现于rec而应该在返回值中
-//    bool arr=false;
-//    bool fun=false;
-//    void link(int nodes_num, ...);
-//    explicit rec(type nodetype, int line_num);
-//    explicit rec(type t,char* name);
-//    explicit rec(type t);
-//    explicit rec(act a);
-// };
-
+class rec;
+class map{
+    public:
+    map* outmap;
+    std::unordered_map<std::string, rec*> checkMap;
+};
 class Arr;
 class Stru;
 class Fun;
@@ -87,18 +57,28 @@ public:
    type t;
    int line_num;
    string name;
-   act a;
-   rec* val;
-   queue<rec*> recs;
-   void link(int nodes_num, ...);
+   rec* val=nullptr;
+   vector<rec*> recs;
    explicit rec(type nodetype, int line_num);
    explicit rec(type t,char* name);
    explicit rec(type t);
-   explicit rec(act a);
+   explicit rec();
+   explicit rec(const rec& other);
+   void link(int nodes_num, ...);
+   
 };
-void buildarr(rec* id, rec* len);
+rec* find(string name, map m);
+void eq(rec* first, rec* second,act a, map m);
+void buildarr (rec* id, rec* len);
+void def (rec* type, rec* node, map m);
+void err(errtype e,rec* r,int err=0);
+bool check(const rec& first, const rec& second);
+rec* usarr(rec* arr,rec* index, map m);
+rec* usfun(rec* fun,rec* args,map m);
+rec* usstruct(rec* stru, rec* mem,map m);
 // void usfun(rec* id,rec* args);
 // void usfun(rec* id);
 // void usarr(rec* id,rec* index);
 // void usstruct(rec*id,rec* mem);
 // void set_type(type t,queue<rec*> recs);
+

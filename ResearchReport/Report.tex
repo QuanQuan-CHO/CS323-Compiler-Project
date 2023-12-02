@@ -38,7 +38,7 @@ Shenzhen, China \\
 \maketitle
 
 \begin{abstract}
-The landscape of open-source compilers is diverse and dynamic, with several prominent players contributing significantly to the field. This research delves into a comprehensive analysis and comparison of several prominent open-source compilers: GCC, Clang/LLVM. The study aims to elucidate the distinctions among these compilers, focusing on aspects such as architecture, optimization techniques, language support, and overall performance. Additionally, a crucial facet of this investigation involves an in-depth examination of the runtime speed differences exhibited by these compilers. By providing a detailed comparison, this research equips developers and enthusiasts with valuable insights to make informed decisions regarding compiler selection for diverse programming needs.
+The landscape of open-source compilers is diverse and dynamic, with several prominent players contributing significantly to the field. This research delves into a comprehensive analysis and comparison of several prominent open-source compilers: GCC and Clang/LLVM. The study aims to elucidate the distinctions among these compilers, focusing on aspects such as architecture, optimization techniques, language support, and overall performance. Additionally, a crucial facet of this investigation involves an in-depth examination of several differences exhibited by these compilers. By providing a detailed comparison, this research equips developers and enthusiasts with valuable insights to make informed decisions regarding compiler selection for diverse programming needs.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -46,11 +46,9 @@ Compiler, GCC, Clang, LLVM
 \end{IEEEkeywords}
 
 \section{Introduction}
-Traditional compilers are typically divided into three main components: the frontend, optimizer, and backend. During the compilation process, the frontend is primarily responsible for lexical and syntactical analysis, transforming source code into an abstract syntax tree. The optimizer builds upon the frontend by enhancing the efficiency of the generated intermediate code through various optimization techniques. The backend then translates the optimized intermediate code into machine code tailored for specific platforms.
+Traditional compilers are typically divided into three main components: the frontend, optimizer and backend. During the compilation process, the frontend is primarily responsible for lexical and syntactical analysis, transforming source code into an abstract syntax tree. The optimizer builds upon the frontend by enhancing the efficiency of the generated intermediate code through various optimization techniques. The backend then translates the optimized intermediate code into machine code tailored for specific platforms.
 
-These three components collaborate to form the complete workflow of a compiler. The frontend understands the structure and syntax of the source code, creating an intermediate representation. The optimizer improves program performance and efficiency through a series of optimization techniques. Finally, the backend translates the optimized intermediate code into machine code relevant to the hardware platform, enabling the computer to execute the program.
-
-As the demand for efficient and high-performance compilers continues to rise, the open-source community has witnessed the emergence and evolution of several notable compiler projects. In this research, we explore and compare several such compilers that have made significant contributions to the field: GCC, Clang and LLVM.
+As the demand for efficient and high-performance compilers continues to rise, the open-source community has witnessed the emergence and evolution of several notable compiler projects. In this research, we explore and compare two such compilers that have made significant contributions to the field: GCC and Clang/LLVM.
 
 GCC (GNU Compiler Collection), stands as one of the most venerable and widely-used open-source compilers, supporting an extensive range of programming languages and platforms. Its robust architecture and comprehensive feature set have solidified its position as a cornerstone in the development community.
 
@@ -128,7 +126,7 @@ The O3 optimization level in GCC represents the highest degree of compiler optim
 
 While the -O3 optimization level is capable of generating high-performance code, it's important to note that the resulting increase in the size of the executable can potentially have detrimental effects on its speed. Specifically, if the size of the executable surpasses the capacity of the available instruction cache, this could lead to significant performance penalties. Consequently, it might be more prudent to opt for compiling at the -O2 optimization level. This decision is driven by the intention to enhance the likelihood that the executable fits within the constraints of the instruction cache, thereby mitigating the risk of severe performance degradation.
 
-The Os optimization level focuses on minimizing the size of the generated executable. It aims to reduce the overall footprint of the compiled program, making it suitable for environments where compactness is a priority, such as embedded systems with limited storage.
+The -Os optimization level focuses on minimizing the size of the generated executable. It aims to reduce the overall footprint of the compiled program, making it suitable for environments where compactness is a priority, such as embedded systems with limited storage.
 
 The -Ofast optimization level is similar to -O3 but allows for more aggressive optimizations, including those that may affect mathematical precision. It prioritizes maximizing execution speed and might not be suitable for applications where strict adherence to floating-point precision is required.
 
@@ -141,10 +139,10 @@ To illustrate the impact of GCC compiler optimization levels, we'll use a C code
 \label{fig4}
 \end{figure}
 
-Running on the same computer, the statistics are shown in Table 1. The "Real" time is the actual wall-clock time it took to execute the program. The "User" time represents the CPU time consumed by the program. The "Sys" time indicates system-related CPU time.\cite{b3}
+Running on the same computer, the statistics are shown in Table 1. The `Real' time is the actual wall-clock time it took to execute the program. The `User' time represents the CPU time consumed by the program. The `Sys' time indicates system-related CPU time.\cite{b3}
 
 \begin{table}
-	\caption{Running Time}
+	\caption{Running Time\cite{b3}}
 	\begin{center}
 		\begin{tabular}{c c c c c c}
 			\toprule
@@ -158,7 +156,7 @@ Running on the same computer, the statistics are shown in Table 1. The "Real" ti
 	\end{center}
 \end{table}
 
-Specifying the target architecture also can yield meaningful benefits. The -march option of gcc allows the CPU type to be specified. The default architecture is i386. GCC runs on all other i386/x86 architectures, but it can result in degraded performance on more recent processors. Let's now look at an example of how performance can be improved by focusing on the actual target. Build a simple test application that performs a bubble sort over 10,000 elements. The elements in the array have been reversed to force the worst-case scenario.\cite{b4}
+Specifying the target architecture can also yield meaningful benefits. The -march option of gcc allows the CPU type to be specified. The default architecture is i386. GCC runs on all other i386/x86 architectures, but it can result in degraded performance on more recent processors. Let's now look at an example of how performance can be improved by focusing on the actual target. Build a simple test application that performs a bubble sort over $10000$ elements. The elements in the array have been reversed to force the worst-case scenario.\cite{b4}
 
 \begin{figure}[htbp]
 \centering
@@ -167,7 +165,7 @@ Specifying the target architecture also can yield meaningful benefits. The -marc
 \label{fig5}
 \end{figure}
 
-By specifying the architecture, in this case a 633MHz Celeron, the compiler can generate instructions for the particular target as well as enable other optimizations available only to that target. As shown in Figure 5, by specifying the architecture we see a time benefit of 237ms (23\% improvement). Although it shows an improvement in speed, the drawback is that the image is slightly larger. Using the size command, we can identify the sizes of the various sections of the image.\cite{b4}
+By specifying the architecture, in this case a 633MHz Celeron, the compiler can generate instructions for the particular target as well as enable other optimizations available only to that target. As shown in Figure 5, by specifying the architecture we see a time benefit of 237ms (23\% improvement). Although it shows an improvement in speed, the drawback is that the image is slightly larger. Using the size command, we can identify the sizes of the various sections of the image, which is shown in Figure 6.\cite{b4}
 
 \begin{figure}[htbp]
 \centering
@@ -201,7 +199,7 @@ In modern computing, SIMD processing units or GPUs are primarily employed for ve
 
 In GCC, using vector instructions through built-in functions is available. On some targets, the instruction set contains SIMD vector instructions which operate on multiple values contained in one large register at the same time.\cite{b6}
 
-Assuming our SIMD processor can handle $4$ double numbers at once, take an addition of two arrays as an example. Inside the loop in line 14, it loads four single-precision floating-point values from the array $a$ into a Neon vector $va$. Then in adds the loaded vector $va$ element-wise to the cumulative sum vector $vsum$. It accumulates the sum as the loop progresses. After the loop, it uses Neon intrinsics to perform pairwise addition on the lower and higher lanes of the cumulative sum vector $vsum$, resulting in a 2-element vector $sum_lane$. Finally it completes the reduction by adding the two elements of the 2-element vector $sum_lane$. The result is a single-precision floating-point value representing the sum of the vectorized elements.
+Assuming our SIMD processor can handle $4$ double numbers at once, take an addition of two arrays as an example in Figure 8. Inside the loop in line 14, it loads four single-precision floating-point values from the array $a$ into a Neon vector $va$. Then it adds the loaded vector $va$ element-wise to the cumulative sum vector $vsum$. It accumulates the sum as the loop progresses. After the loop, it uses Neon intrinsics to perform pairwise addition on the lower and higher lanes of the cumulative sum vector $vsum$, resulting in a 2-element vector $sum_lane$. Finally it completes the reduction by adding the two elements of the 2-element vector $sum_lane$. The result is a single-precision floating-point value representing the sum of the vectorized elements.
 
 \begin{figure}[htbp]
 \centering
@@ -218,9 +216,11 @@ However, when dealing with floating-point operations involving multiplication or
 
 Maintaining numerical stability in the face of reordering operations for parallelism is a fundamental concern. Rounding errors, inherent in floating-point calculations, can accumulate differently depending on the order of operations. Achieving both parallelism and numerical stability requires a delicate balance. The use of appropriate compiler flags, careful algorithm design, and consideration of numerical stability principles are essential in minimizing the impact of rounding errors and ensuring reliable parallel computations.
 
-Now take one more complex example. That is matrix multiplication, which is widely used, forming the foundational logic for numerous algorithms. This paper will compare the time consumption of different approaches in matrix operations, with a focus on exploring the efficacy of O3 optimization and elucidating the methodologies potentially employed by O3 optimization.
+Now take one more complex example into consideration. That is matrix multiplication, which is widely used, forming the foundational logic for numerous algorithms. This paper will compare the time consumption of different approaches in matrix operations, with a focus on exploring the efficacy of O3 optimization and elucidating the methodologies potentially employed by O3 optimization.
 
-In Matrix.h we define a matrix, simultaneously, in Matrix.c we define how it works. Suppose we have two matrices mtx1 and mtx2, and then set ans equal to $mtx1 \times mtx2$. Just follow the principle of matrix multiplication we can write a plain method. Optimizing cache utilization is critical for enhancing computational efficiency. One effective strategy involves manipulating the loop order to improve cache hit rates, specifically by employing a technique known as loop interchange. By employing loop interchange, the order of traversal is rearranged, typically from $ijk$ to $ikj$.
+Sample codes are stored in MatrixMultiplication folder. In Matrix.h we define a matrix, simultaneously, in Matrix.c we define how it works. Suppose we have two matrices $mtx1$ and $mtx2$, and then set $ans$ equal to $mtx1 \times mtx2$.
+
+Just follow the principle of matrix multiplication we can write a plain method, which is shown in Figure 9.
 
 \begin{figure}[htbp]
 \centering
@@ -228,6 +228,8 @@ In Matrix.h we define a matrix, simultaneously, in Matrix.c we define how it wor
 \caption{Matrix Multiplication Plain Method}
 \label{fig9}
 \end{figure}
+
+Optimizing cache utilization is critical for enhancing computational efficiency. One effective strategy involves manipulating the loop order to improve cache hit rates, specifically by employing a technique known as loop interchange. By employing loop interchange, the order of traversal is rearranged, typically from $ijk$ to $ikj$.
 
 When computing each element of the matrix \( C = A \times B \) using the Plain Method, a vector dot product is performed between the rows of matrix \( A \) and the columns of matrix \( B \). As matrices are stored row-wise, accessing individual elements of the corresponding row in matrix \( A \) results in contiguous memory access. However, for matrix \( B \), which requires column-wise computation, accessing current and subsequent positions in memory is non-contiguous. Upon completion of the computation, matrix \( B \) incurs \( n \) jumps in memory access, resulting in \( n^3 \) jumps after \( n^2 \) computations.
 
@@ -324,11 +326,11 @@ Clang is an open-source, cross-platform compiler for the C, C++, Objective-C, an
 
 \subsection{Introduction}
 
-Figure 11 illustrates the basic architecture of Clang/LLVM. Initially, the frontend for LLVM was GCC. Subsequently, Apple aspired to develop its own Clang to replace GCC. However, currently, GCC with Dragon Egg can still generate LLVM IR, serving as a viable alternative to Clang. Moreover, it is possible to develop custom frontends, which, when combined with the LLVM backend, enable the creation of compilers for custom programming languages.
+Figure 11 illustrates the basic architecture of Clang/LLVM. Initially, the frontend for LLVM was GCC. Subsequently, Apple aspired to develop its own Clang to replace GCC. Moreover, it is possible to develop custom frontends, which, when combined with the LLVM backend, enable the creation of compilers for custom programming languages.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics [width=0.95\linewidth]{pictures/ClangLLVMoverview.png}
+\includegraphics [width=1\linewidth]{pictures/ClangLLVMoverview.png}
 \caption{Architecture of Clang/LLVM\cite{b8}}
 \label{fig11}
 \end{figure}
@@ -505,23 +507,28 @@ The goal is to evaluate the performance of the GCC and LLVM/clang compilers supp
 
 \subsection{Diagnostics}
 
-Compile the five .c files\cite{b15} in the Diagnostics Programs folder using both GCC and Clang compilers, and compare which compiler produces more reasonable error messages. Note that the version of GCC is gcc-13.2.0 while the version of Clang is clang-15.0.0. The results are shown in Figure 22 and Figure 23. The commands we use are `gcc -fsyntax-only -Wformat filename.c' and `clang -fsyntax-only -Wformat filename.c', respectively.
+Compile the five .c files\cite{b15} in the `DiagnosticsPrograms' folder using both GCC and Clang compilers, and compare which compiler produces more reasonable error messages. Note that the version of GCC is gcc-13.2.0 while the version of Clang is clang-15.0.0. The results are shown in Figure 22 to Figure 24. The commands we use are `gcc -fsyntax-only -Wformat filename.c' and `clang -fsyntax-only -Wformat filename.c', respectively. For the first example, GCC detects that there are two errors, while Clang only detects one. For the second example, the two compilers give similar output. For the third example, GCC gives an exclusive note. Another 2 results are omitted due to the space limitation.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics [width=0.8\linewidth]{DiagnosticsPrograms/1.png}
+\includegraphics [width=0.8\linewidth]{Pictures/1.png}
 \caption{Diagnostics Comparison 1}
 \label{fig22}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics [width=0.8\linewidth]{DiagnosticsPrograms/2.png}
+\includegraphics [width=0.8\linewidth]{Pictures/2.png}
 \caption{Diagnostics Comparison 2}
 \label{fig23}
 \end{figure}
 
-For the first example, GCC detects that there are two errors, while Clang only detects one. For the second example, the two compilers give similar output. Another 3 results are omitted due to the space limitation.
+\begin{figure}[htbp]
+\centering
+\includegraphics [width=0.8\linewidth]{Pictures/3.png}
+\caption{Diagnostics Comparison 3}
+\label{fig24}
+\end{figure}
 
 In brief, the compilation results of GCC and Clang are largely similar, with GCC providing more detailed error messages for certain examples. Additionally, GCC's error messages incorporate a greater use of color, enhancing their comprehensibility.
 

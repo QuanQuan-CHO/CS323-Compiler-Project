@@ -1,6 +1,6 @@
   #include "err.hpp"
 rec::rec(type nodetype, int line_num) : t(nodetype), line_num(line_num){
-    cout<<this->name<<endl;
+    // cout<<this->name<<endl;
 }
 rec::rec(type t):t(t){
 };
@@ -137,7 +137,7 @@ rec* ac(rec* check){
 for (rec* subRec : check->recs) {
      ac(subRec);
    }
-    cout<<typeToStringMap[check->t]<<endl;
+    // cout<<typeToStringMap[check->t]<<endl;
     deal(check,m);
     return nullptr;
     }
@@ -162,7 +162,7 @@ std::queue<rec*> bfsQueue;
                 }
                 else if (re->t==usarr)
                 {   
-                    cout<<re->toString()<<endl;
+                    // cout<<re->toString()<<endl;
                 }
                 
                 else if (re->t==ussiop)
@@ -200,9 +200,9 @@ std::queue<rec*> bfsQueue;
         }
 }
 void checktassign(rec* left,rec* right){
-    cout<<"我在赋值"<<endl;
-    cout<<left->toString()<<endl;
-    cout<<right->toString()<<endl;
+    // cout<<"我在赋值"<<endl;
+    // cout<<left->toString()<<endl;
+    // cout<<right->toString()<<endl;
     rec* l=find(left->name,m);
     if (!l)
     {
@@ -244,9 +244,9 @@ void checktassign(rec* left,rec* right){
     
 }
 rec* checkbiop(rec* left, rec* right){
-    cout<<"我在比较"<<endl;
-    cout<<left->toString()<<endl;
-    cout<<right->toString()<<endl;
+    // cout<<"我在比较"<<endl;
+    // cout<<left->toString()<<endl;
+    // cout<<right->toString()<<endl;
     rec* l=find(left->name,m);
     if (!l&&left->val!=left)
     {  
@@ -294,7 +294,9 @@ rec* checkusfun(rec* func,rec* args){
         }
         
         if (!args&&f->recs.size()==0){
-        return new rec(*f->val);}
+            rec* res=new rec(*f->val);
+            res->line_num=func->line_num;
+        return res;}
         else if (args&&f->recs.size()==0)
         {
            err(argunmatch,func,0,args->recs.size());
@@ -313,13 +315,15 @@ rec* checkusfun(rec* func,rec* args){
             }
         }
         }
-        
-        return new rec(*f->val);
+        rec* res=new rec(*f->val);
+        res->line_num=func->line_num;
+        return res;
         }
      return nullptr;
     }
 rec* checkusstruct(rec* stru,rec* mem){
-
+    //  cout<<stru->toString()<<endl;
+    //  cout<<mem->toString()<<endl;
      rec* st=find(stru->name,m);
     if (!st){
         err(varnodef,st);
@@ -336,6 +340,8 @@ rec* checkusstruct(rec* stru,rec* mem){
                 if (m->name==mem->name)
                 {   
                     m->line_num=stru->line_num;
+                    // cout<<"返回"<<endl;
+                    // cout<<m->toString()<<endl;
                     return m;
                 }
                 
@@ -347,23 +353,84 @@ rec* checkusstruct(rec* stru,rec* mem){
 
     return nullptr;
 }
-//checkback checkusarr print arr
-rec* checkusarr(rec* arr, rec* index){
-     rec* ar=find(arr->name,m);
+rec* checkusarr(rec* arra, rec* index){
+    // cout<<"___________"<<endl;
+    // cout<<arra->toString()<<endl;
+    //  cout<<"~~~~~~~~~~~~"<<endl;
+     rec* res;
+     if (arra->t!=arr)
+     {
+     rec* ar=find(arra->name,m);
     if (!ar){
-        
+        err(varnodef,arra);
     }else{
-        cout<<ar->toString()<<endl;
+    if (ar->t!=arr)
+    {
+        err(notanarr,arra);
+    }}
+    res=new rec(*ar);
+    res->recs.erase(res->recs.begin());
     }
-    return nullptr;
-}
+    else if (arra->t==arr&&arra->recs.size()==0)
+    {
+        err(notanarr,arra);
+        res=new rec(*arra);
+        res->recs.erase(res->recs.begin());
+    }else{
+        res=new rec(*arra);
+        res->recs.erase(res->recs.begin());
+    }
+    
+    rec* ind=find(index->name,m);
+    if (ind)
+    {
+        if (ind->val->t!=intvar)
+        {
+            err(indexnoint,index);
+        }
+    }else{
+        if (index->t!=intvar)
+        {
+            err(indexnoint,index);
+        }
+    }
+    res->line_num=arra->line_num;
+    return res;
+    }
+
 rec* deal(rec* todeal, map& m){
   
     if (todeal->t==usstruct)
     {   
         rec* str=todeal->recs[0];
         rec* mem=todeal->recs[1]; 
-        todeal->val=checkusstruct(str,mem);
+        rec* s=str;
+        rec* member=mem;
+        if (s->t==usstruct)
+        {
+            s = find(s->val->name,m);
+            
+            if (!s)
+            {
+               err(varnodef,str);
+            }else{
+                s->line_num=str->line_num;
+            }
+        }else{
+           
+            s = find(s->name,m);
+            
+            if (!s)
+            {
+               err(varnodef,str);
+            }else{
+                s->line_num=str->line_num;
+            }
+        }
+      
+        todeal->val=checkusstruct(s,member);
+
+
     }
     if (todeal->t==checkreturn){
         rec* fun=todeal->recs[0];
@@ -378,13 +445,21 @@ rec* deal(rec* todeal, map& m){
         rec* right=todeal->recs[1];     
         rec* l=left;
         rec* r=right;  
-        if ((left->t==usbiop)||(left->t==usfun)||(left->t==usstruct))
+        // cout<<"左边是"<<endl;
+        // cout<<l->toString()<<endl;
+        // cout<<"右边是"<<endl;
+        // cout<<r->toString()<<endl;
+        if ((left->t==usbiop)||(left->t==usfun)||(left->t==usstruct)||(left->t==usarr))
         {  
            
            l=left->val;
-
+           if (left->val==nullptr)
+          {  
+             err(equnmatch,todeal);
+             return nullptr;
+          }
         }
-        if ((right->t==usbiop)||(right->t==usfun)||(right->t==usstruct))
+        if ((right->t==usbiop)||(right->t==usfun)||(right->t==usstruct)||(right->t==usarr))
         {  
           if (right->val==nullptr)
           {
@@ -392,7 +467,6 @@ rec* deal(rec* todeal, map& m){
           }
            r=right->val;
         }
-        
         checktassign(l,r);
         }
     if (todeal->t==usbiop)
@@ -420,10 +494,25 @@ rec* deal(rec* todeal, map& m){
         // checkmap();
     }
     if (todeal->t==usarr)
-    {
+    {   
+        
+        if (todeal->val!=nullptr)
+        {
+            return nullptr;
+        }
+        // cout<<todeal->toString()<<endl;
         rec* arr=todeal->recs[0];
         rec* index=todeal->recs[1];
-        checkusarr(arr,index);
+        rec* d;
+        if (arr->t==usarr)
+        {   
+            arr=arr->val;
+        }
+        if (index->t==usarr)
+        {   
+            index=index->val;
+        }
+        todeal->val= checkusarr(arr,index);
     }
     
     return nullptr;
@@ -433,8 +522,8 @@ rec* deal(rec* todeal, map& m){
 void define (rec* type,rec* node){
     
     // cout<<type->t<<" "<<node->t<<endl;
-    cout<<"start to define"<<endl;
-    cout<<type->name<<endl;
+    // cout<<"start to define"<<endl;
+    // cout<<type->name<<endl;
     if (node->t==structvar){
         node->val=new rec(*type);
         auto it = m.checkMap.find(node->name);
@@ -494,7 +583,7 @@ void define (rec* type,rec* node){
         define(type,element);
     }
     }//批量定义变量
-    checkmap();
+    // checkmap();
 }
 void checkmap(){
     for (auto it = m.checkMap.begin(); it != m.checkMap.end(); ++it) {

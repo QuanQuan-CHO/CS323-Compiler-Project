@@ -47,7 +47,11 @@
 %%
 
 Program:
-  ExtDefList {cout<<"start program"<<endl;checkmap();ac($1);cout<<"finish program"<<endl;}
+  ExtDefList {
+    // cout<<"start program"<<endl;checkmap();
+    ac($1);
+    // cout<<"finish program"<<endl;
+    }
 | MacroStmt ExtDefList {if(!has_error){printf("Program (%d)\n", @$.first_line);}}
 
 MacroStmt:
@@ -65,8 +69,8 @@ DefineStmt:
 | DefineStmt COMMA MACRO MACRO {printf("DefineStmt (%d)\n", @$.first_line);}
 
 ExtDefList:
-  %empty {$$=new rec(noact);cout<<"ExtDeflist"<<endl;}
-| ExtDef ExtDefList {$2->recs.insert($2->recs.begin(), $1);$$=$2;cout<<"ExtDeflist++"<<endl;}
+  %empty {$$=new rec(noact);}
+| ExtDef ExtDefList {$2->recs.insert($2->recs.begin(), $1);$$=$2;}
 
 ExtDef:
   Specifier ExtDecList SEMI {define($1,$2);$$=new rec(noact);$$->link(2,$1,$2);}
@@ -140,7 +144,7 @@ Stmt:
   //assign和noact 的val均为nullptr
 | Exp error {syntax_error("semicolon \';\'",@1.last_line);}
 | CompSt {$$=new rec(noact,"Compst");$$->link(1,$1);}
-| RETURN Exp SEMI {$$=new rec(noact,"Return");$$->link(1,$2);}
+| RETURN Exp SEMI {$$=new rec(noact,"Return");$$->link(1,$2);$$->line_num=@2.last_line;}
 //此节点得到的是exp的val
 | RETURN Exp error {syntax_error("semicolon \';\'",@3.last_line);}
 | RETURN error SEMI {syntax_error("semicolon \';\'",@2.last_line);}
@@ -169,14 +173,14 @@ DecList:
 
 Dec:
   VarDec {$$=$1;}
-| VarDec ASSIGN Exp {$$=new rec(noact);rec* as=new rec(usassign);as->link(2,$1,$3);$$->link(2,$1,as);}
+| VarDec ASSIGN Exp {$$=new rec(noact);rec* as=new rec(usassign); as->line_num=@2.last_line; as->link(2,$1,$3);$$->link(2,$1,as);}
 //检查两边变量
 //将queue中第一个变量的val设为exp的val
 //该节点val返回为赋完值的vardec
 | VarDec ASSIGN error {}
 
 Exp:
-  Exp ASSIGN Exp {$$=new rec(noact); rec* uas=new rec(usassign,"usassign");uas->link(2,$1,$3); $$->link(2,$1,uas);}
+  Exp ASSIGN Exp {$$=new rec(noact); rec* uas=new rec(usassign,"usassign"); uas->line_num=@2.last_line; uas->link(2,$1,$3); $$->link(2,$1,uas);}
   //var 需通过val检测，这个val的t将表示它的类型，val将指向它所存的值
   //检查两边变量，尝试另var val的val指向EXP
 | Exp AND Exp {$$=new rec(usbiop,"Exp");$$->link(3,$1,$2,$3);}

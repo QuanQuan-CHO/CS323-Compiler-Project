@@ -44,9 +44,9 @@ id [_a-zA-Z][_0-9a-zA-Z]*
     [ \t]+ /*ignore word splits*/
     [^," "<>"\n]+ { return MACRO;}
 }
-int {yylval.rec_ptr= new rec(intvar,yytext);;return TYPE;}
-float {yylval.rec_ptr= new rec(floatvar,yytext);; return TYPE;}
-char {yylval.rec_ptr= new rec(charvar,yytext);; return TYPE;}
+int {yylval.rec_ptr= new rec(intvar,yytext);return TYPE;}
+float {yylval.rec_ptr= new rec(floatvar,yytext); return TYPE;}
+char {yylval.rec_ptr= new rec(charvar,yytext); return TYPE;}
 for { return FOR;}
 struct {yylval.rec_ptr= new rec(structvar,yytext); return STRUCT;}
 if { return IF;}

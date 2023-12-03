@@ -71,13 +71,14 @@ class map{
     public:
     map* outmap;
     std::unordered_map<std::string, rec*> checkMap;
+    // map();
 };
 
 rec* find(string name, map& m);
 void buildarr(rec* id, rec* len);
 rec* ac(rec* check);
 rec* deal(rec* todeal,map& m);
-void err(errtype e, rec* r,int err=0);
+void err(errtype e, rec* r,int exp=0,int err=0);
 void define (rec* type,rec* id);
 void checkmap();
 // void usfun(rec* id,rec* args);

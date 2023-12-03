@@ -7,12 +7,10 @@ rec::rec(type t):t(t){
 rec::rec(type t,char* name):t(t),name(string(name)){
     
 };
-rec::rec(type t,string name):t(t),name(name){
-    cout<<name<<endl;
-};
+rec::rec(type t,string name):t(t),name(name){};
 rec::rec(const rec& other) : t(other.t), line_num(other.line_num), name(other.name), val(nullptr) {
-        if (this==&other)
-        {
+        if (other.val==&other)
+        {   val=this;
             return;
         }
         
@@ -28,6 +26,7 @@ rec::rec(const rec& other) : t(other.t), line_num(other.line_num), name(other.na
     }
 rec::rec(){};
 map m;
+
 std::unordered_map<type, std::string> typeToStringMap = {
     {intval, "intval"},
     {charval, "charval"},
@@ -54,13 +53,14 @@ std::unordered_map<type, std::string> typeToStringMap = {
     {checkreturn, "checkreturn"}
 };
 string rec::toString() const{
-    {
-        if (this==val)
-        { return name;
-        }
-        else{
+    {   
         std::string result = "Type: " + typeToStringMap[t] + ", Line Number: " + std::to_string(line_num)
                             + ", Name: " + name ;
+        if (this==val)
+        { return result;
+        }
+        else{
+        
 
         if (val != nullptr) {
             result += ", Value: (" + val->toString()+")";
@@ -95,14 +95,6 @@ void rec::link(int nodes_num, ...){
     }
     va_end(nodes);
     }
-
-void buildarr(rec* id, rec* len){
-    int intValue = std::stoi(len->name);
-    for (int i = 0; i < intValue; i++)
-    {   
-        id->recs.push_back(new rec(var));
-    }
-}
 bool check (const rec& first, const rec& second) {
     // cout<<first.name<<endl<<second.name<<endl;
     // cout<<first.t<<endl<<second.t<<endl;
@@ -110,7 +102,6 @@ bool check (const rec& first, const rec& second) {
     {
        return true;
     }
-    
     // cout<<(first.t==intvar||first.t==floatvar)<<(second.t==intvar||second.t==floatvar)<<endl;
     // if ((first.t==intvar||first.t==floatvar)&&(second.t==intvar||second.t==floatvar))
     // {
@@ -157,15 +148,39 @@ std::queue<rec*> bfsQueue;
             rec* currentNode = bfsQueue.front();
             bfsQueue.pop();    
             if (currentNode->name=="Return")
-            {
+            {  
+                
                rec* re=currentNode->recs[0];
-               if (re->val==re)
+     
+               if ((re->t==usbiop)||(re->t==usfun)||(re->t==usstruct))
+                {   
+                    if (!check(*re->val,*fun->val))
+                    {
+                    err(returnunmatch,re->val);
+                    }
+                    
+                }
+                else if (re->t==usarr)
+                {   
+                    cout<<re->toString()<<endl;
+                }
+                
+                else if (re->t==ussiop)
+                {
+                    if (!check(*re->recs[0],*fun->val))
+                    {
+                    err(returnunmatch,re->val);
+                    }
+                }
+                
+               else if (re->val==re)
                {
                 if (!check(*re->val,*fun->val))
                {
                     err(returnunmatch,re);
                }
-               }else{
+               }
+               else{
                 rec* r=find(re->name,m);
                 if (!r)
                 {
@@ -185,8 +200,9 @@ std::queue<rec*> bfsQueue;
         }
 }
 void checktassign(rec* left,rec* right){
-        //     cout<<left->name<<endl;
-        // cout<<right->name<<endl;
+    cout<<"我在赋值"<<endl;
+    cout<<left->toString()<<endl;
+    cout<<right->toString()<<endl;
     rec* l=find(left->name,m);
     if (!l)
     {
@@ -194,10 +210,10 @@ void checktassign(rec* left,rec* right){
     {
        err(rvalleft,left);
        return;
-    }
+    }   
+
        err(varnodef,left);
     }else{
-        
         rec* r=find(right->name,m);
         if (right->val==right)
         {
@@ -205,7 +221,9 @@ void checktassign(rec* left,rec* right){
                {
                     err(equnmatch,left);
                }
-        }else{
+        }
+        else{
+           
             if (!r)
         {   
             if (!check(*l->val,*right))
@@ -214,6 +232,7 @@ void checktassign(rec* left,rec* right){
                }
             
         }  else{
+           
             if (!check(*l->val,*r->val))
                {
                     err(equnmatch,left);
@@ -225,6 +244,9 @@ void checktassign(rec* left,rec* right){
     
 }
 rec* checkbiop(rec* left, rec* right){
+    cout<<"我在比较"<<endl;
+    cout<<left->toString()<<endl;
+    cout<<right->toString()<<endl;
     rec* l=find(left->name,m);
     if (!l&&left->val!=left)
     {  
@@ -235,7 +257,7 @@ rec* checkbiop(rec* left, rec* right){
         {
             if (!check(*l->val,*right->val))
                {
-                    err(equnmatch,left);
+                    err(opunmatch,left);
                }
         }else{
             if (!r)
@@ -244,30 +266,45 @@ rec* checkbiop(rec* left, rec* right){
         }  else{
             if (!check(*l->val,*r->val))
                {
-                    err(equnmatch,left);
+                    err(opunmatch,left);
                }
         }
         }
     }
+    // if (right->val==right)
+    // {  
+    //    rec* res=new rec(*left);
+    //    res->line_num=left->line_num;
+    //    res->val=right;
+    //    return res;
+    // }
+    
     return new rec(*right);
 }
-rec* checkusfun(rec* fun,rec* args){
-    rec* f=find(fun->name,m);
+rec* checkusfun(rec* func,rec* args){
+    
+    rec* f=find(func->name,m);
     if (!f){
-        err(funnodef,fun);
+        err(funnodef,func);
     }else{
+        if (f->t!=fun)
+        {
+            err(notafun,func);
+            return nullptr;
+        }
+        
         if (!args&&f->recs.size()==0){
         return new rec(*f->val);}
-        else if (f->recs.size()==0&&args)
+        else if (args&&f->recs.size()==0)
         {
-           err(argunmatch,f,args->recs.size());
+           err(argunmatch,func,0,args->recs.size());
         }else if (f->recs.size()!=0&&!args)
         {
-            err(argunmatch,f,args->recs.size());
+            err(argunmatch,func,f->recs[0]->recs.size(),0);
         }else{
             rec* fargs=f->recs[0];
             if (args->recs.size()!=fargs->recs.size()){
-            err(argunmatch,f,args->recs.size());
+            err(argunmatch,func,f->recs[0]->recs.size(),args->recs.size());
             }
             for (rec* r:args->recs){    
             if (!find(r->name,m)&&r->val!=r)
@@ -276,13 +313,13 @@ rec* checkusfun(rec* fun,rec* args){
             }
         }
         }
+        
         return new rec(*f->val);
         }
      return nullptr;
     }
 rec* checkusstruct(rec* stru,rec* mem){
-    cout<<stru->toString()<<endl;
-    cout<<mem->toString()<<endl;
+
      rec* st=find(stru->name,m);
     if (!st){
         err(varnodef,st);
@@ -290,13 +327,16 @@ rec* checkusstruct(rec* stru,rec* mem){
         if(st->val->t!=structvar){
             err(dotnostuct,st);
         }else{
-            rec* smem=st->val;
-            cout<<st->toString()<<endl;
+            rec* stname=st->val;//get apple
+            rec* struc=stname->val;//get struct inside def
+            rec* smem=stname->recs[0];//get link node
             for (rec* r:smem->recs)
             {   
-                if (r->name==mem->name)
-                {
-                    return r;
+                rec* m=r->recs[0];
+                if (m->name==mem->name)
+                {   
+                    m->line_num=stru->line_num;
+                    return m;
                 }
                 
             }
@@ -307,42 +347,56 @@ rec* checkusstruct(rec* stru,rec* mem){
 
     return nullptr;
 }
+//checkback checkusarr print arr
+rec* checkusarr(rec* arr, rec* index){
+     rec* ar=find(arr->name,m);
+    if (!ar){
+        
+    }else{
+        cout<<ar->toString()<<endl;
+    }
+    return nullptr;
+}
 rec* deal(rec* todeal, map& m){
+  
     if (todeal->t==usstruct)
     {   
         rec* str=todeal->recs[0];
         rec* mem=todeal->recs[1]; 
         todeal->val=checkusstruct(str,mem);
     }
-    
     if (todeal->t==checkreturn){
         rec* fun=todeal->recs[0];
         rec* Compst=todeal->recs[1];
+        // cout<<"我放了一下结点进入函数返回检查"<<endl;
+        // cout<<fun->toString()<<endl;
+        // cout<<Compst->toString()<<endl;
         checkback(fun,Compst);
     }
     if (todeal->t==usassign){
         rec* left=todeal->recs[0];
-        rec* right=todeal->recs[1]; 
-        cout<<left->name<<" "<<right->name<<endl;        
-        // if (left->t==usbiop)
-        // {
-        //    left=left->val;
-        // }
-        if (right->t==usbiop||usfun||usstruct)
+        rec* right=todeal->recs[1];     
+        rec* l=left;
+        rec* r=right;  
+        if ((left->t==usbiop)||(left->t==usfun)||(left->t==usstruct))
+        {  
+           
+           l=left->val;
+
+        }
+        if ((right->t==usbiop)||(right->t==usfun)||(right->t==usstruct))
         {  
           if (right->val==nullptr)
           {
              return nullptr;
           }
-          
-           right=right->val;
-          
+           r=right->val;
         }
         
-        checktassign(left,right);
+        checktassign(l,r);
         }
     if (todeal->t==usbiop)
-    {
+    {   
         rec* left=todeal->recs[0];
         if (left->name=="Exp")
         {
@@ -351,7 +405,7 @@ rec* deal(rec* todeal, map& m){
         
         rec* right=todeal->recs[2]; 
         todeal->val=checkbiop(left,right);
-     
+
     }
     if (todeal->t==usfun)
     {   
@@ -362,8 +416,14 @@ rec* deal(rec* todeal, map& m){
             arg=todeal->recs[1]; 
         }
         todeal->val=checkusfun(fun,arg);
-        
+        // cout<<"goback"<<endl;
         // checkmap();
+    }
+    if (todeal->t==usarr)
+    {
+        rec* arr=todeal->recs[0];
+        rec* index=todeal->recs[1];
+        checkusarr(arr,index);
     }
     
     return nullptr;
@@ -397,14 +457,7 @@ void define (rec* type,rec* node){
     }//如果是函数，其rec存的为输入参数，val表示其返回类型
     if (node->t==arr)
     {   
-        // if (type->t==structvar&&!find(type->name,m))
-        //     {
-        //         err(varnodef,type);
-        //         return;
-        //     }
-        for (rec* element : node->recs) {
-        element->val=new rec(*type);
-        }
+        node->val=new rec(*type);
         auto it = m.checkMap.find(node->name);
         if (it != m.checkMap.end()) {
             err(varredef,node);
@@ -448,7 +501,7 @@ void checkmap(){
         std::cout << "Key: " << it->first << ", Value: " << it->second << std::endl;}
     cout<<"finish define"<<endl;
 }
-void err(errtype e, rec* r,int err){
+void err(errtype e, rec* r,int exp,int err){
     if (e==varnodef){
             cout<<"Error type 1 at Line "<<r->line_num<<": "<<r->name<<" is used without a definition"<<endl;
         }else if (e==funnodef){
@@ -474,7 +527,7 @@ void err(errtype e, rec* r,int err){
         }
         else if (e==argunmatch)
         {
-            cout<<"Error type 9 at Line "<<r->line_num<<": invalid argument number, except "<<r->recs.size()<<", got "<<err<<endl;
+            cout<<"Error type 9 at Line "<<r->line_num<<": invalid argument number, except "<<exp<<", got "<<err<<endl;
             //can add a type check
         }
         else if (e==notanarr)

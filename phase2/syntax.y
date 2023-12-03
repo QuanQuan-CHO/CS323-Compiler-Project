@@ -100,8 +100,8 @@ StructSpecifier:
 
 VarDec:
   ID {$1->line_num=@1.last_line;$$=$1;}
-| VarDec LB INT RB {$1->t=arr;$1->val=$3;buildarr($1,$3);$$=$1;}
-//数组的val表示它的类型，t表示它是数组，queue的大小表示它的长度
+| VarDec LB INT RB {$1->t=arr;$1->link(1,$3);$$=$1;}
+//数组的val表示它的类型，t表示它是数组，queue的大小表示它的维度
 //变量的val表示值，t表示它的类型，定义后val值应为相应类型的对应复制
 | VarDec LB INT error {syntax_error("closing bracket \']\'",@3.last_line);}
 | VarDec INT RB {syntax_error("closing bracket \'[\'",@3.last_line);}
@@ -124,9 +124,9 @@ ParamDec:
 CompSt:
   LC DefList StmtList RC {$$=new rec(noact,"DEF+STMT");$$->link(2,$2,$3);}
    //所有def stmt的act除了ruturn语句均为noact
-| LC DefList RC {$$=new rec(noact,"DEF");$$->link(1,$1);}
+| LC DefList RC {$$=new rec(noact,"DEF");$$->link(1,$2);}
 | LC DefList error {syntax_error("closing curly brace \'}\'",@2.last_line);}
-| LC StmtList RC {$$=new rec(noact,"STMT");$$->link(1,$1);}
+| LC StmtList RC {$$=new rec(noact,"STMT");$$->link(1,$2);}
 | LC DefList StmtList error {syntax_error("closing curly brace \'}\'",@3.last_line);}
 | LC DefList StmtList DefList error {syntax_error("specifier",@3.first_line);}
 

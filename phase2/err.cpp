@@ -137,7 +137,7 @@ rec* ac(rec* check){
 for (rec* subRec : check->recs) {
      ac(subRec);
    }
-    cout<<typeToStringMap[check->t]<<endl;
+    // cout<<typeToStringMap[check->t]<<endl;
     deal(check,m);
     return nullptr;
     }
@@ -149,13 +149,30 @@ std::queue<rec*> bfsQueue;
             bfsQueue.pop();    
             if (currentNode->name=="Return")
             {  
-                
+               
                rec* re=currentNode->recs[0];
-     
+                
+                
+                // cout<<fun->toString()<<endl;
                if ((re->t==usbiop)||(re->t==usfun)||(re->t==usstruct))
                 {   
+                    if (re->val==nullptr)
+                    {
+                        return;
+                    }
+                    
+                    if (re->name=="Exp")
+                    {
+                        rec* v=find(re->val->name,m);
+                         if (v)
+                        {
+                            re=v;
+                            }
+                    }
+                    
                     if (!check(*re->val,*fun->val))
                     {
+                    
                     err(returnunmatch,re->val);
                     }
                     
@@ -200,10 +217,14 @@ std::queue<rec*> bfsQueue;
         }
 }
 void checktassign(rec* left,rec* right){
-    // cout<<"我在赋值"<<endl;
     // cout<<left->toString()<<endl;
     // cout<<right->toString()<<endl;
     rec* l=find(left->name,m);
+    // if (right->t==arr&&right->recs.size()==0)
+    // {  
+    //    err(equnmatch,right);
+    // }
+    
     if (!l)
     {
         if (left->val==left)
@@ -230,6 +251,7 @@ void checktassign(rec* left,rec* right){
                {
                     err(varnodef,right);
                }
+            
             
         }  else{
            
@@ -284,6 +306,7 @@ rec* checkbiop(rec* left, rec* right){
 rec* checkusfun(rec* func,rec* args){
     
     rec* f=find(func->name,m);
+
     if (!f){
         err(funnodef,func);
     }else{
@@ -292,7 +315,7 @@ rec* checkusfun(rec* func,rec* args){
             err(notafun,func);
             return nullptr;
         }
-        
+       
         if (!args&&f->recs.size()==0){
             rec* res=new rec(*f->val);
             res->line_num=func->line_num;
@@ -305,15 +328,31 @@ rec* checkusfun(rec* func,rec* args){
             err(argunmatch,func,f->recs[0]->recs.size(),0);
         }else{
             rec* fargs=f->recs[0];
+            // cout<<fargs->toString()<<endl;
+            // cout<<args->toString()<<endl;
             if (args->recs.size()!=fargs->recs.size()){
             err(argunmatch,func,f->recs[0]->recs.size(),args->recs.size());
+            return nullptr;
             }
-            for (rec* r:args->recs){    
-            if (!find(r->name,m)&&r->val!=r)
-            {
-                err(varnodef,r);
-            }
-        }
+     
+        //     for (int a=0;a<fargs->recs.size();a++){   
+        //        rec* r=args->recs[a]; 
+        //     if (!find(r->name,m)&&r->val!=r)
+        //     {
+        //         err(varnodef,r);
+        //     }
+        //     rec* fi=find(r->name,m);
+        //     if (fi)
+        //     {  
+        //        r=fi;
+        //     }
+        //     if (!check(*r,*f->recs[a]))
+        //     {
+        //         err(argtypeunmatch,func);
+        //     }
+            
+        // }
+
         }
         rec* res=new rec(*f->val);
         res->line_num=func->line_num;
@@ -356,31 +395,42 @@ rec* checkusstruct(rec* stru,rec* mem){
 }
 rec* checkusarr(rec* arra, rec* index){
 
-     rec* res;
+     rec* res=nullptr;
      if (arra->t!=arr)
      {
      rec* ar=find(arra->name,m);
     if (!ar){
         err(varnodef,arra);
-    }else{
-    if (ar->t!=arr)
-    {
+    }
+    else{
+         if (ar->t!=arr)
+    {   
         err(notanarr,arra);
-    }}
-    res=new rec(*ar);
-    res->recs.erase(res->recs.begin());
+       
+        }
+        else{
+        res=new rec(*ar);
+        res->line_num=arra->line_num;
+        res->recs.erase(res->recs.begin());
+    }
+    
+    }
+    
     }
     else if (arra->t==arr&&arra->recs.size()==0)
     {
         err(notanarr,arra);
+        return nullptr;
+    }
+    else{
         res=new rec(*arra);
-        
-    }else{
-        res=new rec(*arra);
+        res->line_num=arra->line_num;
         res->recs.erase(res->recs.begin());
     }
-    
-    rec* ind=find(index->name,m);
+   
+
+    rec* ind=find(index->name,m);    
+   
     if (ind)
     { 
         if (ind->val->t!=intvar)
@@ -388,12 +438,16 @@ rec* checkusarr(rec* arra, rec* index){
             err(indexnoint,index);
         }
     }else{ 
-        if (index->t!=intvar)
+        if (index->t==usfun)
+    {
+        index=index->val;
+    }
+    if (index->t!=intvar)
         {   
             err(indexnoint,index);
         }
     }
-    res->line_num=arra->line_num;
+    
     return res;
     }
 
@@ -470,7 +524,8 @@ rec* deal(rec* todeal, map& m){
         if ((right->t==usbiop)||(right->t==usfun)||(right->t==usstruct)||(right->t==usarr))
         {  
           if (right->val==nullptr)
-          {
+          { 
+             err(equnmatch,todeal);
              return nullptr;
           }
            r=right->val;
@@ -483,7 +538,7 @@ rec* deal(rec* todeal, map& m){
         if (left->name=="Exp")
         {
            left=left->val;
-           if (left->val==nullptr)
+           if (left->val==nullptr&&todeal->line_num!=0)
           {  
              err(equnmatch,todeal);
              return nullptr;
@@ -604,6 +659,11 @@ void checkmap(){
     cout<<"finish define"<<endl;
 }
 void err(errtype e, rec* r,int exp,int err){
+    if (r->line_num==0)
+    {
+        return;
+    }
+    
     if (e==varnodef){
             cout<<"Error type 1 at Line "<<r->line_num<<": "<<r->name<<" is used without a definition"<<endl;
         }else if (e==funnodef){
@@ -640,7 +700,7 @@ void err(errtype e, rec* r,int exp,int err){
             cout<<"Error type 11 at Line "<<r->line_num<<": invoking non-function variable \""<<r->name<<"\""<<endl;
         }else if (e==indexnoint)
         {
-            cout<<"Error type 12 at Line "<<r->line_num<<": indexing by non-integer \""<<r->name<<"\""<<endl;
+            cout<<"Error type 12 at Line "<<r->line_num<<": indexing by non-integer "<<endl;
         }else if (e==dotnostuct)
         {
             cout<<"Error type 13 at Line "<<r->line_num<<": accessing with non-struct variable \""<<r->name<<"\""<<endl;
@@ -651,7 +711,11 @@ void err(errtype e, rec* r,int exp,int err){
         {
             cout<<"Error type 15 at Line "<<r->line_num<<": redefine the same structure type \""<<r->name<<"\""<<endl;
         } 
-    
+        else if (e==argtypeunmatch)
+        {
+            cout<<"Error type 9 at Line "<<r->line_num<<": invalid argument type"<<endl;
+        }
+        
         else{
             cout<<"Error type 17 at Line "<<r->line_num<<": err"<<endl;
         }

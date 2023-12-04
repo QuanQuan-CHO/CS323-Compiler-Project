@@ -21,7 +21,8 @@ enum errtype{
     dotnostuct,
     structnohas,
     structredef,
-    argtype
+    outindex,
+    uswithouval
 };
 
  enum type{

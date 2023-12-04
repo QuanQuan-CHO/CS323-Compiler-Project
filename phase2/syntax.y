@@ -48,7 +48,7 @@
 
 Program:
   ExtDefList {
-    // cout<<"start program"<<endl;checkmap();
+    cout<<"start program"<<endl;checkmap();
     ac($1);
     // cout<<"finish program"<<endl;
     }

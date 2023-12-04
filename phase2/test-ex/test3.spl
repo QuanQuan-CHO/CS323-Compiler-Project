@@ -1,0 +1,8 @@
+
+int test_2_r05()
+{
+  int w;
+  struct Apple aa;
+  aa.weight = w + 1.05;
+  return aa;
+}

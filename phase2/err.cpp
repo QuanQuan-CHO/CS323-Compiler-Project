@@ -137,7 +137,7 @@ rec* ac(rec* check){
 for (rec* subRec : check->recs) {
      ac(subRec);
    }
-    // cout<<typeToStringMap[check->t]<<endl;
+    cout<<typeToStringMap[check->t]<<endl;
     deal(check,m);
     return nullptr;
     }
@@ -326,8 +326,9 @@ rec* checkusstruct(rec* stru,rec* mem){
     //  cout<<mem->toString()<<endl;
      rec* st=find(stru->name,m);
     if (!st){
-        err(varnodef,st);
-    }else{
+        err(varnodef,stru);
+    }else{ 
+        
         if(st->val->t!=structvar){
             err(dotnostuct,st);
         }else{
@@ -350,13 +351,11 @@ rec* checkusstruct(rec* stru,rec* mem){
         }
         
     }
-
+   
     return nullptr;
 }
 rec* checkusarr(rec* arra, rec* index){
-    // cout<<"___________"<<endl;
-    // cout<<arra->toString()<<endl;
-    //  cout<<"~~~~~~~~~~~~"<<endl;
+
      rec* res;
      if (arra->t!=arr)
      {
@@ -375,7 +374,7 @@ rec* checkusarr(rec* arra, rec* index){
     {
         err(notanarr,arra);
         res=new rec(*arra);
-        res->recs.erase(res->recs.begin());
+        
     }else{
         res=new rec(*arra);
         res->recs.erase(res->recs.begin());
@@ -383,14 +382,14 @@ rec* checkusarr(rec* arra, rec* index){
     
     rec* ind=find(index->name,m);
     if (ind)
-    {
+    { 
         if (ind->val->t!=intvar)
         {
             err(indexnoint,index);
         }
-    }else{
+    }else{ 
         if (index->t!=intvar)
-        {
+        {   
             err(indexnoint,index);
         }
     }
@@ -399,15 +398,23 @@ rec* checkusarr(rec* arra, rec* index){
     }
 
 rec* deal(rec* todeal, map& m){
-  
+    // cout<<todeal->toString()<<endl;
     if (todeal->t==usstruct)
     {   
         rec* str=todeal->recs[0];
         rec* mem=todeal->recs[1]; 
         rec* s=str;
         rec* member=mem;
+        
         if (s->t==usstruct)
         {
+
+            if (s->val==nullptr)
+          {  
+             err(equnmatch,todeal);
+            
+             return nullptr;
+          }
             s = find(s->val->name,m);
             
             if (!s)
@@ -417,19 +424,20 @@ rec* deal(rec* todeal, map& m){
                 s->line_num=str->line_num;
             }
         }else{
-           
+            
             s = find(s->name,m);
             
             if (!s)
-            {
+            {   
                err(varnodef,str);
+               return nullptr;
             }else{
                 s->line_num=str->line_num;
             }
         }
-      
+        
         todeal->val=checkusstruct(s,member);
-
+      
 
     }
     if (todeal->t==checkreturn){
@@ -475,6 +483,11 @@ rec* deal(rec* todeal, map& m){
         if (left->name=="Exp")
         {
            left=left->val;
+           if (left->val==nullptr)
+          {  
+             err(equnmatch,todeal);
+             return nullptr;
+          }
         }
         
         rec* right=todeal->recs[2]; 
@@ -638,10 +651,7 @@ void err(errtype e, rec* r,int exp,int err){
         {
             cout<<"Error type 15 at Line "<<r->line_num<<": redefine the same structure type \""<<r->name<<"\""<<endl;
         } 
-        else if (e=argtype)
-        {
-            cout<<"Error type 16 at Line "<<r->line_num<<": unmatch args type \""<<r->name<<"\""<<endl;
-        }
+    
         else{
             cout<<"Error type 17 at Line "<<r->line_num<<": err"<<endl;
         }

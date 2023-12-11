@@ -5,7 +5,6 @@
 
     #include "lex.yy.c"
 
-    extern int yylineno;
     void yyerror(const char*){}
 %}
 
@@ -15,11 +14,6 @@
 %token TYPE INT CHAR FLOAT STRUCT ID
 %token IF WHILE RETURN /*control flow word*/
 %token COMMA
-
-%token FOR 
-%token IFDEF MACROELSE ENDIF
-%token INCLUDE DQUOT
-%token DEFINE MACRO
 
 %right ASSIGN
 %left OR
@@ -38,21 +32,6 @@
 /* HIGH-LEVEL DEFINITION specifies the top-level syntax for a SPL program, including global variable declarations and function definitions.*/
 Program:
   ExtDefList {}
-| MacroStmt ExtDefList {}
-
-MacroStmt:
-  IncludeStmt {}
-| DefineStmt {}
-| DefineStmt MacroStmt {}
-| IncludeStmt MacroStmt {}
-
-IncludeStmt:
-  INCLUDE LT MACRO GT {}
-| INCLUDE DQUOT MACRO DQUOT {}
-
-DefineStmt:
-  DEFINE MACRO MACRO {}
-| DefineStmt COMMA MACRO MACRO {}
 
 ExtDefList:
   %empty {}
@@ -115,11 +94,6 @@ Stmt:
 | RETURN Exp SEMI {}
 | IF LP Exp RP Stmt %prec LOWER_ELSE {}
 | IF LP Exp RP Stmt ELSE Stmt {}
-| WHILE LP Exp RP Stmt {}
-| FOR LP Exp SEMI Exp SEMI Exp RP Stmt {}
-/*the two production below is about Macro*/
-| IFDEF Stmt ENDIF {}
-| IFDEF MACRO Stmt MACROELSE Stmt ENDIF {}
 
 
 /* LOCAL DEFINITION includes the declaration and assignment of local variables. */

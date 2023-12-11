@@ -6,7 +6,7 @@ BISON=bison
 # Dependency Tree
 splc: syntax.tab.* lex.yy.c
 	@mkdir -p bin
-	$(CC) syntax.tab.c err.cpp -ll -std=c++17 -o bin/splc
+	$(CC) syntax.tab.c -ll -std=c++17 -o bin/splc
 	@chmod +x bin/splc
 lex.yy.c: lex.l
 	$(FLEX) lex.l
@@ -27,4 +27,4 @@ test: splc
 	@echo "----------test success----------"
 
 clean:
-	@rm -rf lex.yy.c syntax.tab.c syntax.tab.h lexer bin **/*.myout
+	@rm -rf lex.yy.c syntax.tab.c syntax.tab.h lexer bin/splc **/*.myout

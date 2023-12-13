@@ -1,9 +1,10 @@
 %{
     using namespace std;
 
-    #define YYSTYPE char* //Define the type of `yylval`
-
-    #include "lex.yy.c"
+    #define YYSTYPE string //Define the type of `yylval`
+    
+    #include <string>
+    #include "lex.yy.c" //This line MUST AFTER `#define YYSTYPE string`
 
     void yyerror(const char*){}
 %}

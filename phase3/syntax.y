@@ -1,11 +1,12 @@
 %{
     using namespace std;
 
-    #define YYSTYPE string //Define the type of `yylval`
+    #define YYSTYPE node* //Define the type of `yylval`
     
-    #include <string>
-    #include "lex.yy.c" //This line MUST AFTER `#define YYSTYPE string`
+    #include "translate.cpp" //This line MUST BEFORE `#include "lex.yy.c"`
+    #include "lex.yy.c" //This line MUST AFTER `#define YYSTYPE node*`
 
+    
     void yyerror(const char*){}
 %}
 
@@ -32,119 +33,118 @@
 
 /* HIGH-LEVEL DEFINITION specifies the top-level syntax for a SPL program, including global variable declarations and function definitions.*/
 Program:
-  ExtDefList {}
+  ExtDefList {$$=new node("Program",list<node*>{$1}); cout << traverse($$) << endl;}
 
 ExtDefList:
-  %empty {}
-| ExtDef ExtDefList {}
+  %empty {$$=new node("ExtDefList");}
+| ExtDef ExtDefList {$$=new node("ExtDefList",list<node*>{$1,$2});}
 
 ExtDef:
-  Specifier ExtDecList SEMI {}
-| Specifier SEMI {}
-| Specifier FunDec CompSt {}
+  Specifier ExtDecList SEMI {$$=new node("ExtDef",list<node*>{$1,$2,$3});}
+| Specifier SEMI {$$=new node("ExtDef",list<node*>{$1,$2});}
+| Specifier FunDec CompSt {$$=new node("ExtDef",list<node*>{$1,$2,$3});}
 
 ExtDecList:
-  VarDec {}
-| VarDec COMMA ExtDecList {}
+  VarDec {$$=new node("ExtDecList",list<node*>{$1});}
+| VarDec COMMA ExtDecList {$$=new node("ExtDecList",list<node*>{$1,$2,$3});}
 
 
 /* SPECIFIER is related to the type system, in SPL, we have primitive types (int, float and char) and structure type. */
 Specifier:
-  TYPE {}
-| StructSpecifier {}
+  TYPE {$$=new node("Specifier",list<node*>{$1});}
+| StructSpecifier {$$=new node("Specifier",list<node*>{$1});}
 
 StructSpecifier:
-  STRUCT ID LC DefList RC {}
-| STRUCT ID {}
+  STRUCT ID LC DefList RC {$$=new node("StructSpecifier",list<node*>{$1,$2,$3,$4,$5});}
+| STRUCT ID {$$=new node("StructSpecifier",list<node*>{$1,$2});}
 
 
 /* DECLARATOR defines the variable and function declaration.
  * Note that the array type is specified by the declarator. */
 VarDec:
-  ID {}
-| VarDec LB INT RB {}
-| VarDec INT RB {}
+  ID {$$=new node("VarDec",list<node*>{$1});}
+| VarDec LB INT RB {$$=new node("VarDec",list<node*>{$1,$2,$3,$4});}
+| VarDec INT RB {$$=new node("VarDec",list<node*>{$1,$2,$3});}
 
 FunDec:
-  ID LP VarList RP {}
-| ID LP RP {}
-| ID LP error {}
+  ID LP VarList RP {$$=new node("FunDec",list<node*>{$1,$2,$3,$4});}
+| ID LP RP {$$=new node("FunDec",list<node*>{$1,$2,$3});}
 
 VarList:
-  ParamDec COMMA VarList {}
-| ParamDec {}
+  ParamDec COMMA VarList {$$=new node("VarList",list<node*>{$1,$2,$3});}
+| ParamDec {$$=new node("VarList",list<node*>{$1});}
 
 ParamDec:
-  Specifier VarDec {}
+  Specifier VarDec {$$=new node("ParamDec",list<node*>{$1,$2});}
 
 
 /* STATEMENT specifies several program structures, such as branching structure or loop structure.
  * They are mostly enclosed by curly braces, or end with a semicolon. */
 CompSt: /*Because DefList and StmtList isn't empty, we should list all possible cases in the productions*/
-  LC DefList StmtList RC {}
-| LC DefList RC {}
-| LC StmtList RC {}
+  LC DefList StmtList RC {$$=new node("CompSt",list<node*>{$1,$2,$3,$4});}
+| LC DefList RC {$$=new node("CompSt",list<node*>{$1,$2,$3});}
+| LC StmtList RC {$$=new node("CompSt",list<node*>{$1,$2,$3});}
 
 StmtList: /*To prevent shift/reduce conflict, replace StmtList-->%empty with StmtList-->Stmt*/
-  Stmt {}
-| Stmt StmtList {}
+  Stmt {$$=new node("StmtList",list<node*>{$1});}
+| Stmt StmtList {$$=new node("StmtList",list<node*>{$1,$2});}
 
 Stmt:
-  Exp SEMI {}
-| CompSt {}
-| RETURN Exp SEMI {}
-| IF LP Exp RP Stmt %prec LOWER_ELSE {}
-| IF LP Exp RP Stmt ELSE Stmt {}
+  Exp SEMI {$$=new node("Stmt",list<node*>{$1,$2});}
+| CompSt {$$=new node("Stmt",list<node*>{$1});}
+| RETURN Exp SEMI {$$=new node("Stmt",list<node*>{$1,$2,$3});}
+| IF LP Exp RP Stmt %prec LOWER_ELSE {$$=new node("Stmt",list<node*>{$1,$2,$3,$4,$5});}
+| IF LP Exp RP Stmt ELSE Stmt {$$=new node("Stmt",list<node*>{$1,$2,$3,$4,$5,$6,$7});}
 
 
 /* LOCAL DEFINITION includes the declaration and assignment of local variables. */
 DefList: /*To prevent shift/reduce conflict, replace DefList-->%empty with DefList-->Def*/
-  Def {}
-| Def DefList {}
+  Def {$$=new node("DefList",list<node*>{$1});}
+| Def DefList {$$=new node("DefList",list<node*>{$1,$2});}
 
 Def:
-  Specifier DecList SEMI {}
+  Specifier DecList SEMI {$$=new node("Def",list<node*>{$1,$2,$3});}
 
 DecList:
-  Dec {}
-| Dec COMMA DecList {}
+  Dec {$$=new node("DecList",list<node*>{$1});}
+| Dec COMMA DecList {$$=new node("DecList",list<node*>{$1,$2,$3});}
 
 Dec:
-  VarDec {}
-| VarDec ASSIGN Exp {}
+  VarDec {$$=new node("Dec",list<node*>{$1});}
+| VarDec ASSIGN Exp {$$=new node("Dec",list<node*>{$1,$2,$3});}
 
 
 /* EXPRESSION can be a single constant, or operations on variables.
  * Note that these operators have their precedence and associativity, as shown in Table 2 in phase1-guide.pdf. */
 Exp:
-  Exp ASSIGN Exp {}
-| Exp AND Exp {}
-| Exp OR Exp {}
-| Exp LT Exp {}
-| Exp LE Exp {}
-| Exp GT Exp {}
-| Exp GE Exp {}
-| Exp NE Exp {}
-| Exp EQ Exp {}
-| Exp PLUS Exp {}
-| Exp MINUS Exp {}
-| Exp MUL Exp {}
-| Exp DIV Exp {}
-| LP Exp RP {}
-| MINUS Exp {}
-| NOT Exp {}
-| ID LP Args RP {}
-| ID LP RP {}
-| Exp LB Exp RB {}
-| Exp DOT ID {}
-| ID {}
-| INT {}
-| FLOAT {}
-| CHAR {}
+  Exp ASSIGN Exp {$$=new node("Exp",list<node*>{$1,$2,$3});}
+| Exp AND Exp {$$=new node("Exp",list<node*>{$1,$2,$3});}
+| Exp OR Exp {$$=new node("Exp",list<node*>{$1,$2,$3});}
+| Exp LT Exp {$$=new node("Exp",list<node*>{$1,$2,$3});}
+| Exp LE Exp {$$=new node("Exp",list<node*>{$1,$2,$3});}
+| Exp GT Exp {$$=new node("Exp",list<node*>{$1,$2,$3});}
+| Exp GE Exp {$$=new node("Exp",list<node*>{$1,$2,$3});}
+| Exp NE Exp {$$=new node("Exp",list<node*>{$1,$2,$3});}
+| Exp EQ Exp {$$=new node("Exp",list<node*>{$1,$2,$3});}
+| Exp PLUS Exp {$$=new node("Exp",list<node*>{$1,$2,$3});}
+| Exp MINUS Exp {$$=new node("Exp",list<node*>{$1,$2,$3});}
+| Exp MUL Exp {$$=new node("Exp",list<node*>{$1,$2,$3});}
+| Exp DIV Exp {$$=new node("Exp",list<node*>{$1,$2,$3});}
+| LP Exp RP {$$=new node("Exp",list<node*>{$1,$2,$3});}
+| MINUS Exp {$$=new node("Exp",list<node*>{$1,$2});}
+| NOT Exp {$$=new node("Exp",list<node*>{$1,$2});}
+| ID LP Args RP {$$=new node("Exp",list<node*>{$1,$2,$3});}
+| ID LP RP {$$=new node("Exp",list<node*>{$1,$2,$3});}
+| Exp LB Exp RB {$$=new node("Exp",list<node*>{$1,$2,$3,$4});}
+| Exp DOT ID {$$=new node("Exp",list<node*>{$1,$2,$3});}
+| ID {$$=new node("Exp",list<node*>{$1});}
+| INT {$$=new node("Exp",list<node*>{$1});}
+| FLOAT {$$=new node("Exp",list<node*>{$1});}
+| CHAR {$$=new node("Exp",list<node*>{$1});}
 
 Args:
-  Exp COMMA Args {}
-| Exp {}
+  Exp COMMA Args {$$=new node("Args",list<node*>{$1,$2,$3});}
+| Exp {$$=new node("Args",list<node*>{$1});}
 
 %%
 

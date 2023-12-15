@@ -133,7 +133,7 @@ Exp:
 | LP Exp RP {$$=new node("Exp",vector{$1,$2,$3});}
 | MINUS Exp {$$=new node("Exp",vector{$1,$2});}
 | NOT Exp {$$=new node("Exp",vector{$1,$2});}
-| ID LP Args RP {$$=new node("Exp",vector{$1,$2,$3});}
+| ID LP Args RP {$$=new node("Exp",vector{$1,$2,$3,$4});}
 | ID LP RP {$$=new node("Exp",vector{$1,$2,$3});}
 | Exp LB Exp RB {$$=new node("Exp",vector{$1,$2,$3,$4});}
 | Exp DOT ID {$$=new node("Exp",vector{$1,$2,$3});}

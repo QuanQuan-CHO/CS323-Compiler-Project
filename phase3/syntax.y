@@ -90,11 +90,12 @@ StmtList: /*To prevent shift/reduce conflict, replace StmtList-->%empty with Stm
 | Stmt StmtList {$$=new node("StmtList",vector{$1,$2});}
 
 Stmt:
-  Exp SEMI {$$=new node("Stmt",vector{$1,$2});}
-| CompSt {$$=new node("Stmt",vector{$1});}
+  CompSt {$$=new node("Stmt",vector{$1});}
+| Exp SEMI {$$=new node("Stmt",vector{$1,$2});}
 | RETURN Exp SEMI {$$=new node("Stmt",vector{$1,$2,$3});}
 | IF LP Exp RP Stmt %prec LOWER_ELSE {$$=new node("Stmt",vector{$1,$2,$3,$4,$5});}
 | IF LP Exp RP Stmt ELSE Stmt {$$=new node("Stmt",vector{$1,$2,$3,$4,$5,$6,$7});}
+| WHILE LP Exp RP Stmt {$$=new node("Stmt",vector{$1,$2,$3,$4,$5});}
 
 
 /* LOCAL DEFINITION includes the declaration and assignment of local variables. */

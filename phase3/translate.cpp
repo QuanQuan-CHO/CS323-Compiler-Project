@@ -128,10 +128,8 @@ string translate_Exp(node* Exp, string place){
         return place+" := #"+nodes[0]->value;
     }else if(children=="ID"){
         return place+" := "+nodes[0]->value;
-    }else if(children=="CHAR"){
-
-    }else if(children=="FLOAT"){
-
+    }else if(children=="CHAR" || children=="FLOAT"){
+        return ""; //never, because there is only INT primitive type (Assumption 2)
     }else if(children=="Exp ASSIGN Exp"){
         string tp = NEW_PLACE;
         return concat_ir(
@@ -154,11 +152,29 @@ string translate_Exp(node* Exp, string place){
             place+" := #0 - "+tp
         );
     }else if(children=="LP Exp RP"){
-
+        return translate_Exp(nodes[1],place);
     }else if(children=="ID LP Args RP"){
-
+        string function = nodes[0]->value;
+        if(function=="write"){
+            string tp = NEW_PLACE;
+            return concat_ir(
+                translate_Exp(nodes[2],tp),
+                "WRITE "+tp
+            );
+        }else{
+            vector<string> arg_list = {};
+            string code1 = translate_Args(nodes[2],arg_list);
+            string code2 = "";
+            for(int i=arg_list.size()-1;i>=0;i--){
+                code2 += "ARG "+arg_list[i]+"\n";
+            }
+            return code1+"\n"+code2+"place := CALL "+function;
+        }
     }else if(children=="ID LP RP"){
-
+        string function = nodes[0]->value;
+        if(function=="read"){
+            return "READ "+place;
+        }else{return place+" := CALL "+function;}
     }else if(children=="Exp LB Exp RB"){
 
     }else if(children=="Exp DOT ID"){

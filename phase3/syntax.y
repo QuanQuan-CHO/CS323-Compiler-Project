@@ -5,7 +5,6 @@
     
     #include "translate.cpp" //This line MUST BEFORE `#include "lex.yy.c"`
     #include "lex.yy.c" //This line MUST AFTER `#define YYSTYPE node*`
-
     
     void yyerror(const char*){}
 %}

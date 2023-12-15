@@ -104,6 +104,23 @@ string translate_cond_Exp(node* Exp, string lb_t, string lb_f){
     }else{return "";} //never
 }
 
+string translate_Args(node* Args, vector<string> &arg_list){
+    vector<node*> nodes = Args->children;
+    string children = expression(Args);
+    if(children=="Exp"){
+        string tp = NEW_PLACE;
+        arg_list.push_back(tp);
+        return translate_Exp(nodes[0],tp);
+    }else if(children=="Exp COMMA Args"){
+        string tp = NEW_PLACE;
+        arg_list.push_back(tp);
+        return concat_ir(
+            translate_Exp(nodes[0],tp),
+            translate_Args(nodes[2],arg_list)
+        );
+    }else{return "";} //never
+}
+
 string translate_Exp(node* Exp, string place){
     vector<node*> nodes = Exp->children;
     string children = expression(Exp);

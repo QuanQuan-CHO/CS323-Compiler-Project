@@ -90,14 +90,14 @@ string translate_cond_Exp(node* Exp, string lb_t, string lb_f){
         string lb = NEW_LABEL;
         return concat_ir(
             translate_cond_Exp(nodes[0],lb,lb_f),
-            "LABEL "+lb,
+            "LABEL "+lb+" :",
             translate_cond_Exp(nodes[2],lb_t,lb_f)
         );
     }else if(children=="Exp OR Exp"){
         string lb = NEW_LABEL;
         return concat_ir(
             translate_cond_Exp(nodes[0],lb_t,lb),
-            "LABEL "+lb,
+            "LABEL "+lb+" :",
             translate_cond_Exp(nodes[2],lb_t,lb_f)
         );
     }else if(children=="NOT Exp"){
@@ -186,9 +186,9 @@ string translate_Exp(node* Exp, string place){
         return concat_ir(
             place+" := #0",
             translate_cond_Exp(Exp,lb1,lb2),
-            "LABEL "+lb1,
+            "LABEL "+lb1+" :",
             place+" := #1",
-            "LABEL "+lb2
+            "LABEL "+lb2+" :"
         );
     }
 }
@@ -260,9 +260,9 @@ string translate_Stmt(node* Stmt){
         string lb2 = NEW_LABEL;
         return concat_ir(
             translate_cond_Exp(nodes[2],lb1,lb2),
-            "LABEL "+lb1,
+            "LABEL "+lb1+" :",
             translate_Stmt(nodes[4]),
-            "LABEL "+lb2
+            "LABEL "+lb2+" :"
         );
     }else if(children=="IF LP Exp RP Stmt ELSE Stmt"){
         string lb1 = NEW_LABEL;
@@ -270,24 +270,24 @@ string translate_Stmt(node* Stmt){
         string lb3 = NEW_LABEL;
         return concat_ir(
             translate_cond_Exp(nodes[2],lb1,lb2),
-            "LABEL "+lb1,
+            "LABEL "+lb1+" :",
             translate_Stmt(nodes[4]),
             "GOTO "+lb3,
-            "LABEL "+lb2,
+            "LABEL "+lb2+" :",
             translate_Stmt(nodes[6]),
-            "LABEL "+lb3
+            "LABEL "+lb3+" :"
         );
     }else if(children=="WHILE LP Exp RP Stmt"){
         string lb1 = NEW_LABEL;
         string lb2 = NEW_LABEL;
         string lb3 = NEW_LABEL;
         return concat_ir(
-            "LABEL "+lb1,
+            "LABEL "+lb1+" :",
             translate_cond_Exp(nodes[2],lb2,lb3),
-            "LABEL "+lb2,
+            "LABEL "+lb2+" :",
             translate_Stmt(nodes[4]),
             "GOTO "+lb1,
-            "LABEL "+lb3
+            "LABEL "+lb3+" :"
         );
     }else if(children=="CompSt"){
         return translate_CompSt(nodes[0]);

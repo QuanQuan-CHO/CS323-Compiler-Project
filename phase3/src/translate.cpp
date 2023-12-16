@@ -341,7 +341,7 @@ string translate_FunDec(node* FunDec){
       | ID LP VarList RP  
     */
     string name = FunDec->children[0]->value;
-    return "FUNCTION "+name;
+    return "FUNCTION "+name+" :";
 }
 
 string translate_ExtDef(node* ExtDef){

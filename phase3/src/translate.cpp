@@ -1,4 +1,4 @@
-#define NEW_PLACE "#t"+to_string(place_count++)
+#define NEW_PLACE "t"+to_string(place_count++)
 #define NEW_LABEL "label"+to_string(label_count++)
 
 #include <iostream>

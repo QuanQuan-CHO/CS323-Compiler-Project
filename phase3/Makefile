@@ -16,15 +16,7 @@ syntax.tab.*: syntax.y
 lexer: syntax.tab.* lex.yy.c  # For debugging lex.l
 	$(CC) lex.yy.c -ll -o lexer
 
-.PHONY: test clean
-test: splc
-	@echo -e '\nStep1: Test base cases'
-
-	@echo -e '\nStep2: Test self-written cases'
-
-	@echo -e '\nStep3: Test extra cases'
-
-	@echo "----------test success----------"
+.PHONY: clean
 
 clean:
-	@rm -rf lex.yy.c syntax.tab.c syntax.tab.h lexer bin/splc **/*.myout
+	@rm -rf lex.yy.c syntax.tab.c syntax.tab.h lexer bin/splc **/*.ir

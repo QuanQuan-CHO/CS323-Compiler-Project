@@ -26,7 +26,8 @@ string traverse(node* root){
     return res;
 }
 
-//return string example: "Exp ASSIGN Exp"
+//return expression of children nodes
+//example: "Exp ASSIGN Exp"
 string expression(node* n){
     string res = "";
     for(int i=0;i < n->children.size()-1;i++){
@@ -176,9 +177,9 @@ string translate_Exp(node* Exp, string place){
             return "READ "+place;
         }else{return place+" := CALL "+function;}
     }else if(children=="Exp LB Exp RB"){
-
+        return ""; //never, because there are no arrays (Assumption 6)
     }else if(children=="Exp DOT ID"){
-
+        return ""; //never, because there are no structures (Assumption 6)
     }else{ //conditional Exp
         string lb1 = NEW_LABEL;
         string lb2 = NEW_LABEL;
@@ -191,6 +192,57 @@ string translate_Exp(node* Exp, string place){
         );
     }
 }
+
+string translate_VarDec(node* VarDec){
+    vector<node*> nodes = VarDec->children;
+    string children = expression(VarDec);
+    if(children=="ID"){
+        return nodes[0]->value;
+    }else{return "";} //[VarDec LB INT RB] no need to implement array (Assumption 6)
+}
+
+string translate_Dec(node* Dec){
+    vector<node*> nodes = Dec->children;
+    string children = expression(Dec);
+    if(children=="VarDec"){
+        return translate_VarDec(nodes[0]);
+    }else if(children=="VarDec ASSIGN Exp"){
+        string tp = NEW_PLACE; //TODO: query symbol table
+        return translate_Exp(nodes[2],tp);
+    }else{return "";} //never
+}
+
+string translate_DecList(node* DecList){
+    vector<node*> nodes = DecList->children;
+    string children = expression(DecList);
+    if(children=="Dec"){
+        return translate_Dec(nodes[0]);
+    }else if(children=="Dec COMMA DecList"){
+        return concat_ir(
+            translate_Dec(nodes[0]),
+            translate_DecList(nodes[2])
+        );
+    }else{return "";} //never
+}
+
+string translate_Def(node* Def){ //Def: Specifier DecList SEMI
+    return translate_DecList(Def->children[1]);
+}
+
+string translate_DefList(node* DefList){
+    vector<node*> nodes = DefList->children;
+    string children = expression(DefList);
+    if(children=="Def DefList"){
+        return concat_ir(
+            translate_Def(nodes[0]),
+            translate_DefList(nodes[1])
+        );
+    }else if(children=="Def"){
+        return translate_Def(nodes[0]);
+    }else{return "";} //never
+}
+
+string translate_CompSt(node* CompSt);
 
 string translate_Stmt(node* Stmt){
     vector<node*> nodes = Stmt->children;
@@ -238,6 +290,86 @@ string translate_Stmt(node* Stmt){
             "LABEL "+lb3
         );
     }else if(children=="CompSt"){
-        
+        return translate_CompSt(nodes[0]);
     }else{return "";} //never
+}
+
+string translate_StmtList(node* StmtList){
+    vector<node*> nodes = StmtList->children;
+    string children = expression(StmtList);
+    if(children=="Stmt StmtList"){
+        return concat_ir(
+            translate_Stmt(nodes[0]),
+            translate_StmtList(nodes[1])
+        );
+    }else if(children=="Stmt"){
+        return translate_Stmt(nodes[0]);
+    }else{return "";} //never
+}
+
+string translate_CompSt(node* CompSt){
+    vector<node*> nodes = CompSt->children;
+    string children = expression(CompSt);
+    if(children=="LC DefList StmtList RC"){
+        return concat_ir(
+            translate_DefList(nodes[1]),
+            translate_StmtList(nodes[2])
+        );
+    }else if(children=="LC StmtList RC"){
+        return translate_StmtList(nodes[1]);
+    }else if(children=="LC DefList RC"){
+        return translate_DefList(nodes[1]);
+    }else{return "";} //never
+}
+
+string translate_ExtDecList(node* ExtDecList){
+    vector<node*> nodes = ExtDecList->children;
+    string children = expression(ExtDecList);
+    if(children=="VarDec"){
+        return translate_VarDec(nodes[0]);
+    }else if(children=="VarDec COMMA ExtDecList"){
+        return concat_ir(
+            translate_VarDec(nodes[0]),
+            translate_ExtDecList(nodes[2])
+        );
+    }else{return "";} //never
+}
+
+string translate_FunDec(node* FunDec){
+    /*FunDec:
+        ID LP RP
+      | ID LP VarList RP  
+    */
+    string name = FunDec->children[0]->value;
+    return "FUNCTION "+name;
+}
+
+string translate_ExtDef(node* ExtDef){
+    /*According to:
+      - Assumption 2: there are only integer primitive type variables
+      - Assumption 6: there are no structure variables or arrays
+      The `Specifier` here must be `int`
+    */
+    vector<node*> nodes = ExtDef->children;
+    string children = expression(ExtDef);
+    if(children=="Specifier ExtDecList SEMI"){
+        return translate_ExtDecList(nodes[1]);
+    }else if(children=="Specifier FunDec CompSt"){
+        return concat_ir(
+            translate_FunDec(nodes[1]),
+            translate_CompSt(nodes[2])
+        );
+    }else{return "";} //Specifier SEMI
+}
+
+string translate_ExtDefList(node* ExtDefList){
+    vector<node*> nodes = ExtDefList->children;
+    if(nodes.empty()){
+        return "";
+    }else{ //ExtDef ExtDefList
+        return concat_ir(
+            translate_ExtDef(nodes[0]),
+            translate_ExtDefList(nodes[1])
+        );
+    }
 }

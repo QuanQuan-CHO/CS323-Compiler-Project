@@ -3,8 +3,11 @@
 
     #define YYSTYPE node* //Define the type of `yylval`
     
+    #include <fstream>
     #include "translate.cpp" //This line MUST BEFORE `#include "lex.yy.c"`
     #include "lex.yy.c" //This line MUST AFTER `#define YYSTYPE node*`
+
+    node* root; //root of syntax tree
     
     void yyerror(const char*){}
 %}
@@ -32,7 +35,7 @@
 
 /* HIGH-LEVEL DEFINITION specifies the top-level syntax for a SPL program, including global variable declarations and function definitions.*/
 Program:
-  ExtDefList {$$=new node("Program",vector{$1}); cout << traverse($$) << endl;}
+  ExtDefList {root=$1;}
 
 ExtDefList:
   %empty {$$=new node("ExtDefList");}
@@ -63,7 +66,6 @@ StructSpecifier:
 VarDec:
   ID {$$=new node("VarDec",vector{$1});}
 | VarDec LB INT RB {$$=new node("VarDec",vector{$1,$2,$3,$4});}
-| VarDec INT RB {$$=new node("VarDec",vector{$1,$2,$3});}
 
 FunDec:
   ID LP VarList RP {$$=new node("FunDec",vector{$1,$2,$3,$4});}
@@ -148,20 +150,26 @@ Args:
 
 %%
 
-int main(int argc, char **argv){
-    char *file_path;
+int main(int argc, char** argv){
     if(argc < 2){
         fprintf(stderr, "Usage: %s <file_path>\n", argv[0]);
         return 1;
-    } else if(argc == 2){
-        file_path = argv[1];
-        if(!(yyin = fopen(file_path, "r"))){
+    }else if(argc == 2){
+        if(!(yyin=fopen(argv[1], "r"))){
             perror(argv[1]);
             return 1;
         }
         yyparse();
+
+        //write .ir file
+        string spl_path = argv[1];
+        string ir = translate_ExtDefList(root);
+        string ir_path = spl_path.substr(0, spl_path.rfind('.')) + ".ir";
+        ofstream out_stream(ir_path);
+        out_stream << ir;
+        out_stream.close();
         return 0;
-    } else{
+    }else{
         fputs("Too many arguments! Expected: 2.\n", stderr);
         return 1;
     }

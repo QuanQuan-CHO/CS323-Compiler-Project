@@ -364,7 +364,7 @@ string translate_ExtDef(node* ExtDef){
     }else if(children=="Specifier FunDec CompSt"){
         return concat_ir(
             translate_FunDec(nodes[1]),
-            translate_CompSt(nodes[2])
+            translate_CompSt(nodes[2])+"\n"
         );
     }else{return "";} //Specifier SEMI
 }

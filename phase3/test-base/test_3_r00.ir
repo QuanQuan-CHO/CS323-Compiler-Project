@@ -1,0 +1,28 @@
+FUNCTION main :
+READ n
+t8 := n
+t9 := #0
+IF t8 > t9 GOTO label1
+GOTO label2
+LABEL label1 :
+t7 := #1
+WRITE t7
+GOTO label3
+LABEL label2 :
+t5 := n
+t6 := #0
+IF t5 < t6 GOTO label4
+GOTO label5
+LABEL label4 :
+t4 := #1
+t3 := #0 - t4
+WRITE t3
+GOTO label6
+LABEL label5 :
+t2 := #0
+WRITE t2
+LABEL label6 :
+LABEL label3 :
+t1 := #0
+RETURN t1
+

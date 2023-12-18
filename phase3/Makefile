@@ -17,4 +17,4 @@ syntax.tab.*: syntax.y
 .PHONY: clean
 
 clean:
-	@rm -rf **/lex.yy.c **/syntax.tab.c **/syntax.tab.h bin/splc **/*.ir
+	@rm -rf **/lex.yy.c **/syntax.tab.c **/syntax.tab.h bin/splc **/irsim.log

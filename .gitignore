@@ -6,6 +6,7 @@ lex.yy.c
 syntax.tab.c
 syntax.tab.h
 
+irsim.log
 lexer
 splc
 *.myout

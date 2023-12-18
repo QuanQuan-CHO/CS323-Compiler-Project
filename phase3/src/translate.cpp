@@ -248,7 +248,9 @@ string translate_Stmt(node* Stmt){
     vector<node*> nodes = Stmt->children;
     string children = expression(Stmt);
     if(children=="Exp SEMI"){
-        return translate_Exp(nodes[0],NEW_PLACE);
+        /*in this case, there is no need to store the Exp result,
+          so `place` is useless in Exp translation*/
+        return translate_Exp(nodes[0],"");
     }else if(children=="RETURN Exp SEMI"){
         string tp = NEW_PLACE;
         return concat_ir(

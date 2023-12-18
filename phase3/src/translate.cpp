@@ -126,6 +126,8 @@ string translate_Args(node* Args, vector<string> &arg_list){
     }else{return "";} //never
 }
 
+/*[place]: the place to store the result of Exp
+           place=="" means that the Exp result needn't to store */
 string translate_Exp(node* Exp, string place){
     vector<node*> nodes = Exp->children;
     string children = expression(Exp);
@@ -174,6 +176,12 @@ string translate_Exp(node* Exp, string place){
                 "WRITE "+tp
             );
         }else{
+            if(place==""){
+                /*no need to store the result in .spl source code,
+                  but we need to store the result in a useless place,
+                  in order to use IR: "x := CALL f", since there is no IR like "CALL f" */
+                place = NEW_PLACE;
+            }
             vector<string> arg_list = {};
             string code1 = translate_Args(nodes[2],arg_list);
             string code2 = "";
@@ -186,7 +194,15 @@ string translate_Exp(node* Exp, string place){
         string function = nodes[0]->value;
         if(function=="read"){
             return "READ "+place;
-        }else{return place+" := CALL "+function;}
+        }else{
+            if(place==""){
+                /*no need to store the result in .spl source code,
+                  but we need to store the result in a useless place,
+                  in order to use IR: "x := CALL f", since there is no IR like "CALL f" */
+                place = NEW_PLACE;
+            }
+            return place+" := CALL "+function;
+        }
     }else if(children=="Exp LB Exp RB"){
         return ""; //never, because there are no arrays (Assumption 6)
     }else if(children=="Exp DOT ID"){

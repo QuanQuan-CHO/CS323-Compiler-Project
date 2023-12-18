@@ -214,10 +214,12 @@ string translate_Dec(node* Dec){
     vector<node*> nodes = Dec->children;
     string children = expression(Dec);
     if(children=="VarDec"){
-        return translate_VarDec(nodes[0]);
+        return "";
     }else if(children=="VarDec ASSIGN Exp"){
-        string tp = NEW_PLACE; //TODO: query symbol table
-        return translate_Exp(nodes[2],tp);
+        /*In this case, there must be `VarDec->ID`
+          because there is no array (Assumption 6)*/
+        string var_name = nodes[0]->children[0]->value;
+        return translate_Exp(nodes[2], var_name);
     }else{return "";} //never
 }
 

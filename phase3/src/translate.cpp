@@ -169,7 +169,7 @@ string translate_Exp(node* Exp, string place){
             for(int i=arg_list.size()-1;i>=0;i--){
                 code2 += "ARG "+arg_list[i]+"\n";
             }
-            return code1+"\n"+code2+"place := CALL "+function;
+            return code1+"\n"+code2+place+" := CALL "+function;
         }
     }else if(children=="ID LP RP"){
         string function = nodes[0]->value;

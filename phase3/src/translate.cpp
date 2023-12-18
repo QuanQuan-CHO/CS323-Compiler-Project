@@ -43,7 +43,9 @@ string concat_ir(IRs... irs){
     vector<string> ir_vec = {irs...};
     string res = "";
     for(int i=0;i < ir_vec.size()-1;i++){
-        res += ir_vec[i]+"\n";
+        if(ir_vec[i]!=""){
+            res += ir_vec[i]+"\n";
+        }
     }
     return res+ir_vec.back();
 }

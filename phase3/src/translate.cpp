@@ -134,12 +134,16 @@ string translate_Exp(node* Exp, string place){
     }else if(children=="CHAR" || children=="FLOAT"){
         return ""; //never, because there is only INT primitive type (Assumption 2)
     }else if(children=="Exp ASSIGN Exp"){
-        string tp = NEW_PLACE;
-        return concat_ir(
-            translate_Exp(nodes[2],tp),
-            nodes[0]->value+" := "+tp,
-            place+" := "+nodes[2]->value
-        );
+        /*In this case, there must be `Exp1->ID`
+          because there is no struct or array (Assumption 6)*/
+        string var_name = nodes[0]->children[0]->value;
+        string Exp2_ir = translate_Exp(nodes[2],var_name);
+        if(place!=""){ 
+            return concat_ir(
+                Exp2_ir,
+                place+" := "+var_name
+            );
+        }else{return Exp2_ir;} //no need to store the result
     }else if(children=="Exp PLUS Exp"){
         return arithmetic_ir('+',nodes,place);
     }else if(children=="Exp MINUS Exp"){

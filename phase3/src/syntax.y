@@ -168,6 +168,7 @@ int main(int argc, char** argv){
         ofstream out_stream(ir_path);
         out_stream << ir;
         out_stream.close();
+        cout << traverse(root) << endl;
         return 0;
     }else{
         fputs("Too many arguments! Expected: 2.\n", stderr);

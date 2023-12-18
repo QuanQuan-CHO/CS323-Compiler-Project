@@ -8,6 +8,7 @@
 int place_count = 1;
 int label_count = 1;
 
+//for debug
 string shift(string str){
     stringstream in(str);
     stringstream out;
@@ -18,6 +19,7 @@ string shift(string str){
     return out.str();
 }
 
+//for debug
 string traverse(node* root){
     string res = root->type+"\n";
     for(node* child: root->children){
@@ -157,6 +159,9 @@ string translate_Exp(node* Exp, string place){
     }else if(children=="ID LP Args RP"){
         string function = nodes[0]->value;
         if(function=="write"){
+            node* Args = nodes[2]; //in this case, there must be `Args->Exp`
+            nodes[2]=Args->children[0]; //replace the `Args` with `Exp`
+            //The children now becomes `ID LP Exp RP`
             string tp = NEW_PLACE;
             return concat_ir(
                 translate_Exp(nodes[2],tp),

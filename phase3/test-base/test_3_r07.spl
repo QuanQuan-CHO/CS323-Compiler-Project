@@ -1,3 +1,4 @@
+//output: 175 36 103
 int main()
 {
     int a, b, c;

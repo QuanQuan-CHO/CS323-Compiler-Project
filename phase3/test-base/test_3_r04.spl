@@ -1,3 +1,4 @@
+//output: 6 28
 int mod(int x,int n)
 {
     return x -(x / n) * n;

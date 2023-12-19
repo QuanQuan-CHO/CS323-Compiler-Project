@@ -1,3 +1,4 @@
+//output: 370 371 407 3
 int mod(int number2, int m2)
 {
     int result = number2 - number2 / m2 * m2;

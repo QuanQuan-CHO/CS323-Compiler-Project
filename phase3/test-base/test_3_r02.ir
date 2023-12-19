@@ -1,0 +1,60 @@
+FUNCTION calculateBinomialCoefficient :
+PARAM row
+PARAM col
+coefficient := #1
+i := #0
+t25 := row
+t26 := col
+IF t25 < t26 GOTO label6
+GOTO label7
+LABEL label6 :
+t24 := #0
+RETURN t24
+LABEL label7 :
+t20 := col
+t22 := row
+t23 := col
+t21 := t22 - t23
+IF t20 > t21 GOTO label4
+GOTO label5
+LABEL label4 :
+t18 := row
+t19 := col
+col := t18 - t19
+LABEL label5 :
+LABEL label1 :
+t16 := i
+t17 := col
+IF t16 < t17 GOTO label2
+GOTO label3
+LABEL label2 :
+t12 := coefficient
+t14 := row
+t15 := i
+t13 := t14 - t15
+coefficient := t12 * t13
+t8 := coefficient
+t10 := i
+t11 := #1
+t9 := t10 + t11
+coefficient := t8 / t9
+t6 := i
+t7 := #1
+i := t6 + t7
+GOTO label1
+LABEL label3 :
+t5 := coefficient
+RETURN t5
+
+FUNCTION main :
+READ r
+READ c
+t3 := r
+t4 := c
+ARG t4
+ARG t3
+coe := CALL calculateBinomialCoefficient
+t2 := coe
+WRITE t2
+t1 := #0
+RETURN t1

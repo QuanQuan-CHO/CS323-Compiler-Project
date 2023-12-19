@@ -1,0 +1,81 @@
+FUNCTION mod :
+PARAM x
+PARAM n
+t27 := x
+t31 := x
+t32 := n
+t29 := t31 / t32
+t30 := n
+t28 := t29 * t30
+t26 := t27 - t28
+RETURN t26
+
+FUNCTION isPerfectNumber :
+PARAM number
+sum := #0
+j := #1
+LABEL label9 :
+t22 := j
+t24 := number
+t25 := #2
+t23 := t24 / t25
+IF t22 <= t23 GOTO label10
+GOTO label11
+LABEL label10 :
+t20 := number
+t21 := j
+ARG t21
+ARG t20
+t18 := CALL mod
+t19 := #0
+IF t18 == t19 GOTO label12
+GOTO label13
+LABEL label12 :
+t16 := sum
+t17 := j
+sum := t16 + t17
+LABEL label13 :
+t14 := j
+t15 := #1
+j := t14 + t15
+GOTO label9
+LABEL label11 :
+t12 := sum
+t13 := number
+IF t12 == t13 GOTO label6
+GOTO label7
+LABEL label6 :
+t11 := #1
+RETURN t11
+GOTO label8
+LABEL label7 :
+t10 := #0
+RETURN t10
+LABEL label8 :
+
+FUNCTION main :
+count := #0
+i := #1
+LABEL label1 :
+t8 := i
+t9 := #100
+IF t8 <= t9 GOTO label2
+GOTO label3
+LABEL label2 :
+t7 := i
+ARG t7
+t5 := CALL isPerfectNumber
+t6 := #1
+IF t5 == t6 GOTO label4
+GOTO label5
+LABEL label4 :
+t4 := i
+WRITE t4
+LABEL label5 :
+t2 := i
+t3 := #1
+i := t2 + t3
+GOTO label1
+LABEL label3 :
+t1 := #0
+RETURN t1

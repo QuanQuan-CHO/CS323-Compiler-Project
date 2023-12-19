@@ -1,3 +1,4 @@
+//output: Fibonacci Sequence
 int main() {
     int i, tu1, tu2, tu3, m, a, b, c;
     a = 1;

@@ -1,3 +1,4 @@
+/*row=n, col=k*/
 int calculateBinomialCoefficient(int row, int col) {
     int coefficient = 1;
     int i = 0;

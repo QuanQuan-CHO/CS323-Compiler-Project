@@ -369,13 +369,31 @@ string translate_ExtDecList(node* ExtDecList){
     }else{return "";} //never
 }
 
+//ParamDec: Specifier VarDec
+string translate_ParamDec(node* ParamDec){
+    vector<node*> nodes = ParamDec->children;
+    return "PARAM "+translate_VarDec(nodes[1]);
+}
+
+string translate_VarList(node* VarList){
+    vector<node*> nodes = VarList->children;
+    return concat_ir(
+        translate_ParamDec(nodes[0]),
+        expression(VarList) == "ParamDec COMMA VarList" ?
+        translate_VarList(nodes[2]) :
+        "" //ParamDec
+    );
+}
+
 string translate_FunDec(node* FunDec){
-    /*FunDec:
-        ID LP RP
-      | ID LP VarList RP  
-    */
-    string name = FunDec->children[0]->value;
-    return "FUNCTION "+name+" :";
+    vector<node*> nodes = FunDec->children;
+    string name = nodes[0]->value;
+    return concat_ir(
+        "FUNCTION "+name+" :",
+        expression(FunDec) == "ID LP VarList RP" ?
+        translate_VarList(nodes[2]) :
+        "" //ID LP RP: without parameters
+    );
 }
 
 string translate_ExtDef(node* ExtDef){

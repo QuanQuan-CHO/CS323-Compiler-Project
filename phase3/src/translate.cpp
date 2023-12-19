@@ -42,12 +42,15 @@ template<typename... IRs>
 string concat_ir(IRs... irs){
     vector<string> ir_vec = {irs...};
     string res = "";
-    for(int i=0;i < ir_vec.size()-1;i++){
+    for(int i=0;i<ir_vec.size();i++){
         if(ir_vec[i]!=""){
             res += ir_vec[i]+"\n";
         }
     }
-    return res+ir_vec.back();
+    if(res!=""){
+        res.pop_back(); //remove the last '\n'
+    }
+    return res;
 }
 
 string translate_Exp(node* Exp, string place);

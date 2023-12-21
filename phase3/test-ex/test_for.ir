@@ -1,0 +1,91 @@
+FUNCTION test_sum1 :
+sum1 := #0
+a := #1
+LABEL label10 :
+t32 := a
+t33 := #10
+IF t32 <= t33 GOTO label11
+GOTO label12
+LABEL label11 :
+t30 := sum1
+t31 := a
+sum1 := t30 + t31
+t28 := a
+t29 := #1
+a := t28 + t29
+GOTO label10
+LABEL label12 :
+t27 := sum1
+RETURN t27
+
+FUNCTION test_sum2 :
+sum2 := #0
+b := #1
+LABEL label7 :
+t25 := b
+t26 := #10
+IF t25 <= t26 GOTO label8
+GOTO label9
+LABEL label8 :
+t23 := sum2
+t24 := b
+sum2 := t23 + t24
+t21 := b
+t22 := #1
+b := t21 + t22
+GOTO label7
+LABEL label9 :
+t20 := sum2
+RETURN t20
+
+FUNCTION test_sum3 :
+sum3 := #0
+c := #1
+LABEL label4 :
+t18 := c
+t19 := #10
+IF t18 <= t19 GOTO label5
+GOTO label6
+LABEL label5 :
+t16 := sum3
+t17 := c
+sum3 := t16 + t17
+t14 := c
+t15 := #1
+c := t14 + t15
+GOTO label4
+LABEL label6 :
+t13 := sum3
+RETURN t13
+
+FUNCTION test_sum4 :
+sum4 := #0
+d := #1
+LABEL label1 :
+t11 := d
+t12 := #10
+IF t11 <= t12 GOTO label2
+GOTO label3
+LABEL label2 :
+t9 := sum4
+t10 := d
+sum4 := t9 + t10
+t7 := d
+t8 := #1
+d := t7 + t8
+GOTO label1
+LABEL label3 :
+t6 := sum4
+RETURN t6
+
+FUNCTION main :
+t5 := CALL test_sum1
+WRITE t5
+t4 := CALL test_sum2
+WRITE t4
+t3 := CALL test_sum3
+WRITE t3
+t2 := CALL test_sum4
+WRITE t2
+t1 := #0
+RETURN t1

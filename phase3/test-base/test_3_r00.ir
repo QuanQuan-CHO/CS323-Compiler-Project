@@ -25,4 +25,3 @@ LABEL label6 :
 LABEL label3 :
 t1 := #0
 RETURN t1
-

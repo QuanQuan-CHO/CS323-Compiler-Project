@@ -16,7 +16,7 @@
 %nonassoc ELSE
 
 %token TYPE INT CHAR FLOAT STRUCT ID
-%token IF WHILE RETURN /*control flow word*/
+%token IF WHILE FOR RETURN /*control flow word*/
 %token COMMA
 
 %right ASSIGN
@@ -97,7 +97,10 @@ Stmt:
 | IF LP Exp RP Stmt %prec LOWER_ELSE {$$=new node("Stmt",vector{$1,$2,$3,$4,$5});}
 | IF LP Exp RP Stmt ELSE Stmt {$$=new node("Stmt",vector{$1,$2,$3,$4,$5,$6,$7});}
 | WHILE LP Exp RP Stmt {$$=new node("Stmt",vector{$1,$2,$3,$4,$5});}
-
+| FOR LP Def Exp SEMI Exp RP Stmt {$$=new node("Stmt",vector{$1,$2,$3,$4,$5,$6,$7,$8});} //for(...;...;...){...}
+| FOR LP Def Exp SEMI RP Stmt {$$=new node("Stmt",vector{$1,$2,$3,$4,$5,$6,$7});}        //for(...;...;){...}
+| FOR LP SEMI Exp SEMI Exp RP Stmt {$$=new node("Stmt",vector{$1,$2,$3,$4,$5,$6,$7,$8});}//for(;...;...){...}
+| FOR LP SEMI Exp SEMI RP Stmt {$$=new node("Stmt",vector{$1,$2,$3,$4,$5,$6,$7});}       //for(;...;){...}
 
 /* LOCAL DEFINITION includes the declaration and assignment of local variables. */
 DefList: /*To prevent shift/reduce conflict, replace DefList-->%empty with DefList-->Def*/

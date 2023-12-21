@@ -14,6 +14,7 @@ if {yylval=new node("IF"); return IF;}
 else {yylval=new node("ELSE"); return ELSE;}
 while {yylval=new node("WHILE"); return WHILE;}
 return {yylval=new node("RETURN"); return RETURN;}
+for {yylval=new node("FOR"); return FOR;}
     /* Because CHAR is 2 Byte, only 1 or 2 hex char is allowed */
 '([^']|\\[xX](0|[1-9a-fA-F][0-9a-fA-F]?))' {yylval=new node("CHAR"); return CHAR;}
 ";" {yylval=new node("SEMI"); return SEMI;}

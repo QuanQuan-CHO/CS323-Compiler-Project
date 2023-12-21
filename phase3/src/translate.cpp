@@ -325,6 +325,62 @@ string translate_Stmt(node* Stmt){
         );
     }else if(children=="CompSt"){
         return translate_CompSt(nodes[0]);
+    }else if(children=="FOR LP Def Exp SEMI Exp RP Stmt"){
+        string lb1 = NEW_LABEL;
+        string lb2 = NEW_LABEL;
+        string lb3 = NEW_LABEL;
+        //for(...;...;...){...}
+        return concat_ir(
+            translate_Def(nodes[2]),
+            "LABEL "+lb1+" :",
+            translate_cond_Exp(nodes[3],lb2,lb3),
+            "LABEL "+lb2+" :",
+            translate_Stmt(nodes[7]),
+            translate_Exp(nodes[5],""), //no need to store the result
+            "GOTO "+lb1,
+            "LABEL "+lb3+" :"   
+        );
+    }else if(children=="FOR LP Def Exp SEMI RP Stmt"){
+        string lb1 = NEW_LABEL;
+        string lb2 = NEW_LABEL;
+        string lb3 = NEW_LABEL;
+        //for(...;...;){...}
+        return concat_ir(
+            translate_Def(nodes[2]),
+            "LABEL "+lb1+" :",
+            translate_cond_Exp(nodes[3],lb2,lb3),
+            "LABEL "+lb2+" :",
+            translate_Stmt(nodes[6]),
+            "GOTO "+lb1,
+            "LABEL "+lb3+" :"   
+        );
+    }else if(children=="FOR LP SEMI Exp SEMI Exp RP Stmt"){
+        string lb1 = NEW_LABEL;
+        string lb2 = NEW_LABEL;
+        string lb3 = NEW_LABEL;
+        //for(;...;...){...}
+        return concat_ir(
+            "LABEL "+lb1+" :",
+            translate_cond_Exp(nodes[3],lb2,lb3),
+            "LABEL "+lb2+" :",
+            translate_Stmt(nodes[7]),
+            translate_Exp(nodes[5],""), //no need to store the result
+            "GOTO "+lb1,
+            "LABEL "+lb3+" :"   
+        );
+    }else if(children=="FOR LP SEMI Exp SEMI RP Stmt"){
+        string lb1 = NEW_LABEL;
+        string lb2 = NEW_LABEL;
+        string lb3 = NEW_LABEL;
+        //for(;...;){...}
+        return concat_ir(
+            "LABEL "+lb1+" :",
+            translate_cond_Exp(nodes[3],lb2,lb3),
+            "LABEL "+lb2+" :",
+            translate_Stmt(nodes[6]),
+            "GOTO "+lb1,
+            "LABEL "+lb3+" :"   
+        );
     }else{return "";} //never
 }
 

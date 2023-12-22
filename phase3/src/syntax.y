@@ -85,6 +85,7 @@ CompSt: /*Because DefList and StmtList isn't empty, we should list all possible 
   LC DefList StmtList RC {$$=new node("CompSt",vector{$1,$2,$3,$4});}
 | LC DefList RC {$$=new node("CompSt",vector{$1,$2,$3});}
 | LC StmtList RC {$$=new node("CompSt",vector{$1,$2,$3});}
+| LC StmtList DefList StmtList RC {$$=new node("CompSt",vector{$1,$2,$3,$4,$5});}
 
 StmtList: /*To prevent shift/reduce conflict, replace StmtList-->%empty with StmtList-->Stmt*/
   Stmt {$$=new node("StmtList",vector{$1});}

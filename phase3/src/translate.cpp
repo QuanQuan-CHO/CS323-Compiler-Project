@@ -69,23 +69,21 @@ string translate_Exp(node* Exp, string place);
 string arithmetic_ir(char op, vector<node*> nodes, string place){
     string tp1 = NEW_PLACE;
     string tp2 = NEW_PLACE;
-    return concat_ir(
-        translate_Exp(nodes[0],tp1),
-        translate_Exp(nodes[2],tp2),
-        place+" := "+tp1+" "+op+" "+tp2
-    );
+    string ir1 = translate_Exp(nodes[0],tp1);
+    string ir2 = translate_Exp(nodes[2],tp2);
+    string ir3 = place+" := "+tp1+" "+op+" "+tp2;
+    return concat_ir(ir1,ir2,ir3);
 }
 
 //For conditional Exp: "Exp EQ/NE/LE/LT/GT/GE Exp"
 string comparison_ir(string op, vector<node*> nodes, string lb_t, string lb_f){
     string tp1 = NEW_PLACE;
     string tp2 = NEW_PLACE;
-    return concat_ir(
-        translate_Exp(nodes[0],tp1),
-        translate_Exp(nodes[2],tp2),
-        "IF "+tp1+" "+op+" "+tp2+" GOTO "+lb_t,
-        "GOTO "+lb_f
-    );
+    string ir1 = translate_Exp(nodes[0],tp1);
+    string ir2 = translate_Exp(nodes[2],tp2);
+    string ir3 = "IF "+tp1+" "+op+" "+tp2+" GOTO "+lb_t;
+    string ir4 = "GOTO "+lb_f;
+    return concat_ir(ir1,ir2,ir3,ir4);
 }
 
 string translate_cond_Exp(node* Exp, string lb_t, string lb_f){
@@ -105,18 +103,16 @@ string translate_cond_Exp(node* Exp, string lb_t, string lb_f){
         return comparison_ir(">=",nodes,lb_t,lb_f);
     }else if(children=="Exp AND Exp"){
         string lb = NEW_LABEL;
-        return concat_ir(
-            translate_cond_Exp(nodes[0],lb,lb_f),
-            "LABEL "+lb+" :",
-            translate_cond_Exp(nodes[2],lb_t,lb_f)
-        );
+        string ir1 = translate_cond_Exp(nodes[0],lb,lb_f);
+        string ir2 = "LABEL "+lb+" :";
+        string ir3 = translate_cond_Exp(nodes[2],lb_t,lb_f);
+        return concat_ir(ir1,ir2,ir3);
     }else if(children=="Exp OR Exp"){
         string lb = NEW_LABEL;
-        return concat_ir(
-            translate_cond_Exp(nodes[0],lb_t,lb),
-            "LABEL "+lb+" :",
-            translate_cond_Exp(nodes[2],lb_t,lb_f)
-        );
+        string ir1 = translate_cond_Exp(nodes[0],lb_t,lb);
+        string ir2 = "LABEL "+lb+" :";
+        string ir3 = translate_cond_Exp(nodes[2],lb_t,lb_f);
+        return concat_ir(ir1,ir2,ir3);
     }else if(children=="NOT Exp"){
         return translate_cond_Exp(nodes[1],lb_f,lb_t);
     }else{return "";} //never
@@ -131,11 +127,10 @@ string translate_Args(node* Args, vector<string> &arg_list){
         return translate_Exp(nodes[0],tp);
     }else if(children=="Exp COMMA Args"){
         string tp = NEW_PLACE;
+        string ir1 = translate_Exp(nodes[0],tp);
         arg_list.push_back(tp);
-        return concat_ir(
-            translate_Exp(nodes[0],tp),
-            translate_Args(nodes[2],arg_list)
-        );
+        string ir2 = translate_Args(nodes[2],arg_list);
+        return concat_ir(ir1,ir2);
     }else{return "";} //never
 }
 
@@ -329,10 +324,9 @@ string translate_DecList(node* DecList){
     if(children=="Dec"){
         return translate_Dec(nodes[0]);
     }else if(children=="Dec COMMA DecList"){
-        return concat_ir(
-            translate_Dec(nodes[0]),
-            translate_DecList(nodes[2])
-        );
+        string ir1 = translate_Dec(nodes[0]);
+        string ir2 = translate_DecList(nodes[2]);
+        return concat_ir(ir1,ir2);
     }else{return "";} //never
 }
 
@@ -344,10 +338,9 @@ string translate_DefList(node* DefList){
     vector<node*> nodes = DefList->children;
     string children = expression(DefList);
     if(children=="Def DefList"){
-        return concat_ir(
-            translate_Def(nodes[0]),
-            translate_DefList(nodes[1])
-        );
+        string ir1 = translate_Def(nodes[0]);
+        string ir2 = translate_DefList(nodes[1]);
+        return concat_ir(ir1,ir2);
     }else if(children=="Def"){
         return translate_Def(nodes[0]);
     }else{return "";} //never
@@ -371,37 +364,34 @@ string translate_Stmt(node* Stmt){
     }else if(children=="IF LP Exp RP Stmt"){
         string lb1 = NEW_LABEL;
         string lb2 = NEW_LABEL;
-        return concat_ir(
-            translate_cond_Exp(nodes[2],lb1,lb2),
-            "LABEL "+lb1+" :",
-            translate_Stmt(nodes[4]),
-            "LABEL "+lb2+" :"
-        );
+        string ir1 = translate_cond_Exp(nodes[2],lb1,lb2);
+        string ir2 = "LABEL "+lb1+" :";
+        string ir3 = translate_Stmt(nodes[4]);
+        string ir4 = "LABEL "+lb2+" :";
+        return concat_ir(ir1,ir2,ir3,ir4);
     }else if(children=="IF LP Exp RP Stmt ELSE Stmt"){
         string lb1 = NEW_LABEL;
         string lb2 = NEW_LABEL;
         string lb3 = NEW_LABEL;
-        return concat_ir(
-            translate_cond_Exp(nodes[2],lb1,lb2),
-            "LABEL "+lb1+" :",
-            translate_Stmt(nodes[4]),
-            "GOTO "+lb3,
-            "LABEL "+lb2+" :",
-            translate_Stmt(nodes[6]),
-            "LABEL "+lb3+" :"
-        );
+        string ir1 = translate_cond_Exp(nodes[2],lb1,lb2);
+        string ir2 = "LABEL "+lb1+" :";
+        string ir3 = translate_Stmt(nodes[4]);
+        string ir4 = "GOTO "+lb3;
+        string ir5 = "LABEL "+lb2+" :";
+        string ir6 = translate_Stmt(nodes[6]);
+        string ir7 = "LABEL "+lb3+" :";
+        return concat_ir(ir1,ir2,ir3,ir4,ir5,ir6,ir7);
     }else if(children=="WHILE LP Exp RP Stmt"){
         string lb1 = NEW_LABEL;
         string lb2 = NEW_LABEL;
         string lb3 = NEW_LABEL;
-        return concat_ir(
-            "LABEL "+lb1+" :",
-            translate_cond_Exp(nodes[2],lb2,lb3),
-            "LABEL "+lb2+" :",
-            translate_Stmt(nodes[4]),
-            "GOTO "+lb1,
-            "LABEL "+lb3+" :"
-        );
+        string ir1 = "LABEL "+lb1+" :";
+        string ir2 = translate_cond_Exp(nodes[2],lb2,lb3);
+        string ir3 = "LABEL "+lb2+" :";
+        string ir4 = translate_Stmt(nodes[4]);
+        string ir5 = "GOTO "+lb1;
+        string ir6 = "LABEL "+lb3+" :";
+        return concat_ir(ir1,ir2,ir3,ir4,ir5,ir6);
     }else if(children=="CompSt"){
         return translate_CompSt(nodes[0]);
     }else if(children=="FOR LP Def Exp SEMI Exp RP Stmt"){
@@ -409,57 +399,53 @@ string translate_Stmt(node* Stmt){
         string lb2 = NEW_LABEL;
         string lb3 = NEW_LABEL;
         //for(...;...;...){...}
-        return concat_ir(
-            translate_Def(nodes[2]),
-            "LABEL "+lb1+" :",
-            translate_cond_Exp(nodes[3],lb2,lb3),
-            "LABEL "+lb2+" :",
-            translate_Stmt(nodes[7]),
-            translate_Exp(nodes[5],""), //no need to store the result
-            "GOTO "+lb1,
-            "LABEL "+lb3+" :"   
-        );
+        string ir1 = translate_Def(nodes[2]);
+        string ir2 = "LABEL "+lb1+" :";
+        string ir3 = translate_cond_Exp(nodes[3],lb2,lb3);
+        string ir4 = "LABEL "+lb2+" :";
+        string ir5 = translate_Stmt(nodes[7]);
+        string ir6 = translate_Exp(nodes[5],""); //no need to store the result
+        string ir7 = "GOTO "+lb1;
+        string ir8 = "LABEL "+lb3+" :";
+        return concat_ir(ir1,ir2,ir3,ir4,ir5,ir6,ir7,ir8);
     }else if(children=="FOR LP Def Exp SEMI RP Stmt"){
         string lb1 = NEW_LABEL;
         string lb2 = NEW_LABEL;
         string lb3 = NEW_LABEL;
         //for(...;...;){...}
-        return concat_ir(
-            translate_Def(nodes[2]),
-            "LABEL "+lb1+" :",
-            translate_cond_Exp(nodes[3],lb2,lb3),
-            "LABEL "+lb2+" :",
-            translate_Stmt(nodes[6]),
-            "GOTO "+lb1,
-            "LABEL "+lb3+" :"   
-        );
+        string ir1 = translate_Def(nodes[2]);
+        string ir2 = "LABEL "+lb1+" :";
+        string ir3 = translate_cond_Exp(nodes[3],lb2,lb3);
+        string ir4 = "LABEL "+lb2+" :";
+        string ir5 = translate_Stmt(nodes[6]);
+        string ir6 = "GOTO "+lb1;
+        string ir7 = "LABEL "+lb3+" :";
+        return concat_ir(ir1,ir2,ir3,ir4,ir5,ir6,ir7);
     }else if(children=="FOR LP SEMI Exp SEMI Exp RP Stmt"){
         string lb1 = NEW_LABEL;
         string lb2 = NEW_LABEL;
         string lb3 = NEW_LABEL;
         //for(;...;...){...}
-        return concat_ir(
-            "LABEL "+lb1+" :",
-            translate_cond_Exp(nodes[3],lb2,lb3),
-            "LABEL "+lb2+" :",
-            translate_Stmt(nodes[7]),
-            translate_Exp(nodes[5],""), //no need to store the result
-            "GOTO "+lb1,
-            "LABEL "+lb3+" :"   
-        );
+        string ir1 = "LABEL "+lb1+" :";
+        string ir2 = translate_cond_Exp(nodes[3],lb2,lb3);
+        string ir3 = "LABEL "+lb2+" :";
+        string ir4 = translate_Stmt(nodes[7]);
+        string ir5 = translate_Exp(nodes[5],""); //no need to store the result
+        string ir6 = "GOTO "+lb1;
+        string ir7 = "LABEL "+lb3+" :";
+        return concat_ir(ir1,ir2,ir3,ir4,ir5,ir6,ir7);
     }else if(children=="FOR LP SEMI Exp SEMI RP Stmt"){
         string lb1 = NEW_LABEL;
         string lb2 = NEW_LABEL;
         string lb3 = NEW_LABEL;
         //for(;...;){...}
-        return concat_ir(
-            "LABEL "+lb1+" :",
-            translate_cond_Exp(nodes[3],lb2,lb3),
-            "LABEL "+lb2+" :",
-            translate_Stmt(nodes[6]),
-            "GOTO "+lb1,
-            "LABEL "+lb3+" :"   
-        );
+        string ir1 = "LABEL "+lb1+" :";
+        string ir2 = translate_cond_Exp(nodes[3],lb2,lb3);
+        string ir3 = "LABEL "+lb2+" :";
+        string ir4 = translate_Stmt(nodes[6]);
+        string ir5 = "GOTO "+lb1;
+        string ir6 = "LABEL "+lb3+" :";
+        return concat_ir(ir1,ir2,ir3,ir4,ir5,ir6);
     }else{return "";} //never
 }
 
@@ -467,10 +453,9 @@ string translate_StmtList(node* StmtList){
     vector<node*> nodes = StmtList->children;
     string children = expression(StmtList);
     if(children=="Stmt StmtList"){
-        return concat_ir(
-            translate_Stmt(nodes[0]),
-            translate_StmtList(nodes[1])
-        );
+        string ir1 = translate_Stmt(nodes[0]);
+        string ir2 = translate_StmtList(nodes[1]);
+        return concat_ir(ir1,ir2);
     }else if(children=="Stmt"){
         return translate_Stmt(nodes[0]);
     }else{return "";} //never
@@ -480,9 +465,9 @@ string translate_CompSt(node* CompSt){
     vector<node*> nodes = CompSt->children;
     string children = expression(CompSt);
     if(children=="LC DefList StmtList RC"){
-        string code1 = translate_DefList(nodes[1]);
-        string code2 = translate_StmtList(nodes[2]);
-        return concat_ir(code1,code2);
+        string ir1 = translate_DefList(nodes[1]);
+        string ir2 = translate_StmtList(nodes[2]);
+        return concat_ir(ir1,ir2);
     }else if(children=="LC StmtList RC"){
         return translate_StmtList(nodes[1]);
     }else if(children=="LC DefList RC"){
@@ -496,10 +481,9 @@ string translate_ExtDecList(node* ExtDecList){
     if(children=="VarDec"){
         return translate_VarDec(nodes[0]);
     }else if(children=="VarDec COMMA ExtDecList"){
-        return concat_ir(
-            translate_VarDec(nodes[0]),
-            translate_ExtDecList(nodes[2])
-        );
+        string ir1 = translate_VarDec(nodes[0]);
+        string ir2 = translate_ExtDecList(nodes[2]);
+        return concat_ir(ir1,ir2);
     }else{return "";} //never
 }
 
@@ -511,12 +495,11 @@ string translate_ParamDec(node* ParamDec){
 
 string translate_VarList(node* VarList){
     vector<node*> nodes = VarList->children;
-    return concat_ir(
-        translate_ParamDec(nodes[0]),
-        expression(VarList) == "ParamDec COMMA VarList" ?
-        translate_VarList(nodes[2]) :
-        "" //ParamDec
-    );
+    string ir1 = translate_ParamDec(nodes[0]);
+    string ir2 = expression(VarList) == "ParamDec COMMA VarList" ?
+                 translate_VarList(nodes[2]) :
+                 ""; //ParamDec
+    return concat_ir(ir1,ir2);
 }
 
 string translate_FunDec(node* FunDec){
@@ -541,10 +524,9 @@ string translate_ExtDef(node* ExtDef){
     if(children=="Specifier ExtDecList SEMI"){
         return translate_ExtDecList(nodes[1]);
     }else if(children=="Specifier FunDec CompSt"){
-        return concat_ir(
-            translate_FunDec(nodes[1]),
-            translate_CompSt(nodes[2])+"\n"
-        );
+        string ir1 = translate_FunDec(nodes[1]);
+        string ir2 = translate_CompSt(nodes[2])+"\n"; //add newline to separate different functions
+        return concat_ir(ir1,ir2);
     }else{return "";} //Specifier SEMI
 }
 
@@ -553,9 +535,8 @@ string translate_ExtDefList(node* ExtDefList){
     if(nodes.empty()){
         return "";
     }else{ //ExtDef ExtDefList
-        return concat_ir(
-            translate_ExtDef(nodes[0]),
-            translate_ExtDefList(nodes[1])
-        );
+        string ir1 = translate_ExtDef(nodes[0]);
+        string ir2 = translate_ExtDefList(nodes[1]);
+        return concat_ir(ir1,ir2);
     }
 }

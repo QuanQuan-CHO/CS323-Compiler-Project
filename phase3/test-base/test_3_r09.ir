@@ -1,32 +1,32 @@
 FUNCTION sqr :
 PARAM i1
-t13 := i1
-t14 := i1
-t12 := t13 * t14
-RETURN t12
+t2 := i1
+t3 := i1
+t1 := t2 * t3
+RETURN t1
 
 FUNCTION cbc :
 PARAM i2
-t10 := i2
-t11 := i2
-t8 := t10 * t11
-t9 := i2
-t7 := t8 * t9
-RETURN t7
+t7 := i2
+t8 := i2
+t5 := t7 * t8
+t6 := i2
+t4 := t5 * t6
+RETURN t4
 
 FUNCTION main :
 READ a
-t6 := a
-WRITE t6
-t5 := a
-ARG t5
+t9 := a
+WRITE t9
+t10 := a
+ARG t10
 r := CALL sqr
-t4 := r
-WRITE t4
-t3 := a
-ARG t3
+t11 := r
+WRITE t11
+t12 := a
+ARG t12
 r := CALL cbc
-t2 := r
-WRITE t2
-t1 := #0
-RETURN t1
+t13 := r
+WRITE t13
+t14 := #0
+RETURN t14

@@ -3,10 +3,20 @@
 
 #include <iostream>
 #include <sstream>
+#include <unordered_map>
 #include "node.cpp"
 
 int place_count = 1;
 int label_count = 1;
+
+/*array_name -> {size1,size2,...}, store the array size of each level
+  for example:
+- if a[6] is declared, then the entry is a->{1}
+- if b[6][8] is declared, then the entry is b->{1,8}
+- if c[6][8][7] is declared, then the entry is c->{1,7,7*8}, i.e:c->{1,7,56}
+- if d[6][8][7][3] is declared, then the entry is d->{1,3,3*7,3*7*8}, i.e:d->{1,3,21,168}
+*/
+unordered_map<string,vector<int>> arrays = {};
 
 //for debug
 string shift(string str){
@@ -141,16 +151,35 @@ string translate_Exp(node* Exp, string place){
     }else if(children=="CHAR" || children=="FLOAT"){
         return ""; //never, because there is only INT primitive type (Assumption 2)
     }else if(children=="Exp ASSIGN Exp"){
-        /*In this case, there must be `Exp1->ID`
-          because there is no struct or array (Assumption 6)*/
-        string var_name = nodes[0]->children[0]->value;
-        string Exp2_ir = translate_Exp(nodes[2],var_name);
-        if(place!=""){ 
-            return concat_ir(
-                Exp2_ir,
-                place+" := "+var_name
-            );
-        }else{return Exp2_ir;} //no need to store the result
+        if(expression(nodes[0])=="ID"){
+            string var_name = nodes[0]->children[0]->value;
+            string Exp2_ir = translate_Exp(nodes[2],var_name);
+            if(place!=""){ 
+                return concat_ir(
+                    Exp2_ir,
+                    place+" := "+var_name
+                );
+            }else{return Exp2_ir;} //no need to store the result
+        }else{ //nodes[0] is array entry: Exp LB Exp RB
+            //Process Exp1
+            string Exp1_ir = translate_Exp(nodes[0],"");
+            int lastline_index = Exp1_ir.find_last_of('\n');
+            string array_ir = Exp1_ir.substr(0,lastline_index);
+            string address = Exp1_ir.substr(lastline_index+1);
+
+            if(place!=""){ 
+                return concat_ir(
+                    array_ir,
+                    translate_Exp(nodes[2], address),
+                    place+" := "+address
+                );
+            }else{ //no need to store the result
+                return concat_ir(
+                    array_ir,
+                    translate_Exp(nodes[2], address)
+                );
+            }
+        }
     }else if(children=="Exp PLUS Exp"){
         return arithmetic_ir('+',nodes,place);
     }else if(children=="Exp MINUS Exp"){
@@ -207,7 +236,44 @@ string translate_Exp(node* Exp, string place){
             return place+" := CALL "+function;
         }
     }else if(children=="Exp LB Exp RB"){
-        return ""; //never, because there are no arrays (Assumption 6)
+        node* Exp1 = Exp;
+        do{ //first, iterate to find out the array_name
+            Exp1 = Exp1->children[0];
+            nodes = Exp1->children;
+        }while(expression(Exp1)=="Exp LB Exp RB");
+        string array_name = nodes[0]->value; //here, nodes[0] must be `ID`
+        vector<int> sizes = arrays[array_name];
+
+        Exp1 = Exp;
+        nodes = Exp1->children;
+        int offset = 0;
+        //second, iterate to calculate the offset
+        string ir = "";
+        string _offset = NEW_PLACE;
+        for(int k=0;expression(Exp1)=="Exp LB Exp RB";k++){
+            string tp = NEW_PLACE;
+            ir += translate_Exp(nodes[2],tp)+"\n";
+            ir += tp+" := "+tp+" * #"+to_string(sizes[k])+"\n";
+            ir += _offset+" := "+_offset+" + "+tp+"\n";
+            Exp1 = Exp1->children[0];
+            nodes = Exp1->children;
+        }
+
+        string address = NEW_PLACE;
+        ir += _offset+" := "+_offset+" * #4\n";
+        ir += address+" := &"+array_name+" + "+_offset+"\n";
+        if(place==""){
+            /*no need to store the result, return the array entry's address,
+              Exp appears on left of "=", need to assign the array entry with another value
+              for example: a[1][2]=4 */
+            return ir+"*"+address;
+        }else{ //`place` is not empty
+            /*need to store the result in the `place` address
+              Exp appears on right of "=", the array entry's value needs to be assigned to another variable
+              for example: b=a[3][6];
+            */
+            return ir+place+" := *"+address;
+        }
     }else if(children=="Exp DOT ID"){
         return ""; //never, because there are no structures (Assumption 6)
     }else{ //conditional Exp
@@ -228,17 +294,30 @@ string translate_VarDec(node* VarDec){
     string children = expression(VarDec);
     if(children=="ID"){
         return nodes[0]->value;
-    }else{return "";} //[VarDec LB INT RB] no need to implement array (Assumption 6)
+    }else if(children=="VarDec LB INT RB"){
+        int count = 1;
+        vector<int> sizes= {};
+        do{//iterate multi-level array
+            sizes.push_back(count);
+            count *= stoi(nodes[2]->value);
+            VarDec = VarDec->children[0];
+            nodes = VarDec->children;
+        }while(expression(VarDec)=="VarDec LB INT RB");
+        string array_name = nodes[0]->value; //here, nodes[0] must be `ID`
+        arrays.insert({array_name,sizes});
+        return "DEC "+array_name+" "+to_string(count*4); //each int's size is 4 byte
+    }else{return "";} //never
 }
 
 string translate_Dec(node* Dec){
     vector<node*> nodes = Dec->children;
     string children = expression(Dec);
     if(children=="VarDec"){
-        return "";
+        if(expression(nodes[0])=="VarDec LB INT RB"){
+            return translate_VarDec(nodes[0]); //only array declaration needs to be translated
+        }else{return "";}
     }else if(children=="VarDec ASSIGN Exp"){
-        /*In this case, there must be `VarDec->ID`
-          because there is no array (Assumption 6)*/
+        //here, there must be VarDec: ID
         string var_name = nodes[0]->children[0]->value;
         return translate_Exp(nodes[2], var_name);
     }else{return "";} //never
@@ -401,10 +480,9 @@ string translate_CompSt(node* CompSt){
     vector<node*> nodes = CompSt->children;
     string children = expression(CompSt);
     if(children=="LC DefList StmtList RC"){
-        return concat_ir(
-            translate_DefList(nodes[1]),
-            translate_StmtList(nodes[2])
-        );
+        string code1 = translate_DefList(nodes[1]);
+        string code2 = translate_StmtList(nodes[2]);
+        return concat_ir(code1,code2);
     }else if(children=="LC StmtList RC"){
         return translate_StmtList(nodes[1]);
     }else if(children=="LC DefList RC"){

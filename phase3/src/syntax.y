@@ -163,6 +163,7 @@ int main(int argc, char** argv){
             return 1;
         }
         yyparse();
+        cout << traverse(root) << endl;
 
         //write .ir file
         string spl_path = argv[1];
@@ -171,7 +172,6 @@ int main(int argc, char** argv){
         ofstream out_stream(ir_path);
         out_stream << ir;
         out_stream.close();
-        cout << traverse(root) << endl;
         return 0;
     }else{
         fputs("Too many arguments! Expected: 2.\n", stderr);

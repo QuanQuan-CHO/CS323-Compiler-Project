@@ -23,6 +23,12 @@ for {yylval=new node("FOR"); return FOR;}
 "<=" {yylval=new node("LE"); return LE;}
 ">=" {yylval=new node("GE"); return GE;}
 "!=" {yylval=new node("NE"); return NE;}
+"+=" {yylval=new node("PLUS_ASSIGN"); return PLUS_ASSIGN;}
+"-=" {yylval=new node("MINUS_ASSIGN"); return MINUS_ASSIGN;}
+"*=" {yylval=new node("MUL_ASSIGN"); return MUL_ASSIGN;}
+"/=" {yylval=new node("DIV_ASSIGN"); return DIV_ASSIGN;}
+"++" {yylval=new node("SELF_PLUS"); return SELF_PLUS;}
+"--" {yylval=new node("SELF_MINUS"); return SELF_MINUS;}
 "=" {yylval=new node("ASSIGN"); return ASSIGN;}
 "!" {yylval=new node("NOT"); return NOT;}
 "<" {yylval=new node("LT"); return LT;}

@@ -1,0 +1,51 @@
+int self_plus(){
+    int a=-1;
+    a++;
+    write(a);
+    return 0;
+}
+
+int self_minus(){
+    int b=1;
+    b--;
+    write(b);
+    return 0;
+}
+
+int plus_assign(){
+    int c=-6;
+    c+=6;
+    write(c);
+    return 0;
+}
+
+int minus_assign(){
+    int d=7;
+    d-=7;
+    write(d);
+    return 0;
+}
+
+int mul_assign(){
+    int e=3;
+    e*=4;
+    write(e);
+    return 0;
+}
+
+int div_assign(){
+    int f=15;
+    f/=5;
+    write(f);
+    return 0;
+}
+
+int main(){
+    self_plus();
+    self_minus();
+    plus_assign();
+    minus_assign();
+    mul_assign();
+    div_assign();
+    return 0;
+}

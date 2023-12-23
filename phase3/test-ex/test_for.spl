@@ -1,43 +1,43 @@
-int test_sum1(){
+int for1(){
     int sum1=0;
-    for(int a=1;a<=10;a=a+1){
-        sum1=sum1+a;
+    for(int a=1;a<=10;a++){
+        sum1+=a;
     }
     return sum1;
 }
 
-int test_sum2(){
+int for2(){
     int sum2=0;
     int b=1;
-    for(;b<=10;b=b+1){
-        sum2=sum2+b;
+    for(;b<=10;b++){
+        sum2+=b;
     }
     return sum2;
 }
 
-int test_sum3(){
+int for3(){
     int sum3=0;
     for(int c=1;c<=10;){
-        sum3=sum3+c;
-        c=c+1;
+        sum3+=c;
+        c++;
     }
     return sum3;
 }
 
-int test_sum4(){
+int for4(){
     int sum4=0;
     int d=1;
     for(;d<=10;){
-        sum4=sum4+d;
-        d=d+1;
+        sum4+=d;
+        d++;
     }
     return sum4;
 }
 
 int main(){
-    write(test_sum1());
-    write(test_sum2());
-    write(test_sum3());
-    write(test_sum4());
+    write(for1());
+    write(for2());
+    write(for3());
+    write(for4());
     return 0;
 }

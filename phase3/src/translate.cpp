@@ -245,6 +245,7 @@ string translate_Exp(node* Exp, string place){
         //second, iterate to calculate the offset
         string ir = "";
         string _offset = NEW_PLACE;
+        ir += _offset+" := #0\n";
         for(int k=0;expression(Exp1)=="Exp LB Exp RB";k++){
             string tp = NEW_PLACE;
             ir += translate_Exp(nodes[2],tp)+"\n";

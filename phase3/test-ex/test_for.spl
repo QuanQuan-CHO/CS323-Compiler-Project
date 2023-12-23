@@ -1,3 +1,4 @@
+//output: 55 55 55 55
 int for1(){
     int sum1=0;
     for(int a=1;a<=10;a++){

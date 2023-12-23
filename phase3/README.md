@@ -10,7 +10,7 @@
 
 ## Design
 
-In this phase, we use the `node` class to generate the syntax tree during the bottom-up parsing process of Bison
+In this phase, we generate the syntax tree using the `node` class during the bottom-up parsing process of Bison
 
 ```cpp
 class node { //syntax tree node
@@ -55,10 +55,162 @@ int label_count = 1;
 
 
 
-## Optimization
-
-
-
 
 
 ## Extra Feature
+
+### Compound Assignment Operator
+
+To support the compound assignment operators:  `+= -= *= /= ++ --`, we first added six match rules in `lex.l`
+
+```cpp
+"+=" {yylval=new node("PLUS_ASSIGN"); return PLUS_ASSIGN;}
+"-=" {yylval=new node("MINUS_ASSIGN"); return MINUS_ASSIGN;}
+"*=" {yylval=new node("MUL_ASSIGN"); return MUL_ASSIGN;}
+"/=" {yylval=new node("DIV_ASSIGN"); return DIV_ASSIGN;}
+"++" {yylval=new node("SELF_PLUS"); return SELF_PLUS;}
+"--" {yylval=new node("SELF_MINUS"); return SELF_MINUS;}
+```
+
+Then we just need to convert the compound expression to normal expression during the parsing process of Bison, by changing the syntax tree's structure: 
+
+- convert `Exp1 [+-*/]= Exp2` to `Exp1 = Exp1 [+-*/] Exp2` 
+
+  ```cpp
+  node* convert_assign(node* Exp1, node* Exp2, string _operator){
+      node* op = new node(_operator); //`operator` is an internal keyword in C++
+      node* res = new node("Exp",vector{Exp1,op,Exp2});
+      node* assign = new node("ASSIGN");
+      return new node("Exp",vector{Exp1,assign,res});
+  }
+  
+  %%
+  Exp:
+  ...
+  | Exp PLUS_ASSIGN Exp {$$=convert_assign($1,$3,"PLUS");}
+  | Exp MINUS_ASSIGN Exp {$$=convert_assign($1,$3,"MINUS");}
+  | Exp MUL_ASSIGN Exp {$$=convert_assign($1,$3,"MUL");}
+  | Exp DIV_ASSIGN Exp {$$=convert_assign($1,$3,"DIV");}
+  %%
+  ```
+
+- convert `Exp[++|--]` to `Exp = Exp [+-] 1`
+
+  ```cpp
+  node* convert_self_assign(node* Exp, string _operator){ //`operator` is an internal keyword in C++
+      node* one = new node("Exp", vector{new node("INT", "1")});
+      return convert_assign(Exp, one, _operator);
+  }
+  
+  %%
+  Exp:
+  ...
+  | Exp SELF_PLUS {$$=convert_self_assign($1,"PLUS");}
+  | Exp SELF_MINUS {$$=convert_self_assign($1,"MINUS");}
+  %%
+  ```
+
+After the preprocess of compound assignment operator, we can normally apply the translation scheme during the top-down traverse
+
+
+
+### For Loop
+
+To support for loop, we added four productions in `syntax.y`
+
+```cpp
+Stmt:
+  ...
+  //for(...;...;...){...}
+| FOR LP Def Exp SEMI Exp RP Stmt {$$=new node("Stmt",vector{$1,$2,$3,$4,$5,$6,$7,$8});}
+  //for(...;...;){...}
+| FOR LP Def Exp SEMI RP Stmt {$$=new node("Stmt",vector{$1,$2,$3,$4,$5,$6,$7});}    
+  //for(;...;...){...}
+| FOR LP SEMI Exp SEMI Exp RP Stmt {$$=new node("Stmt",vector{$1,$2,$3,$4,$5,$6,$7,$8});}
+  //for(;...;){...}
+| FOR LP SEMI Exp SEMI RP Stmt {$$=new node("Stmt",vector{$1,$2,$3,$4,$5,$6,$7});}
+```
+
+While traversing the syntax tree, we just need to translate the for loop like while loop, below is the example translation scheme for `for(...;...;...){...}`
+
+```cpp
+if(children=="FOR LP Def Exp SEMI Exp RP Stmt"){
+    string lb1 = NEW_LABEL;
+    string lb2 = NEW_LABEL;
+    string lb3 = NEW_LABEL;
+    string ir1 = translate_Def(nodes[2]);
+    string ir2 = "LABEL "+lb1+" :";
+    string ir3 = translate_cond_Exp(nodes[3],lb2,lb3);
+    string ir4 = "LABEL "+lb2+" :";
+    string ir5 = translate_Stmt(nodes[7]);
+    string ir6 = translate_Exp(nodes[5],""); //no need to store the result
+    string ir7 = "GOTO "+lb1;
+    string ir8 = "LABEL "+lb3+" :";
+    return concat_ir(ir1,ir2,ir3,ir4,ir5,ir6,ir7,ir8);
+}
+```
+
+
+
+### Multi-dimension Array
+
+#### Data Structure
+
+The arrays' information are stored in a map(like symbol table), which stores the array size of each level
+
+```cpp
+unordered_map<string,vector<int>> arrays = {}; //array_name -> {size1,size2,...}
+```
+
+For example: 
+
+- If `a[6]` is declared, then the entry is `a->{1}`
+- If `b[6][8]` is declared, then the entry is `b->{1,8}`
+- If `c[6][8][7]` is declared, then the entry is `c->{1,7,7*8}`, i.e:`c->{1,7,56}`
+- If `d[6][8][7][3]` is declared, then the entry is `d->{1,3,3*7,3*7*8}`, i.e:`d->{1,3,21,168}`
+
+By querying this map, we can compute the offset of each entry conveniently
+
+
+
+#### Array Declaration
+
+The declaration of array appears in the production `VarDec: VarDec LB INT RB`
+
+We can get the size of each dimension by iterating the syntax tree, then store the array information into the map, and generate the `DEC` IR code: `DEC {array_name} 4*{entry_count}`
+
+```cpp
+if(children=="VarDec LB INT RB"){
+    int count = 1;
+    vector<int> sizes= {};
+    do{//iterate multi-level array
+        sizes.push_back(count);
+        count *= stoi(nodes[2]->value);
+        VarDec = VarDec->children[0];
+        nodes = VarDec->children;
+    }while(expression(VarDec)=="VarDec LB INT RB");
+    string array_name = nodes[0]->value; //here, nodes[0] must be `ID`
+    arrays.insert({array_name,sizes}); //store the array information into the map
+    return "DEC "+array_name+" "+to_string(count*4); //each int's size is 4 byte
+}
+```
+
+
+
+#### Array Access
+
+The access of the array appears in the production `Exp: Exp LB Exp RB`
+
+We can get the index of each dimension by iterating the syntax tree, then compute the offset using the following formula
+
+$$
+\text{offset} = \sum_{i=1}^n \text{size}_i · \text{index}_i
+$$
+
+Then we can get the array access IR below
+
+```
+address := &{array_name} + offset
+place := *address
+```
+

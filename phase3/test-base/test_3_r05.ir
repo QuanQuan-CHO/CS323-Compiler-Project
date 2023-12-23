@@ -5,55 +5,55 @@ c := #3
 tu1 := #1
 tu2 := #1
 READ m
-t17 := m
-t18 := #1
-IF t17 < t18 GOTO label1
+t1 := m
+t2 := #1
+IF t1 < t2 GOTO label1
 GOTO label2
 LABEL label1 :
-t16 := #0
-WRITE t16
+t3 := #0
+WRITE t3
 GOTO label3
 LABEL label2 :
-t14 := m
-t15 := #1
-IF t14 == t15 GOTO label4
-GOTO label12
-LABEL label12 :
-t12 := m
-t13 := #2
-IF t12 == t13 GOTO label4
+t4 := m
+t5 := #1
+IF t4 == t5 GOTO label4
+GOTO label7
+LABEL label7 :
+t6 := m
+t7 := #2
+IF t6 == t7 GOTO label4
 GOTO label5
 LABEL label4 :
-t11 := #1
-WRITE t11
+t8 := #1
+WRITE t8
 GOTO label6
 LABEL label5 :
 t9 := m
 t10 := #2
-IF t9 > t10 GOTO label7
-GOTO label8
-LABEL label7 :
+IF t9 > t10 GOTO label8
+GOTO label9
+LABEL label8 :
 i := #3
-LABEL label9 :
-t7 := i
-t8 := m
-IF t7 <= t8 GOTO label10
-GOTO label11
 LABEL label10 :
-t5 := tu1
-t6 := tu2
-tu3 := t5 + t6
+t11 := i
+t12 := m
+IF t11 <= t12 GOTO label11
+GOTO label12
+LABEL label11 :
+t13 := tu1
+t14 := tu2
+tu3 := t13 + t14
 tu1 := tu2
 tu2 := tu3
-t3 := i
-t4 := #1
-i := t3 + t4
-GOTO label9
-LABEL label11 :
-t2 := tu3
-WRITE t2
-LABEL label8 :
+t15 := i
+t16 := #1
+i := t15 + t16
+GOTO label10
+LABEL label12 :
+t17 := tu3
+WRITE t17
+LABEL label9 :
 LABEL label6 :
 LABEL label3 :
-t1 := #0
-RETURN t1
+t18 := #0
+RETURN t18

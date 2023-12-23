@@ -8,6 +8,20 @@
     #include "lex.yy.c" //This line MUST AFTER `#define YYSTYPE node*`
 
     node* root; //root of syntax tree
+
+    //convert `Exp1 [+-*/]= Exp2` to `Exp1 = Exp1 [+-*/] Exp2`
+    node* convert_assign(node* Exp1, node* Exp2, string _operator){
+        node* op = new node(_operator); //`operator` is an internal keyword in C++
+        node* res = new node("Exp",vector{Exp1,op,Exp2});
+        node* assign = new node("ASSIGN");
+        return new node("Exp",vector{Exp1,assign,res});
+    }
+
+    //convert `Exp[++|--]` to `Exp = Exp [+-] 1`
+    node* convert_self_assign(node* Exp, string _operator){ //`operator` is an internal keyword in C++
+        node* one = new node("Exp", vector{new node("INT", "1")});
+        return convert_assign(Exp, one, _operator);
+    }
     
     void yyerror(const char*){}
 %}
@@ -20,6 +34,8 @@
 %token COMMA
 
 %right ASSIGN
+%right PLUS_ASSIGN MINUS_ASSIGN MUL_ASSIGN DIV_ASSIGN /* += -= *= /= */
+%right SELF_PLUS SELF_MINUS /* ++ -- */
 %left OR
 %left AND
 %left EQ NE
@@ -124,6 +140,12 @@ Dec:
  * Note that these operators have their precedence and associativity, as shown in Table 2 in phase1-guide.pdf. */
 Exp:
   Exp ASSIGN Exp {$$=new node("Exp",vector{$1,$2,$3});}
+| Exp PLUS_ASSIGN Exp {$$=convert_assign($1,$3,"PLUS");}  //convert `Exp1 += Exp2` to `Exp1 = Exp1 + Exp2`
+| Exp MINUS_ASSIGN Exp {$$=convert_assign($1,$3,"MINUS");}//convert `Exp1 -= Exp2` to `Exp1 = Exp1 - Exp2`
+| Exp MUL_ASSIGN Exp {$$=convert_assign($1,$3,"MUL");}    //convert `Exp1 *= Exp2` to `Exp1 = Exp1 * Exp2`
+| Exp DIV_ASSIGN Exp {$$=convert_assign($1,$3,"DIV");}    //convert `Exp1 /= Exp2` to `Exp1 = Exp1 / Exp2`
+| Exp SELF_PLUS {$$=convert_self_assign($1,"PLUS");}      //convert `Exp++` to `Exp = Exp + 1`
+| Exp SELF_MINUS {$$=convert_self_assign($1,"MINUS");}    //convert `Exp--` to `Exp = Exp - 1`
 | Exp AND Exp {$$=new node("Exp",vector{$1,$2,$3});}
 | Exp OR Exp {$$=new node("Exp",vector{$1,$2,$3});}
 | Exp LT Exp {$$=new node("Exp",vector{$1,$2,$3});}
@@ -164,6 +186,7 @@ int main(int argc, char** argv){
             return 1;
         }
         yyparse();
+        cout << traverse(root) << endl;
 
         //write .ir file
         string spl_path = argv[1];
@@ -172,7 +195,6 @@ int main(int argc, char** argv){
         ofstream out_stream(ir_path);
         out_stream << ir;
         out_stream.close();
-        cout << traverse(root) << endl;
         return 0;
     }else{
         fputs("Too many arguments! Expected: 2.\n", stderr);

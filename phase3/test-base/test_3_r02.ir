@@ -3,58 +3,58 @@ PARAM row
 PARAM col
 coefficient := #1
 i := #0
-t25 := row
-t26 := col
-IF t25 < t26 GOTO label6
+t1 := row
+t2 := col
+IF t1 < t2 GOTO label1
+GOTO label2
+LABEL label1 :
+t3 := #0
+RETURN t3
+LABEL label2 :
+t4 := col
+t6 := row
+t7 := col
+t5 := t6 - t7
+IF t4 > t5 GOTO label3
+GOTO label4
+LABEL label3 :
+t8 := row
+t9 := col
+col := t8 - t9
+LABEL label4 :
+LABEL label5 :
+t10 := i
+t11 := col
+IF t10 < t11 GOTO label6
 GOTO label7
 LABEL label6 :
-t24 := #0
-RETURN t24
-LABEL label7 :
-t20 := col
-t22 := row
-t23 := col
-t21 := t22 - t23
-IF t20 > t21 GOTO label4
-GOTO label5
-LABEL label4 :
-t18 := row
-t19 := col
-col := t18 - t19
-LABEL label5 :
-LABEL label1 :
-t16 := i
-t17 := col
-IF t16 < t17 GOTO label2
-GOTO label3
-LABEL label2 :
 t12 := coefficient
 t14 := row
 t15 := i
 t13 := t14 - t15
 coefficient := t12 * t13
-t8 := coefficient
-t10 := i
-t11 := #1
-t9 := t10 + t11
-coefficient := t8 / t9
-t6 := i
-t7 := #1
-i := t6 + t7
-GOTO label1
-LABEL label3 :
-t5 := coefficient
-RETURN t5
+t16 := coefficient
+t18 := i
+t19 := #1
+t17 := t18 + t19
+coefficient := t16 / t17
+t20 := i
+t21 := #1
+i := t20 + t21
+GOTO label5
+LABEL label7 :
+t22 := coefficient
+RETURN t22
 
 FUNCTION main :
 READ r
 READ c
-t3 := r
-t4 := c
-ARG t4
-ARG t3
+t23 := r
+t24 := c
+ARG t24
+ARG t23
 coe := CALL calculateBinomialCoefficient
-t2 := coe
-WRITE t2
-t1 := #0
-RETURN t1
+t25 := coe
+WRITE t25
+t26 := #0
+RETURN t26

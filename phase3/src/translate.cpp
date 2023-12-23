@@ -3,10 +3,20 @@
 
 #include <iostream>
 #include <sstream>
+#include <unordered_map>
 #include "node.cpp"
 
 int place_count = 1;
 int label_count = 1;
+
+/*array_name -> {size1,size2,...}, store the array size of each level
+  for example:
+- if a[6] is declared, then the entry is a->{1}
+- if b[6][8] is declared, then the entry is b->{1,8}
+- if c[6][8][7] is declared, then the entry is c->{1,7,7*8}, i.e:c->{1,7,56}
+- if d[6][8][7][3] is declared, then the entry is d->{1,3,3*7,3*7*8}, i.e:d->{1,3,21,168}
+*/
+unordered_map<string,vector<int>> arrays = {};
 
 //for debug
 string shift(string str){
@@ -59,23 +69,21 @@ string translate_Exp(node* Exp, string place);
 string arithmetic_ir(char op, vector<node*> nodes, string place){
     string tp1 = NEW_PLACE;
     string tp2 = NEW_PLACE;
-    return concat_ir(
-        translate_Exp(nodes[0],tp1),
-        translate_Exp(nodes[2],tp2),
-        place+" := "+tp1+" "+op+" "+tp2
-    );
+    string ir1 = translate_Exp(nodes[0],tp1);
+    string ir2 = translate_Exp(nodes[2],tp2);
+    string ir3 = place+" := "+tp1+" "+op+" "+tp2;
+    return concat_ir(ir1,ir2,ir3);
 }
 
 //For conditional Exp: "Exp EQ/NE/LE/LT/GT/GE Exp"
 string comparison_ir(string op, vector<node*> nodes, string lb_t, string lb_f){
     string tp1 = NEW_PLACE;
     string tp2 = NEW_PLACE;
-    return concat_ir(
-        translate_Exp(nodes[0],tp1),
-        translate_Exp(nodes[2],tp2),
-        "IF "+tp1+" "+op+" "+tp2+" GOTO "+lb_t,
-        "GOTO "+lb_f
-    );
+    string ir1 = translate_Exp(nodes[0],tp1);
+    string ir2 = translate_Exp(nodes[2],tp2);
+    string ir3 = "IF "+tp1+" "+op+" "+tp2+" GOTO "+lb_t;
+    string ir4 = "GOTO "+lb_f;
+    return concat_ir(ir1,ir2,ir3,ir4);
 }
 
 string translate_cond_Exp(node* Exp, string lb_t, string lb_f){
@@ -95,18 +103,16 @@ string translate_cond_Exp(node* Exp, string lb_t, string lb_f){
         return comparison_ir(">=",nodes,lb_t,lb_f);
     }else if(children=="Exp AND Exp"){
         string lb = NEW_LABEL;
-        return concat_ir(
-            translate_cond_Exp(nodes[0],lb,lb_f),
-            "LABEL "+lb+" :",
-            translate_cond_Exp(nodes[2],lb_t,lb_f)
-        );
+        string ir1 = translate_cond_Exp(nodes[0],lb,lb_f);
+        string ir2 = "LABEL "+lb+" :";
+        string ir3 = translate_cond_Exp(nodes[2],lb_t,lb_f);
+        return concat_ir(ir1,ir2,ir3);
     }else if(children=="Exp OR Exp"){
         string lb = NEW_LABEL;
-        return concat_ir(
-            translate_cond_Exp(nodes[0],lb_t,lb),
-            "LABEL "+lb+" :",
-            translate_cond_Exp(nodes[2],lb_t,lb_f)
-        );
+        string ir1 = translate_cond_Exp(nodes[0],lb_t,lb);
+        string ir2 = "LABEL "+lb+" :";
+        string ir3 = translate_cond_Exp(nodes[2],lb_t,lb_f);
+        return concat_ir(ir1,ir2,ir3);
     }else if(children=="NOT Exp"){
         return translate_cond_Exp(nodes[1],lb_f,lb_t);
     }else{return "";} //never
@@ -121,11 +127,10 @@ string translate_Args(node* Args, vector<string> &arg_list){
         return translate_Exp(nodes[0],tp);
     }else if(children=="Exp COMMA Args"){
         string tp = NEW_PLACE;
+        string ir1 = translate_Exp(nodes[0],tp);
         arg_list.push_back(tp);
-        return concat_ir(
-            translate_Exp(nodes[0],tp),
-            translate_Args(nodes[2],arg_list)
-        );
+        string ir2 = translate_Args(nodes[2],arg_list);
+        return concat_ir(ir1,ir2);
     }else{return "";} //never
 }
 
@@ -141,16 +146,35 @@ string translate_Exp(node* Exp, string place){
     }else if(children=="CHAR" || children=="FLOAT"){
         return ""; //never, because there is only INT primitive type (Assumption 2)
     }else if(children=="Exp ASSIGN Exp"){
-        /*In this case, there must be `Exp1->ID`
-          because there is no struct or array (Assumption 6)*/
-        string var_name = nodes[0]->children[0]->value;
-        string Exp2_ir = translate_Exp(nodes[2],var_name);
-        if(place!=""){ 
-            return concat_ir(
-                Exp2_ir,
-                place+" := "+var_name
-            );
-        }else{return Exp2_ir;} //no need to store the result
+        if(expression(nodes[0])=="ID"){
+            string var_name = nodes[0]->children[0]->value;
+            string Exp2_ir = translate_Exp(nodes[2],var_name);
+            if(place!=""){ 
+                return concat_ir(
+                    Exp2_ir,
+                    place+" := "+var_name
+                );
+            }else{return Exp2_ir;} //no need to store the result
+        }else{ //nodes[0] is array entry: Exp LB Exp RB
+            //Process Exp1
+            string Exp1_ir = translate_Exp(nodes[0],"");
+            int lastline_index = Exp1_ir.find_last_of('\n');
+            string array_ir = Exp1_ir.substr(0,lastline_index);
+            string address = Exp1_ir.substr(lastline_index+1);
+
+            if(place!=""){ 
+                return concat_ir(
+                    array_ir,
+                    translate_Exp(nodes[2], address),
+                    place+" := "+address
+                );
+            }else{ //no need to store the result
+                return concat_ir(
+                    array_ir,
+                    translate_Exp(nodes[2], address)
+                );
+            }
+        }
     }else if(children=="Exp PLUS Exp"){
         return arithmetic_ir('+',nodes,place);
     }else if(children=="Exp MINUS Exp"){
@@ -207,7 +231,45 @@ string translate_Exp(node* Exp, string place){
             return place+" := CALL "+function;
         }
     }else if(children=="Exp LB Exp RB"){
-        return ""; //never, because there are no arrays (Assumption 6)
+        node* Exp1 = Exp;
+        do{ //first, iterate to find out the array_name
+            Exp1 = Exp1->children[0];
+            nodes = Exp1->children;
+        }while(expression(Exp1)=="Exp LB Exp RB");
+        string array_name = nodes[0]->value; //here, nodes[0] must be `ID`
+        vector<int> sizes = arrays[array_name];
+
+        Exp1 = Exp;
+        nodes = Exp1->children;
+        int offset = 0;
+        //second, iterate to calculate the offset
+        string ir = "";
+        string _offset = NEW_PLACE;
+        ir += _offset+" := #0\n";
+        for(int k=0;expression(Exp1)=="Exp LB Exp RB";k++){
+            string tp = NEW_PLACE;
+            ir += translate_Exp(nodes[2],tp)+"\n";
+            ir += tp+" := "+tp+" * #"+to_string(sizes[k])+"\n";
+            ir += _offset+" := "+_offset+" + "+tp+"\n";
+            Exp1 = Exp1->children[0];
+            nodes = Exp1->children;
+        }
+
+        string address = NEW_PLACE;
+        ir += _offset+" := "+_offset+" * #4\n";
+        ir += address+" := &"+array_name+" + "+_offset+"\n";
+        if(place==""){
+            /*no need to store the result, return the array entry's address,
+              Exp appears on left of "=", need to assign the array entry with another value
+              for example: a[1][2]=4 */
+            return ir+"*"+address;
+        }else{ //`place` is not empty
+            /*need to store the result in the `place` address
+              Exp appears on right of "=", the array entry's value needs to be assigned to another variable
+              for example: b=a[3][6];
+            */
+            return ir+place+" := *"+address;
+        }
     }else if(children=="Exp DOT ID"){
         return ""; //never, because there are no structures (Assumption 6)
     }else{ //conditional Exp
@@ -228,17 +290,30 @@ string translate_VarDec(node* VarDec){
     string children = expression(VarDec);
     if(children=="ID"){
         return nodes[0]->value;
-    }else{return "";} //[VarDec LB INT RB] no need to implement array (Assumption 6)
+    }else if(children=="VarDec LB INT RB"){
+        int count = 1;
+        vector<int> sizes= {};
+        do{//iterate multi-level array
+            sizes.push_back(count);
+            count *= stoi(nodes[2]->value);
+            VarDec = VarDec->children[0];
+            nodes = VarDec->children;
+        }while(expression(VarDec)=="VarDec LB INT RB");
+        string array_name = nodes[0]->value; //here, nodes[0] must be `ID`
+        arrays.insert({array_name,sizes});
+        return "DEC "+array_name+" "+to_string(count*4); //each int's size is 4 byte
+    }else{return "";} //never
 }
 
 string translate_Dec(node* Dec){
     vector<node*> nodes = Dec->children;
     string children = expression(Dec);
     if(children=="VarDec"){
-        return "";
+        if(expression(nodes[0])=="VarDec LB INT RB"){
+            return translate_VarDec(nodes[0]); //only array declaration needs to be translated
+        }else{return "";}
     }else if(children=="VarDec ASSIGN Exp"){
-        /*In this case, there must be `VarDec->ID`
-          because there is no array (Assumption 6)*/
+        //here, there must be VarDec: ID
         string var_name = nodes[0]->children[0]->value;
         return translate_Exp(nodes[2], var_name);
     }else{return "";} //never
@@ -250,10 +325,9 @@ string translate_DecList(node* DecList){
     if(children=="Dec"){
         return translate_Dec(nodes[0]);
     }else if(children=="Dec COMMA DecList"){
-        return concat_ir(
-            translate_Dec(nodes[0]),
-            translate_DecList(nodes[2])
-        );
+        string ir1 = translate_Dec(nodes[0]);
+        string ir2 = translate_DecList(nodes[2]);
+        return concat_ir(ir1,ir2);
     }else{return "";} //never
 }
 
@@ -265,10 +339,9 @@ string translate_DefList(node* DefList){
     vector<node*> nodes = DefList->children;
     string children = expression(DefList);
     if(children=="Def DefList"){
-        return concat_ir(
-            translate_Def(nodes[0]),
-            translate_DefList(nodes[1])
-        );
+        string ir1 = translate_Def(nodes[0]);
+        string ir2 = translate_DefList(nodes[1]);
+        return concat_ir(ir1,ir2);
     }else if(children=="Def"){
         return translate_Def(nodes[0]);
     }else{return "";} //never
@@ -292,37 +365,34 @@ string translate_Stmt(node* Stmt){
     }else if(children=="IF LP Exp RP Stmt"){
         string lb1 = NEW_LABEL;
         string lb2 = NEW_LABEL;
-        return concat_ir(
-            translate_cond_Exp(nodes[2],lb1,lb2),
-            "LABEL "+lb1+" :",
-            translate_Stmt(nodes[4]),
-            "LABEL "+lb2+" :"
-        );
+        string ir1 = translate_cond_Exp(nodes[2],lb1,lb2);
+        string ir2 = "LABEL "+lb1+" :";
+        string ir3 = translate_Stmt(nodes[4]);
+        string ir4 = "LABEL "+lb2+" :";
+        return concat_ir(ir1,ir2,ir3,ir4);
     }else if(children=="IF LP Exp RP Stmt ELSE Stmt"){
         string lb1 = NEW_LABEL;
         string lb2 = NEW_LABEL;
         string lb3 = NEW_LABEL;
-        return concat_ir(
-            translate_cond_Exp(nodes[2],lb1,lb2),
-            "LABEL "+lb1+" :",
-            translate_Stmt(nodes[4]),
-            "GOTO "+lb3,
-            "LABEL "+lb2+" :",
-            translate_Stmt(nodes[6]),
-            "LABEL "+lb3+" :"
-        );
+        string ir1 = translate_cond_Exp(nodes[2],lb1,lb2);
+        string ir2 = "LABEL "+lb1+" :";
+        string ir3 = translate_Stmt(nodes[4]);
+        string ir4 = "GOTO "+lb3;
+        string ir5 = "LABEL "+lb2+" :";
+        string ir6 = translate_Stmt(nodes[6]);
+        string ir7 = "LABEL "+lb3+" :";
+        return concat_ir(ir1,ir2,ir3,ir4,ir5,ir6,ir7);
     }else if(children=="WHILE LP Exp RP Stmt"){
         string lb1 = NEW_LABEL;
         string lb2 = NEW_LABEL;
         string lb3 = NEW_LABEL;
-        return concat_ir(
-            "LABEL "+lb1+" :",
-            translate_cond_Exp(nodes[2],lb2,lb3),
-            "LABEL "+lb2+" :",
-            translate_Stmt(nodes[4]),
-            "GOTO "+lb1,
-            "LABEL "+lb3+" :"
-        );
+        string ir1 = "LABEL "+lb1+" :";
+        string ir2 = translate_cond_Exp(nodes[2],lb2,lb3);
+        string ir3 = "LABEL "+lb2+" :";
+        string ir4 = translate_Stmt(nodes[4]);
+        string ir5 = "GOTO "+lb1;
+        string ir6 = "LABEL "+lb3+" :";
+        return concat_ir(ir1,ir2,ir3,ir4,ir5,ir6);
     }else if(children=="CompSt"){
         return translate_CompSt(nodes[0]);
     }else if(children=="FOR LP Def Exp SEMI Exp RP Stmt"){
@@ -330,57 +400,53 @@ string translate_Stmt(node* Stmt){
         string lb2 = NEW_LABEL;
         string lb3 = NEW_LABEL;
         //for(...;...;...){...}
-        return concat_ir(
-            translate_Def(nodes[2]),
-            "LABEL "+lb1+" :",
-            translate_cond_Exp(nodes[3],lb2,lb3),
-            "LABEL "+lb2+" :",
-            translate_Stmt(nodes[7]),
-            translate_Exp(nodes[5],""), //no need to store the result
-            "GOTO "+lb1,
-            "LABEL "+lb3+" :"   
-        );
+        string ir1 = translate_Def(nodes[2]);
+        string ir2 = "LABEL "+lb1+" :";
+        string ir3 = translate_cond_Exp(nodes[3],lb2,lb3);
+        string ir4 = "LABEL "+lb2+" :";
+        string ir5 = translate_Stmt(nodes[7]);
+        string ir6 = translate_Exp(nodes[5],""); //no need to store the result
+        string ir7 = "GOTO "+lb1;
+        string ir8 = "LABEL "+lb3+" :";
+        return concat_ir(ir1,ir2,ir3,ir4,ir5,ir6,ir7,ir8);
     }else if(children=="FOR LP Def Exp SEMI RP Stmt"){
         string lb1 = NEW_LABEL;
         string lb2 = NEW_LABEL;
         string lb3 = NEW_LABEL;
         //for(...;...;){...}
-        return concat_ir(
-            translate_Def(nodes[2]),
-            "LABEL "+lb1+" :",
-            translate_cond_Exp(nodes[3],lb2,lb3),
-            "LABEL "+lb2+" :",
-            translate_Stmt(nodes[6]),
-            "GOTO "+lb1,
-            "LABEL "+lb3+" :"   
-        );
+        string ir1 = translate_Def(nodes[2]);
+        string ir2 = "LABEL "+lb1+" :";
+        string ir3 = translate_cond_Exp(nodes[3],lb2,lb3);
+        string ir4 = "LABEL "+lb2+" :";
+        string ir5 = translate_Stmt(nodes[6]);
+        string ir6 = "GOTO "+lb1;
+        string ir7 = "LABEL "+lb3+" :";
+        return concat_ir(ir1,ir2,ir3,ir4,ir5,ir6,ir7);
     }else if(children=="FOR LP SEMI Exp SEMI Exp RP Stmt"){
         string lb1 = NEW_LABEL;
         string lb2 = NEW_LABEL;
         string lb3 = NEW_LABEL;
         //for(;...;...){...}
-        return concat_ir(
-            "LABEL "+lb1+" :",
-            translate_cond_Exp(nodes[3],lb2,lb3),
-            "LABEL "+lb2+" :",
-            translate_Stmt(nodes[7]),
-            translate_Exp(nodes[5],""), //no need to store the result
-            "GOTO "+lb1,
-            "LABEL "+lb3+" :"   
-        );
+        string ir1 = "LABEL "+lb1+" :";
+        string ir2 = translate_cond_Exp(nodes[3],lb2,lb3);
+        string ir3 = "LABEL "+lb2+" :";
+        string ir4 = translate_Stmt(nodes[7]);
+        string ir5 = translate_Exp(nodes[5],""); //no need to store the result
+        string ir6 = "GOTO "+lb1;
+        string ir7 = "LABEL "+lb3+" :";
+        return concat_ir(ir1,ir2,ir3,ir4,ir5,ir6,ir7);
     }else if(children=="FOR LP SEMI Exp SEMI RP Stmt"){
         string lb1 = NEW_LABEL;
         string lb2 = NEW_LABEL;
         string lb3 = NEW_LABEL;
         //for(;...;){...}
-        return concat_ir(
-            "LABEL "+lb1+" :",
-            translate_cond_Exp(nodes[3],lb2,lb3),
-            "LABEL "+lb2+" :",
-            translate_Stmt(nodes[6]),
-            "GOTO "+lb1,
-            "LABEL "+lb3+" :"   
-        );
+        string ir1 = "LABEL "+lb1+" :";
+        string ir2 = translate_cond_Exp(nodes[3],lb2,lb3);
+        string ir3 = "LABEL "+lb2+" :";
+        string ir4 = translate_Stmt(nodes[6]);
+        string ir5 = "GOTO "+lb1;
+        string ir6 = "LABEL "+lb3+" :";
+        return concat_ir(ir1,ir2,ir3,ir4,ir5,ir6);
     }else{return "";} //never
 }
 
@@ -388,10 +454,9 @@ string translate_StmtList(node* StmtList){
     vector<node*> nodes = StmtList->children;
     string children = expression(StmtList);
     if(children=="Stmt StmtList"){
-        return concat_ir(
-            translate_Stmt(nodes[0]),
-            translate_StmtList(nodes[1])
-        );
+        string ir1 = translate_Stmt(nodes[0]);
+        string ir2 = translate_StmtList(nodes[1]);
+        return concat_ir(ir1,ir2);
     }else if(children=="Stmt"){
         return translate_Stmt(nodes[0]);
     }else{return "";} //never
@@ -401,10 +466,9 @@ string translate_CompSt(node* CompSt){
     vector<node*> nodes = CompSt->children;
     string children = expression(CompSt);
     if(children=="LC DefList StmtList RC"){
-        return concat_ir(
-            translate_DefList(nodes[1]),
-            translate_StmtList(nodes[2])
-        );
+        string ir1 = translate_DefList(nodes[1]);
+        string ir2 = translate_StmtList(nodes[2]);
+        return concat_ir(ir1,ir2);
     }else if(children=="LC StmtList RC"){
         return translate_StmtList(nodes[1]);
     }else if(children=="LC DefList RC"){
@@ -418,10 +482,9 @@ string translate_ExtDecList(node* ExtDecList){
     if(children=="VarDec"){
         return translate_VarDec(nodes[0]);
     }else if(children=="VarDec COMMA ExtDecList"){
-        return concat_ir(
-            translate_VarDec(nodes[0]),
-            translate_ExtDecList(nodes[2])
-        );
+        string ir1 = translate_VarDec(nodes[0]);
+        string ir2 = translate_ExtDecList(nodes[2]);
+        return concat_ir(ir1,ir2);
     }else{return "";} //never
 }
 
@@ -433,12 +496,11 @@ string translate_ParamDec(node* ParamDec){
 
 string translate_VarList(node* VarList){
     vector<node*> nodes = VarList->children;
-    return concat_ir(
-        translate_ParamDec(nodes[0]),
-        expression(VarList) == "ParamDec COMMA VarList" ?
-        translate_VarList(nodes[2]) :
-        "" //ParamDec
-    );
+    string ir1 = translate_ParamDec(nodes[0]);
+    string ir2 = expression(VarList) == "ParamDec COMMA VarList" ?
+                 translate_VarList(nodes[2]) :
+                 ""; //ParamDec
+    return concat_ir(ir1,ir2);
 }
 
 string translate_FunDec(node* FunDec){
@@ -463,10 +525,9 @@ string translate_ExtDef(node* ExtDef){
     if(children=="Specifier ExtDecList SEMI"){
         return translate_ExtDecList(nodes[1]);
     }else if(children=="Specifier FunDec CompSt"){
-        return concat_ir(
-            translate_FunDec(nodes[1]),
-            translate_CompSt(nodes[2])+"\n"
-        );
+        string ir1 = translate_FunDec(nodes[1]);
+        string ir2 = translate_CompSt(nodes[2])+"\n"; //add newline to separate different functions
+        return concat_ir(ir1,ir2);
     }else{return "";} //Specifier SEMI
 }
 
@@ -475,9 +536,8 @@ string translate_ExtDefList(node* ExtDefList){
     if(nodes.empty()){
         return "";
     }else{ //ExtDef ExtDefList
-        return concat_ir(
-            translate_ExtDef(nodes[0]),
-            translate_ExtDefList(nodes[1])
-        );
+        string ir1 = translate_ExtDef(nodes[0]);
+        string ir2 = translate_ExtDefList(nodes[1]);
+        return concat_ir(ir1,ir2);
     }
 }

@@ -150,3 +150,65 @@ if(children=="FOR LP Def Exp SEMI Exp RP Stmt"){
 }
 ```
 
+
+
+### Multi-dimension Array
+
+#### Data Structure
+
+The arrays' information are stored in a map(like symbol table), which stores the array size of each level
+
+```cpp
+unordered_map<string,vector<int>> arrays = {}; //array_name -> {size1,size2,...}
+```
+
+For example: 
+
+- If `a[6]` is declared, then the entry is `a->{1}`
+- If `b[6][8]` is declared, then the entry is `b->{1,8}`
+- If `c[6][8][7]` is declared, then the entry is `c->{1,7,7*8}`, i.e:`c->{1,7,56}`
+- If `d[6][8][7][3]` is declared, then the entry is `d->{1,3,3*7,3*7*8}`, i.e:`d->{1,3,21,168}`
+
+By querying this map, we can compute the offset of each entry conveniently
+
+
+
+#### Array Declaration
+
+The declaration of array appears in the production `VarDec: VarDec LB INT RB`
+
+We can get the size of each dimension by iterating the syntax tree, then store the array information into the map, and generate the `DEC` IR code: `DEC {array_name} 4*{entry_count}`
+
+```cpp
+if(children=="VarDec LB INT RB"){
+    int count = 1;
+    vector<int> sizes= {};
+    do{//iterate multi-level array
+        sizes.push_back(count);
+        count *= stoi(nodes[2]->value);
+        VarDec = VarDec->children[0];
+        nodes = VarDec->children;
+    }while(expression(VarDec)=="VarDec LB INT RB");
+    string array_name = nodes[0]->value; //here, nodes[0] must be `ID`
+    arrays.insert({array_name,sizes}); //store the array information into the map
+    return "DEC "+array_name+" "+to_string(count*4); //each int's size is 4 byte
+}
+```
+
+
+
+#### Array Access
+
+The access of the array appears in the production `Exp: Exp LB Exp RB`
+
+We can get the index of each dimension by iterating the syntax tree, then compute the offset using the following formula
+$$
+\text{offset} = \sum_{i=1}^n \text{size}_i · \text{index}_i
+$$
+ Then we can get the array access IR below
+
+```
+address := &{array_name} + offset
+place := *address
+```
+

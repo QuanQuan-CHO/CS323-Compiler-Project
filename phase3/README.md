@@ -202,10 +202,12 @@ if(children=="VarDec LB INT RB"){
 The access of the array appears in the production `Exp: Exp LB Exp RB`
 
 We can get the index of each dimension by iterating the syntax tree, then compute the offset using the following formula
+
 $$
 \text{offset} = \sum_{i=1}^n \text{size}_i · \text{index}_i
 $$
- Then we can get the array access IR below
+
+Then we can get the array access IR below
 
 ```
 address := &{array_name} + offset

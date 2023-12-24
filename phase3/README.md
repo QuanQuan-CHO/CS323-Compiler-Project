@@ -57,6 +57,38 @@ int label_count = 1;
 
 
 
+## IR Optimization
+
+We apply IR optimization to `translate_Exp()` function, the optimization is enabled by default.
+
+However, in some cases, optimization will cause error, so we should disable it when invoking the function
+
+```cpp
+string translate_Exp(node* Exp, string* place, bool optimize=true);
+```
+
+The key idea is eliminating the IR only for production `Exp: INT|ID|CHAR|FLOAT`
+
+So it is extremely easy to implement, the core code is **just 5 lines** as shown below
+
+```cpp
+string translate_Exp(node* Exp, string* place, bool optimize){
+    if(nodes.size()==1){ //Exp:INT|ID|CHAR|FLOAT
+        if(optimize){
+            *place = nodes[0]->value; //value of INT|ID|CHAR|FLOAT
+            return ""; //No need to generate IR for constant
+        }else{return *place+" := "+nodes[0]->value;} //without optimization, need to generate IR for constant
+    }
+    ...
+}
+```
+
+Although it is easy, it can **eliminate nearly half redundant IR instructions** according to the test, so it is a very cost-effective method for IR optimization
+
+
+
+
+
 ## Extra Feature
 
 ### Compound Assignment Operator
@@ -143,7 +175,7 @@ if(children=="FOR LP Def Exp SEMI Exp RP Stmt"){
     string ir3 = translate_cond_Exp(nodes[3],lb2,lb3);
     string ir4 = "LABEL "+lb2+" :";
     string ir5 = translate_Stmt(nodes[7]);
-    string ir6 = translate_Exp(nodes[5],""); //no need to store the result
+    string ir6 = translate_Exp(nodes[5],nullptr); //no need to store the result
     string ir7 = "GOTO "+lb1;
     string ir8 = "LABEL "+lb3+" :";
     return concat_ir(ir1,ir2,ir3,ir4,ir5,ir6,ir7,ir8);
@@ -185,7 +217,7 @@ if(children=="VarDec LB INT RB"){
     vector<int> sizes= {};
     do{//iterate multi-level array
         sizes.push_back(count);
-        count *= stoi(nodes[2]->value);
+        count *= stoi(nodes[2]->value.substr(1)); //delete the first '#' in INT
         VarDec = VarDec->children[0];
         nodes = VarDec->children;
     }while(expression(VarDec)=="VarDec LB INT RB");

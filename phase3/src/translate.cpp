@@ -1,4 +1,4 @@
-#define NEW_PLACE "t"+to_string(place_count++)
+#define NEW_PLACE "$"+to_string(place_count++)
 #define NEW_LABEL "label"+to_string(label_count++)
 
 #include <iostream>
@@ -63,7 +63,7 @@ string concat_ir(IRs... irs){
     return res;
 }
 
-string translate_Exp(node* Exp, string* place);
+string translate_Exp(node* Exp, string* place, bool need_optimization=true);
 
 //For arithmetic Exp: "Exp PLUS/MINUS/MUL/DIV Exp"
 string arithmetic_ir(char op, vector<node*> nodes, string place){
@@ -136,17 +136,22 @@ string translate_Args(node* Args, vector<string> &arg_list){
 }
 
 /*[place]: the place to store the result of Exp
-           place==nullptr means that the Exp result needn't to store */
-string translate_Exp(node* Exp, string* place){
+           place==nullptr means that the Exp result needn't to store
+  [need_optimization]: whether need to optimize IR, default is true
+*/
+string translate_Exp(node* Exp, string* place, bool need_optimization){
     vector<node*> nodes = Exp->children;
     string children = expression(Exp);
     if(nodes.size()==1){ //INT ID CHAR FLOAT
-        return *place+" := "+nodes[0]->value;
+        if(need_optimization){
+            *place = nodes[0]->value;
+            return ""; //IR optimization: no need to generate IR for constant
+        }else{return *place+" := "+nodes[0]->value;}
     }else if(children=="Exp ASSIGN Exp"){
         if(expression(nodes[0])=="ID"){
             string var_name = nodes[0]->children[0]->value;
-            string Exp2_ir = translate_Exp(nodes[2],&var_name);
-            if(place!=nullptr){ 
+            string Exp2_ir = translate_Exp(nodes[2],&var_name,false); //shouldn't optimize IR
+            if(place!=nullptr){
                 return concat_ir(
                     Exp2_ir,
                     *place+" := "+var_name
@@ -160,13 +165,14 @@ string translate_Exp(node* Exp, string* place){
             string address = Exp1_ir.substr(lastline_index+1);
 
             if(place!=nullptr){
-                string ir2 = translate_Exp(nodes[2], &address);
+                cout << "-------" << address << endl;
+                string ir2 = translate_Exp(nodes[2], &address, false); //shouldn't optimize IR
                 string ir3 = *place+" := "+address;
                 return concat_ir(array_ir,ir2,ir3);
             }else{ //no need to store the result
                 return concat_ir(
                     array_ir,
-                    translate_Exp(nodes[2], &address)
+                    translate_Exp(nodes[2], &address ,false) //shouldn't optimize IR
                 );
             }
         }
@@ -242,10 +248,14 @@ string translate_Exp(node* Exp, string* place){
         string _offset = NEW_PLACE;
         ir += _offset+" := #0\n";
         for(int k=0;expression(Exp1)=="Exp LB Exp RB";k++){
-            string tp = NEW_PLACE;
-            ir += translate_Exp(nodes[2],&tp)+"\n";
-            ir += tp+" := "+tp+" * #"+to_string(sizes[k])+"\n";
-            ir += _offset+" := "+_offset+" + "+tp+"\n";
+            string tp1 = NEW_PLACE;
+            string Exp2_ir = translate_Exp(nodes[2],&tp1);
+            if(Exp2_ir!=""){
+                ir += Exp2_ir+"\n";
+            }
+            string tp2 = NEW_PLACE;
+            ir += tp2+" := "+tp1+" * #"+to_string(sizes[k])+"\n";
+            ir += _offset+" := "+_offset+" + "+tp2+"\n";
             Exp1 = Exp1->children[0];
             nodes = Exp1->children;
         }
@@ -310,7 +320,7 @@ string translate_Dec(node* Dec){
     }else if(children=="VarDec ASSIGN Exp"){
         //here, there must be VarDec: ID
         string var_name = nodes[0]->children[0]->value;
-        return translate_Exp(nodes[2], &var_name);
+        return translate_Exp(nodes[2], &var_name, false); //shouldn't optimize IR
     }else{return "";} //never
 }
 

@@ -139,12 +139,8 @@ string translate_Args(node* Args, vector<string> &arg_list){
 string translate_Exp(node* Exp, string place){
     vector<node*> nodes = Exp->children;
     string children = expression(Exp);
-    if(children=="INT"){
-        return place+" := #"+nodes[0]->value;
-    }else if(children=="ID"){
+    if(nodes.size()==1){ //INT ID CHAR FLOAT
         return place+" := "+nodes[0]->value;
-    }else if(children=="CHAR" || children=="FLOAT"){
-        return ""; //never, because there is only INT primitive type (Assumption 2)
     }else if(children=="Exp ASSIGN Exp"){
         if(expression(nodes[0])=="ID"){
             string var_name = nodes[0]->children[0]->value;
@@ -295,7 +291,7 @@ string translate_VarDec(node* VarDec){
         vector<int> sizes= {};
         do{//iterate multi-level array
             sizes.push_back(count);
-            count *= stoi(nodes[2]->value);
+            count *= stoi(nodes[2]->value.substr(1)); //delete the first '#' in INT
             VarDec = VarDec->children[0];
             nodes = VarDec->children;
         }while(expression(VarDec)=="VarDec LB INT RB");

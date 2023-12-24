@@ -19,7 +19,7 @@
 
     //convert `Exp[++|--]` to `Exp = Exp [+-] 1`
     node* convert_self_assign(node* Exp, string _operator){ //`operator` is an internal keyword in C++
-        node* one = new node("Exp", vector{new node("INT", "1")});
+        node* one = new node("Exp", vector{new node("INT", "#1")});
         return convert_assign(Exp, one, _operator);
     }
     

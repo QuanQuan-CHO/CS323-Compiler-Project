@@ -46,8 +46,12 @@ for {yylval=new node("FOR"); return FOR;}
 "{" {yylval=new node("LC"); return LC;}
 "}" {yylval=new node("RC"); return RC;}
 ({valid_decimal_int})\.[0-9]+ {yylval=new node("FLOAT"); return FLOAT;}
-{valid_decimal_int} {yylval=new node("INT",yytext); return INT; /* not include minus number */}
-0[xX](0|[1-9a-fA-F][0-9a-fA-F]*) {yylval=new node("INT",to_string(strtol(yytext,&yytext,16))); return INT;} /* valid_hex_int should be converted to decimal form */
+{valid_decimal_int} { // not include minus number
+    string text = yytext;
+    yylval=new node("INT","#"+text); //constant in IR
+    return INT;
+}
+0[xX](0|[1-9a-fA-F][0-9a-fA-F]*) {yylval=new node("INT","#"+to_string(strtol(yytext,&yytext,16))); return INT;} /* valid_hex_int should be converted to decimal form */
 {id} {yylval=new node("ID",yytext); return ID;}
 "." {yylval=new node("DOT"); return DOT;}
 \n {}

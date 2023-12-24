@@ -158,12 +158,10 @@ string translate_Exp(node* Exp, string* place){
             string array_ir = Exp1_ir.substr(0,lastline_index);
             string address = Exp1_ir.substr(lastline_index+1);
 
-            if(place!=nullptr){ 
-                return concat_ir(
-                    array_ir,
-                    translate_Exp(nodes[2], &address),
-                    *place+" := "+address
-                );
+            if(place!=nullptr){
+                string ir2 = translate_Exp(nodes[2], &address);
+                string ir3 = *place+" := "+address;
+                return concat_ir(array_ir,ir2,ir3);
             }else{ //no need to store the result
                 return concat_ir(
                     array_ir,
@@ -181,10 +179,9 @@ string translate_Exp(node* Exp, string* place){
         return arithmetic_ir('/',nodes,*place);
     }else if(children=="MINUS Exp"){
         string tp = NEW_PLACE;
-        return concat_ir(
-            translate_Exp(nodes[1],&tp),
-            *place+" := #0 - "+tp
-        );
+        string ir1 = translate_Exp(nodes[1],&tp);
+        string ir2 = *place+" := #0 - "+tp;
+        return concat_ir(ir1,ir2);
     }else if(children=="LP Exp RP"){
         return translate_Exp(nodes[1],place);
     }else if(children=="ID LP Args RP"){
@@ -194,10 +191,9 @@ string translate_Exp(node* Exp, string* place){
             nodes[2]=Args->children[0]; //replace the `Args` with `Exp`
             //The children now becomes `ID LP Exp RP`
             string tp = NEW_PLACE;
-            return concat_ir(
-                translate_Exp(nodes[2],&tp),
-                "WRITE "+tp
-            );
+            string ir1 = translate_Exp(nodes[2],&tp);
+            string ir2 = "WRITE "+tp;
+            return concat_ir(ir1,ir2);
         }else{
             if(place==nullptr){
                 /*no need to store the result in .spl source code,
@@ -356,10 +352,9 @@ string translate_Stmt(node* Stmt){
         return translate_Exp(nodes[0],nullptr);
     }else if(children=="RETURN Exp SEMI"){
         string tp = NEW_PLACE;
-        return concat_ir(
-            translate_Exp(nodes[1],&tp),
-            "RETURN "+tp
-        );
+        string ir1 = translate_Exp(nodes[1],&tp);
+        string ir2 = "RETURN "+tp;
+        return concat_ir(ir1,ir2);
     }else if(children=="IF LP Exp RP Stmt"){
         string lb1 = NEW_LABEL;
         string lb2 = NEW_LABEL;

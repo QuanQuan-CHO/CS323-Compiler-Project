@@ -18,26 +18,6 @@ int label_count = 1;
 */
 unordered_map<string,vector<int>> arrays = {};
 
-//for debug
-string shift(string str){
-    stringstream in(str);
-    stringstream out;
-    string line;
-    while(getline(in,line)){
-        out << "  " << line << "\n";
-    }
-    return out.str();
-}
-
-//for debug
-string traverse(node* root){
-    string res = root->type+"\n";
-    for(node* child: root->children){
-        res += shift(traverse(child));
-    }
-    return res;
-}
-
 //return expression of children nodes
 //example: "Exp ASSIGN Exp"
 string expression(node* n){
@@ -63,7 +43,7 @@ string concat_ir(IRs... irs){
     return res;
 }
 
-string translate_Exp(node* Exp, string* place, bool need_optimization=true);
+string translate_Exp(node* Exp, string* place, bool optimize=true);
 
 //For arithmetic Exp: "Exp PLUS/MINUS/MUL/DIV Exp"
 string arithmetic_ir(char op, vector<node*> nodes, string place){
@@ -137,13 +117,13 @@ string translate_Args(node* Args, vector<string> &arg_list){
 
 /*[place]: the place to store the result of Exp
            place==nullptr means that the Exp result needn't to store
-  [need_optimization]: whether need to optimize IR, default is true
+  [optimize]: whether need to optimize IR, default is true
 */
-string translate_Exp(node* Exp, string* place, bool need_optimization){
+string translate_Exp(node* Exp, string* place, bool optimize){
     vector<node*> nodes = Exp->children;
     string children = expression(Exp);
     if(nodes.size()==1){ //INT ID CHAR FLOAT
-        if(need_optimization){
+        if(optimize){
             *place = nodes[0]->value;
             return ""; //IR optimization: no need to generate IR for constant
         }else{return *place+" := "+nodes[0]->value;}

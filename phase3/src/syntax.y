@@ -186,7 +186,6 @@ int main(int argc, char** argv){
             return 1;
         }
         yyparse();
-        cout << traverse(root) << endl;
 
         //write .ir file
         string spl_path = argv[1];

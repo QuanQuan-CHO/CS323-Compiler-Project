@@ -123,8 +123,9 @@ string translate_Args(node* Args, vector<string> &arg_list){
     string children = expression(Args);
     if(children=="Exp"){
         string tp = NEW_PLACE;
+        string ir = translate_Exp(nodes[0],&tp);
         arg_list.push_back(tp);
-        return translate_Exp(nodes[0],&tp);
+        return ir;
     }else if(children=="Exp COMMA Args"){
         string tp = NEW_PLACE;
         string ir1 = translate_Exp(nodes[0],&tp);
@@ -208,7 +209,7 @@ string translate_Exp(node* Exp, string* place){
             for(int i=arg_list.size()-1;i>=0;i--){
                 code2 += "ARG "+arg_list[i]+"\n";
             }
-            return code1+"\n"+code2+*place+" := CALL "+function;
+            return concat_ir(code1, code2+*place+" := CALL "+function);
         }
     }else if(children=="ID LP RP"){
         string function = nodes[0]->value;

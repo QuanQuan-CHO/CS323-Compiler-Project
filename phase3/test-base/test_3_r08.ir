@@ -1,145 +1,96 @@
 FUNCTION main :
 READ year
 READ month
-t1 := year
-t5 := year
-t6 := #100
-t3 := t5 / t6
-t4 := #100
-t2 := t3 * t4
-IF t1 == t2 GOTO label1
+$3 := year / #100
+$2 := $3 * #100
+IF year == $2 GOTO label1
 GOTO label2
 LABEL label1 :
-t7 := year
-t11 := year
-t12 := #400
-t9 := t11 / t12
-t10 := #400
-t8 := t9 * t10
-IF t7 == t8 GOTO label4
+$9 := year / #400
+$8 := $9 * #400
+IF year == $8 GOTO label4
 GOTO label5
 LABEL label4 :
-t13 := month
-t14 := #2
-IF t13 == t14 GOTO label7
+IF month == #2 GOTO label7
 GOTO label8
 LABEL label7 :
-t15 := #29
-WRITE t15
+WRITE #29
 GOTO label9
 LABEL label8 :
-t16 := month
-t20 := month
-t21 := #2
-t18 := t20 / t21
-t19 := #2
-t17 := t18 * t19
-IF t16 == t17 GOTO label10
+$18 := month / #2
+$17 := $18 * #2
+IF month == $17 GOTO label10
 GOTO label11
 LABEL label10 :
-t22 := #30
-WRITE t22
+WRITE #30
 GOTO label12
 LABEL label11 :
-t23 := #31
-WRITE t23
+WRITE #31
 LABEL label12 :
 LABEL label9 :
 GOTO label6
 LABEL label5 :
-t24 := month
-t25 := #2
-IF t24 == t25 GOTO label13
+IF month == #2 GOTO label13
 GOTO label14
 LABEL label13 :
-t26 := #28
-WRITE t26
+WRITE #28
 GOTO label15
 LABEL label14 :
-t27 := month
-t31 := month
-t32 := #2
-t29 := t31 / t32
-t30 := #2
-t28 := t29 * t30
-IF t27 == t28 GOTO label16
+$29 := month / #2
+$28 := $29 * #2
+IF month == $28 GOTO label16
 GOTO label17
 LABEL label16 :
-t33 := #30
-WRITE t33
+WRITE #30
 GOTO label18
 LABEL label17 :
-t34 := #31
-WRITE t34
+WRITE #31
 LABEL label18 :
 LABEL label15 :
 LABEL label6 :
 GOTO label3
 LABEL label2 :
-t35 := year
-t39 := year
-t40 := #4
-t37 := t39 / t40
-t38 := #4
-t36 := t37 * t38
-IF t35 == t36 GOTO label19
+$37 := year / #4
+$36 := $37 * #4
+IF year == $36 GOTO label19
 GOTO label20
 LABEL label19 :
-t41 := month
-t42 := #2
-IF t41 == t42 GOTO label22
+IF month == #2 GOTO label22
 GOTO label23
 LABEL label22 :
-t43 := #29
-WRITE t43
+WRITE #29
 GOTO label24
 LABEL label23 :
-t44 := month
-t48 := month
-t49 := #2
-t46 := t48 / t49
-t47 := #2
-t45 := t46 * t47
-IF t44 == t45 GOTO label25
+$46 := month / #2
+$45 := $46 * #2
+IF month == $45 GOTO label25
 GOTO label26
 LABEL label25 :
-t50 := #30
-WRITE t50
+WRITE #30
 GOTO label27
 LABEL label26 :
-t51 := #31
-WRITE t51
+WRITE #31
 LABEL label27 :
 LABEL label24 :
 GOTO label21
 LABEL label20 :
-t52 := month
-t53 := #2
-IF t52 == t53 GOTO label28
+IF month == #2 GOTO label28
 GOTO label29
 LABEL label28 :
-t54 := #28
-WRITE t54
+WRITE #28
 GOTO label30
 LABEL label29 :
-t55 := month
-t59 := month
-t60 := #2
-t57 := t59 / t60
-t58 := #2
-t56 := t57 * t58
-IF t55 == t56 GOTO label31
+$57 := month / #2
+$56 := $57 * #2
+IF month == $56 GOTO label31
 GOTO label32
 LABEL label31 :
-t61 := #30
-WRITE t61
+WRITE #30
 GOTO label33
 LABEL label32 :
-t62 := #31
-WRITE t62
+WRITE #31
 LABEL label33 :
 LABEL label30 :
 LABEL label21 :
 LABEL label3 :
-t63 := #0
-RETURN t63
+RETURN #0

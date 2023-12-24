@@ -2,90 +2,61 @@ FUNCTION for1 :
 sum1 := #0
 a := #1
 LABEL label1 :
-t1 := a
-t2 := #10
-IF t1 <= t2 GOTO label2
+IF a <= #10 GOTO label2
 GOTO label3
 LABEL label2 :
-t3 := sum1
-t4 := a
-sum1 := t3 + t4
-t5 := a
-t6 := #1
-a := t5 + t6
+sum1 := sum1 + a
+a := a + #1
 GOTO label1
 LABEL label3 :
-t7 := sum1
-RETURN t7
+RETURN sum1
 
 FUNCTION for2 :
 sum2 := #0
 b := #1
 LABEL label4 :
-t8 := b
-t9 := #10
-IF t8 <= t9 GOTO label5
+IF b <= #10 GOTO label5
 GOTO label6
 LABEL label5 :
-t10 := sum2
-t11 := b
-sum2 := t10 + t11
-t12 := b
-t13 := #1
-b := t12 + t13
+sum2 := sum2 + b
+b := b + #1
 GOTO label4
 LABEL label6 :
-t14 := sum2
-RETURN t14
+RETURN sum2
 
 FUNCTION for3 :
 sum3 := #0
 c := #1
 LABEL label7 :
-t15 := c
-t16 := #10
-IF t15 <= t16 GOTO label8
+IF c <= #10 GOTO label8
 GOTO label9
 LABEL label8 :
-t17 := sum3
-t18 := c
-sum3 := t17 + t18
-t19 := c
-t20 := #1
-c := t19 + t20
+sum3 := sum3 + c
+c := c + #1
 GOTO label7
 LABEL label9 :
-t21 := sum3
-RETURN t21
+RETURN sum3
 
 FUNCTION for4 :
 sum4 := #0
 d := #1
 LABEL label10 :
-t22 := d
-t23 := #10
-IF t22 <= t23 GOTO label11
+IF d <= #10 GOTO label11
 GOTO label12
 LABEL label11 :
-t24 := sum4
-t25 := d
-sum4 := t24 + t25
-t26 := d
-t27 := #1
-d := t26 + t27
+sum4 := sum4 + d
+d := d + #1
 GOTO label10
 LABEL label12 :
-t28 := sum4
-RETURN t28
+RETURN sum4
 
 FUNCTION main :
-t29 := CALL for1
-WRITE t29
-t30 := CALL for2
-WRITE t30
-t31 := CALL for3
-WRITE t31
-t32 := CALL for4
-WRITE t32
-t33 := #0
-RETURN t33
+$29 := CALL for1
+WRITE $29
+$30 := CALL for2
+WRITE $30
+$31 := CALL for3
+WRITE $31
+$32 := CALL for4
+WRITE $32
+RETURN #0

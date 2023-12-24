@@ -3,61 +3,37 @@ PARAM n
 PARAM p1
 PARAM p2
 PARAM p3
-t1 := n
-t2 := #1
-IF t1 == t2 GOTO label1
+IF n == #1 GOTO label1
 GOTO label2
 LABEL label1 :
-t6 := p1
-t7 := #1000000
-t4 := t6 * t7
-t5 := p3
-t3 := t4 + t5
-WRITE t3
+$4 := p1 * #1000000
+$3 := $4 + p3
+WRITE $3
 GOTO label3
 LABEL label2 :
-t10 := n
-t11 := #1
-t9 := t10 - t11
-t12 := p1
-t13 := p3
-t14 := p2
-ARG t14
-ARG t13
-ARG t12
-ARG t9
-t8 := CALL hanoi
-t18 := p1
-t19 := #1000000
-t16 := t18 * t19
-t17 := p3
-t15 := t16 + t17
-WRITE t15
-t22 := n
-t23 := #1
-t21 := t22 - t23
-t24 := p2
-t25 := p1
-t26 := p3
-ARG t26
-ARG t25
-ARG t24
-ARG t21
-t20 := CALL hanoi
+$9 := n - #1
+ARG p2
+ARG p3
+ARG p1
+ARG $9
+$8 := CALL hanoi
+$16 := p1 * #1000000
+$15 := $16 + p3
+WRITE $15
+$21 := n - #1
+ARG p3
+ARG p1
+ARG p2
+ARG $21
+$20 := CALL hanoi
 LABEL label3 :
-t27 := #0
-RETURN t27
+RETURN #0
 
 FUNCTION main :
 sum := #3
-t29 := sum
-t30 := #1
-t31 := #2
-t32 := #3
-ARG t32
-ARG t31
-ARG t30
-ARG t29
-t28 := CALL hanoi
-t33 := #0
-RETURN t33
+ARG #3
+ARG #2
+ARG #1
+ARG sum
+$28 := CALL hanoi
+RETURN #0

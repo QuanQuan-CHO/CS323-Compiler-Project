@@ -1,71 +1,44 @@
 FUNCTION self_plus :
-t1 := #1
-a := #0 - t1
-t2 := a
-t3 := #1
-a := t2 + t3
-t4 := a
-WRITE t4
-t5 := #0
-RETURN t5
+a := #0 - #1
+a := a + #1
+WRITE a
+RETURN #0
 
 FUNCTION self_minus :
 b := #1
-t6 := b
-t7 := #1
-b := t6 - t7
-t8 := b
-WRITE t8
-t9 := #0
-RETURN t9
+b := b - #1
+WRITE b
+RETURN #0
 
 FUNCTION plus_assign :
-t10 := #6
-c := #0 - t10
-t11 := c
-t12 := #6
-c := t11 + t12
-t13 := c
-WRITE t13
-t14 := #0
-RETURN t14
+c := #0 - #6
+c := c + #6
+WRITE c
+RETURN #0
 
 FUNCTION minus_assign :
 d := #7
-t15 := d
-t16 := #7
-d := t15 - t16
-t17 := d
-WRITE t17
-t18 := #0
-RETURN t18
+d := d - #7
+WRITE d
+RETURN #0
 
 FUNCTION mul_assign :
 e := #3
-t19 := e
-t20 := #4
-e := t19 * t20
-t21 := e
-WRITE t21
-t22 := #0
-RETURN t22
+e := e * #4
+WRITE e
+RETURN #0
 
 FUNCTION div_assign :
 f := #15
-t23 := f
-t24 := #5
-f := t23 / t24
-t25 := f
-WRITE t25
-t26 := #0
-RETURN t26
+f := f / #5
+WRITE f
+RETURN #0
 
 FUNCTION main :
-t27 := CALL self_plus
-t28 := CALL self_minus
-t29 := CALL plus_assign
-t30 := CALL minus_assign
-t31 := CALL mul_assign
-t32 := CALL div_assign
-t33 := #0
-RETURN t33
+$27 := CALL self_plus
+$28 := CALL self_minus
+$29 := CALL plus_assign
+$30 := CALL minus_assign
+$31 := CALL mul_assign
+$32 := CALL div_assign
+RETURN #0

@@ -1,64 +1,40 @@
 FUNCTION calculateTax :
 PARAM income
 tax := #0
-t1 := income
-t2 := #5000
-IF t1 <= t2 GOTO label1
+IF income <= #5000 GOTO label1
 GOTO label2
 LABEL label1 :
-t3 := #0
-RETURN t3
+RETURN #0
 GOTO label3
 LABEL label2 :
-t4 := income
-t5 := #10000
-IF t4 <= t5 GOTO label4
+IF income <= #10000 GOTO label4
 GOTO label5
 LABEL label4 :
-t8 := income
-t9 := #5000
-t6 := t8 - t9
-t7 := #20
-tax := t6 / t7
+$6 := income - #5000
+tax := $6 / #20
 GOTO label6
 LABEL label5 :
-t10 := income
-t11 := #50000
-IF t10 <= t11 GOTO label7
+IF income <= #50000 GOTO label7
 GOTO label8
 LABEL label7 :
-t12 := #250
-t16 := income
-t17 := #10000
-t14 := t16 - t17
-t15 := #10
-t13 := t14 / t15
-tax := t12 + t13
+$14 := income - #10000
+$13 := $14 / #10
+tax := #250 + $13
 GOTO label9
 LABEL label8 :
-t20 := #250
-t21 := #4000
-t18 := t20 + t21
-t24 := income
-t25 := #50000
-t22 := t24 - t25
-t23 := #5
-t19 := t22 / t23
-tax := t18 + t19
+$18 := #250 + #4000
+$22 := income - #50000
+$19 := $22 / #5
+tax := $18 + $19
 LABEL label9 :
 LABEL label6 :
 LABEL label3 :
-t26 := tax
-RETURN t26
+RETURN tax
 
 FUNCTION main :
 READ income
-t27 := income
-t29 := income
-ARG t29
-t28 := CALL calculateTax
-real_income := t27 - t28
-t30 := real_income
-WRITE t30
-t31 := #0
-RETURN t31
+ARG income
+$28 := CALL calculateTax
+real_income := income - $28
+WRITE real_income
+RETURN #0

@@ -3,58 +3,35 @@ PARAM row
 PARAM col
 coefficient := #1
 i := #0
-t1 := row
-t2 := col
-IF t1 < t2 GOTO label1
+IF row < col GOTO label1
 GOTO label2
 LABEL label1 :
-t3 := #0
-RETURN t3
+RETURN #0
 LABEL label2 :
-t4 := col
-t6 := row
-t7 := col
-t5 := t6 - t7
-IF t4 > t5 GOTO label3
+$5 := row - col
+IF col > $5 GOTO label3
 GOTO label4
 LABEL label3 :
-t8 := row
-t9 := col
-col := t8 - t9
+col := row - col
 LABEL label4 :
 LABEL label5 :
-t10 := i
-t11 := col
-IF t10 < t11 GOTO label6
+IF i < col GOTO label6
 GOTO label7
 LABEL label6 :
-t12 := coefficient
-t14 := row
-t15 := i
-t13 := t14 - t15
-coefficient := t12 * t13
-t16 := coefficient
-t18 := i
-t19 := #1
-t17 := t18 + t19
-coefficient := t16 / t17
-t20 := i
-t21 := #1
-i := t20 + t21
+$13 := row - i
+coefficient := coefficient * $13
+$17 := i + #1
+coefficient := coefficient / $17
+i := i + #1
 GOTO label5
 LABEL label7 :
-t22 := coefficient
-RETURN t22
+RETURN coefficient
 
 FUNCTION main :
 READ r
 READ c
-t23 := r
-t24 := c
-ARG t24
-ARG t23
+ARG c
+ARG r
 coe := CALL calculateBinomialCoefficient
-t25 := coe
-WRITE t25
-t26 := #0
-RETURN t26
+WRITE coe
+RETURN #0

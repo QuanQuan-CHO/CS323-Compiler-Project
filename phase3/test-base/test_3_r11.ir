@@ -1,54 +1,38 @@
 FUNCTION mod :
 PARAM x
 PARAM n
-t2 := x
-t6 := x
-t7 := n
-t4 := t6 / t7
-t5 := n
-t3 := t4 * t5
-t1 := t2 - t3
-RETURN t1
+$4 := x / n
+$3 := $4 * n
+$1 := x - $3
+RETURN $1
 
 FUNCTION DigitSum :
 PARAM y
-t8 := y
-t9 := #0
-IF t8 == t9 GOTO label1
+IF y == #0 GOTO label1
 GOTO label2
 LABEL label1 :
-t10 := #0
-RETURN t10
+RETURN #0
 LABEL label2 :
-t14 := y
-t15 := #10
-ARG t15
-ARG t14
-t12 := CALL mod
-t17 := y
-t18 := #10
-t16 := t17 / t18
-ARG t16
-t13 := CALL DigitSum
-t11 := t12 + t13
-RETURN t11
+ARG #10
+ARG y
+$12 := CALL mod
+$16 := y / #10
+ARG $16
+$13 := CALL DigitSum
+$11 := $12 + $13
+RETURN $11
 
 FUNCTION main :
 READ num
-t19 := num
-t20 := #0
-IF t19 < t20 GOTO label3
+IF num < #0 GOTO label3
 GOTO label4
 LABEL label3 :
-t22 := #1
-t21 := #0 - t22
-WRITE t21
+$21 := #0 - #1
+WRITE $21
 GOTO label5
 LABEL label4 :
-t24 := num
-ARG t24
-t23 := CALL DigitSum
-WRITE t23
+ARG num
+$23 := CALL DigitSum
+WRITE $23
 LABEL label5 :
-t25 := #0
-RETURN t25
+RETURN #0

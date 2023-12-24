@@ -1,172 +1,106 @@
 FUNCTION mod :
 PARAM number2
 PARAM m2
-t1 := number2
-t5 := number2
-t6 := m2
-t3 := t5 / t6
-t4 := m2
-t2 := t3 * t4
-result := t1 - t2
+$3 := number2 / m2
+$2 := $3 * m2
+result := number2 - $2
 result2 := result
-t7 := result
-RETURN t7
+RETURN result
 
 FUNCTION power :
 PARAM base1
 PARAM p1
-t10 := #1
-t11 := p1
-t8 := t10 + t11
-t9 := p1
-ret1 := t8 - t9
+$8 := #1 + p1
+ret1 := $8 - p1
 LABEL label1 :
-t12 := p1
-t22 := ret1
-t23 := ret1
-t20 := t22 - t23
-t21 := #90
-t18 := t20 + t21
-t19 := #89
-t16 := t18 - t19
-t17 := #1
-t14 := t16 + t17
-t15 := #2
-t13 := t14 - t15
-IF t12 > t13 GOTO label2
+$20 := ret1 - ret1
+$18 := $20 + #90
+$16 := $18 - #89
+$14 := $16 + #1
+$13 := $14 - #2
+IF p1 > $13 GOTO label2
 GOTO label3
 LABEL label2 :
-t24 := ret1
-t25 := base1
-ret1 := t24 * t25
-t32 := #2
-t33 := #1
-t30 := t32 * t33
-t31 := p1
-t28 := t30 * t31
-t34 := #1
-t35 := p1
-t29 := t34 * t35
-t26 := t28 - t29
-t27 := #1
-p1 := t26 - t27
+ret1 := ret1 * base1
+$30 := #2 * #1
+$28 := $30 * p1
+$29 := #1 * p1
+$26 := $28 - $29
+p1 := $26 - #1
 GOTO label1
 LABEL label3 :
-t36 := ret1
-RETURN t36
+RETURN ret1
 
 FUNCTION getNumDigits :
 PARAM number3
 ret3 := #0
-t37 := number3
-t38 := #0
-IF t37 < t38 GOTO label4
+IF number3 < #0 GOTO label4
 GOTO label5
 LABEL label4 :
-t40 := #1
-t39 := #0 - t40
-RETURN t39
+$39 := #0 - #1
+RETURN $39
 LABEL label5 :
 LABEL label6 :
-t41 := number3
-t42 := #0
-IF t41 > t42 GOTO label7
+IF number3 > #0 GOTO label7
 GOTO label8
 LABEL label7 :
-t43 := number3
-t44 := #10
-number3 := t43 / t44
-t45 := ret3
-t46 := #2
-ret3 := t45 + t46
-t47 := ret3
-t48 := #2
-ret3 := t47 + t48
-t49 := ret3
-t50 := #3
-ret3 := t49 - t50
+number3 := number3 / #10
+ret3 := ret3 + #2
+ret3 := ret3 + #2
+ret3 := ret3 - #3
 GOTO label6
 LABEL label8 :
-t51 := ret3
-RETURN t51
+RETURN ret3
 
 FUNCTION isNarcissistic :
 PARAM number4
-t55 := #1
-t56 := number4
-t53 := t55 + t56
-t54 := #1
-t52 := t53 - t54
-ARG t52
+$53 := #1 + number4
+$52 := $53 - #1
+ARG $52
 numDigits4 := CALL getNumDigits
 sum4 := #0
 n4 := number4
 LABEL label9 :
-t57 := n4
-t58 := #0
-IF t57 > t58 GOTO label10
+IF n4 > #0 GOTO label10
 GOTO label11
 LABEL label10 :
-t59 := n4
-t60 := #10
-ARG t60
-ARG t59
+ARG #10
+ARG n4
 s4 := CALL mod
-t63 := n4
-t64 := s4
-t61 := t63 - t64
-t62 := #10
-n4 := t61 / t62
-t65 := sum4
-t67 := s4
-t68 := numDigits4
-ARG t68
-ARG t67
-t66 := CALL power
-sum4 := t65 + t66
+$61 := n4 - s4
+n4 := $61 / #10
+ARG numDigits4
+ARG s4
+$66 := CALL power
+sum4 := sum4 + $66
 GOTO label9
 LABEL label11 :
-t69 := sum4
-t70 := number4
-IF t69 == t70 GOTO label12
+IF sum4 == number4 GOTO label12
 GOTO label13
 LABEL label12 :
-t71 := #1
-RETURN t71
+RETURN #1
 GOTO label14
 LABEL label13 :
-t72 := #0
-RETURN t72
+RETURN #0
 LABEL label14 :
 
 FUNCTION main :
 count := #0
 i := #300
 LABEL label15 :
-t73 := i
-t74 := #500
-IF t73 < t74 GOTO label16
+IF i < #500 GOTO label16
 GOTO label17
 LABEL label16 :
-t77 := i
-ARG t77
-t75 := CALL isNarcissistic
-t76 := #1
-IF t75 == t76 GOTO label18
+ARG i
+$75 := CALL isNarcissistic
+IF $75 == #1 GOTO label18
 GOTO label19
 LABEL label18 :
-t78 := i
-WRITE t78
-t79 := count
-t80 := #1
-count := t79 + t80
+WRITE i
+count := count + #1
 LABEL label19 :
-t81 := i
-t82 := #1
-i := t81 + t82
+i := i + #1
 GOTO label15
 LABEL label17 :
-t83 := count
-WRITE t83
-t84 := count
-RETURN t84
+WRITE count
+RETURN count

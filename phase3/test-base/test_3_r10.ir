@@ -1,107 +1,71 @@
 FUNCTION gcd1 :
 PARAM a
 PARAM b
-t1 := a
-t5 := a
-t6 := b
-t3 := t5 / t6
-t4 := b
-t2 := t3 * t4
-temp := t1 - t2
+$3 := a / b
+$2 := $3 * b
+temp := a - $2
 LABEL label1 :
-t7 := temp
-t8 := #0
-IF t7 != t8 GOTO label2
+IF temp != #0 GOTO label2
 GOTO label3
 LABEL label2 :
 a := b
 b := temp
-t9 := a
-t13 := a
-t14 := b
-t11 := t13 / t14
-t12 := b
-t10 := t11 * t12
-temp := t9 - t10
+$11 := a / b
+$10 := $11 * b
+temp := a - $10
 GOTO label1
 LABEL label3 :
 result := b
-t15 := result
-RETURN t15
+RETURN result
 
 FUNCTION gcd2 :
 PARAM x
 PARAM y
 remainder := #0
-t16 := x
-t17 := y
-IF t16 > t17 GOTO label4
+IF x > y GOTO label4
 GOTO label5
 LABEL label4 :
-t18 := x
-t22 := x
-t23 := y
-t20 := t22 / t23
-t21 := y
-t19 := t20 * t21
-remainder := t18 - t19
-t24 := remainder
-t25 := #0
-IF t24 == t25 GOTO label7
+$20 := x / y
+$19 := $20 * y
+remainder := x - $19
+IF remainder == #0 GOTO label7
 GOTO label8
 LABEL label7 :
-t26 := y
-RETURN t26
+RETURN y
 GOTO label9
 LABEL label8 :
-t28 := y
-t29 := remainder
-ARG t29
-ARG t28
-t27 := CALL gcd2
-RETURN t27
+ARG remainder
+ARG y
+$27 := CALL gcd2
+RETURN $27
 LABEL label9 :
 GOTO label6
 LABEL label5 :
-t30 := y
-t34 := y
-t35 := x
-t32 := t34 / t35
-t33 := x
-t31 := t32 * t33
-remainder := t30 - t31
-t36 := remainder
-t37 := #0
-IF t36 == t37 GOTO label10
+$32 := y / x
+$31 := $32 * x
+remainder := y - $31
+IF remainder == #0 GOTO label10
 GOTO label11
 LABEL label10 :
-t38 := x
-RETURN t38
+RETURN x
 GOTO label12
 LABEL label11 :
-t40 := x
-t41 := remainder
-ARG t41
-ARG t40
-t39 := CALL gcd2
-RETURN t39
+ARG remainder
+ARG x
+$39 := CALL gcd2
+RETURN $39
 LABEL label12 :
 LABEL label6 :
 
 FUNCTION main :
 READ m
 READ n
-t43 := m
-t44 := n
-ARG t44
-ARG t43
-t42 := CALL gcd1
-WRITE t42
-t46 := m
-t47 := n
-ARG t47
-ARG t46
-t45 := CALL gcd2
-WRITE t45
-t48 := #0
-RETURN t48
+ARG n
+ARG m
+$42 := CALL gcd1
+WRITE $42
+ARG n
+ARG m
+$45 := CALL gcd2
+WRITE $45
+RETURN #0

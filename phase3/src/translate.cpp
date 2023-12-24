@@ -63,14 +63,14 @@ string concat_ir(IRs... irs){
     return res;
 }
 
-string translate_Exp(node* Exp, string place);
+string translate_Exp(node* Exp, string* place);
 
 //For arithmetic Exp: "Exp PLUS/MINUS/MUL/DIV Exp"
 string arithmetic_ir(char op, vector<node*> nodes, string place){
     string tp1 = NEW_PLACE;
     string tp2 = NEW_PLACE;
-    string ir1 = translate_Exp(nodes[0],tp1);
-    string ir2 = translate_Exp(nodes[2],tp2);
+    string ir1 = translate_Exp(nodes[0],&tp1);
+    string ir2 = translate_Exp(nodes[2],&tp2);
     string ir3 = place+" := "+tp1+" "+op+" "+tp2;
     return concat_ir(ir1,ir2,ir3);
 }
@@ -79,8 +79,8 @@ string arithmetic_ir(char op, vector<node*> nodes, string place){
 string comparison_ir(string op, vector<node*> nodes, string lb_t, string lb_f){
     string tp1 = NEW_PLACE;
     string tp2 = NEW_PLACE;
-    string ir1 = translate_Exp(nodes[0],tp1);
-    string ir2 = translate_Exp(nodes[2],tp2);
+    string ir1 = translate_Exp(nodes[0],&tp1);
+    string ir2 = translate_Exp(nodes[2],&tp2);
     string ir3 = "IF "+tp1+" "+op+" "+tp2+" GOTO "+lb_t;
     string ir4 = "GOTO "+lb_f;
     return concat_ir(ir1,ir2,ir3,ir4);
@@ -124,10 +124,10 @@ string translate_Args(node* Args, vector<string> &arg_list){
     if(children=="Exp"){
         string tp = NEW_PLACE;
         arg_list.push_back(tp);
-        return translate_Exp(nodes[0],tp);
+        return translate_Exp(nodes[0],&tp);
     }else if(children=="Exp COMMA Args"){
         string tp = NEW_PLACE;
-        string ir1 = translate_Exp(nodes[0],tp);
+        string ir1 = translate_Exp(nodes[0],&tp);
         arg_list.push_back(tp);
         string ir2 = translate_Args(nodes[2],arg_list);
         return concat_ir(ir1,ir2);
@@ -135,55 +135,55 @@ string translate_Args(node* Args, vector<string> &arg_list){
 }
 
 /*[place]: the place to store the result of Exp
-           place=="" means that the Exp result needn't to store */
-string translate_Exp(node* Exp, string place){
+           place==nullptr means that the Exp result needn't to store */
+string translate_Exp(node* Exp, string* place){
     vector<node*> nodes = Exp->children;
     string children = expression(Exp);
     if(nodes.size()==1){ //INT ID CHAR FLOAT
-        return place+" := "+nodes[0]->value;
+        return *place+" := "+nodes[0]->value;
     }else if(children=="Exp ASSIGN Exp"){
         if(expression(nodes[0])=="ID"){
             string var_name = nodes[0]->children[0]->value;
-            string Exp2_ir = translate_Exp(nodes[2],var_name);
-            if(place!=""){ 
+            string Exp2_ir = translate_Exp(nodes[2],&var_name);
+            if(place!=nullptr){ 
                 return concat_ir(
                     Exp2_ir,
-                    place+" := "+var_name
+                    *place+" := "+var_name
                 );
             }else{return Exp2_ir;} //no need to store the result
         }else{ //nodes[0] is array entry: Exp LB Exp RB
             //Process Exp1
-            string Exp1_ir = translate_Exp(nodes[0],"");
+            string Exp1_ir = translate_Exp(nodes[0],nullptr);
             int lastline_index = Exp1_ir.find_last_of('\n');
             string array_ir = Exp1_ir.substr(0,lastline_index);
             string address = Exp1_ir.substr(lastline_index+1);
 
-            if(place!=""){ 
+            if(place!=nullptr){ 
                 return concat_ir(
                     array_ir,
-                    translate_Exp(nodes[2], address),
-                    place+" := "+address
+                    translate_Exp(nodes[2], &address),
+                    *place+" := "+address
                 );
             }else{ //no need to store the result
                 return concat_ir(
                     array_ir,
-                    translate_Exp(nodes[2], address)
+                    translate_Exp(nodes[2], &address)
                 );
             }
         }
     }else if(children=="Exp PLUS Exp"){
-        return arithmetic_ir('+',nodes,place);
+        return arithmetic_ir('+',nodes,*place);
     }else if(children=="Exp MINUS Exp"){
-        return arithmetic_ir('-',nodes,place);
+        return arithmetic_ir('-',nodes,*place);
     }else if(children=="Exp MUL Exp"){
-        return arithmetic_ir('*',nodes,place);
+        return arithmetic_ir('*',nodes,*place);
     }else if(children=="Exp DIV Exp"){
-        return arithmetic_ir('/',nodes,place);
+        return arithmetic_ir('/',nodes,*place);
     }else if(children=="MINUS Exp"){
         string tp = NEW_PLACE;
         return concat_ir(
-            translate_Exp(nodes[1],tp),
-            place+" := #0 - "+tp
+            translate_Exp(nodes[1],&tp),
+            *place+" := #0 - "+tp
         );
     }else if(children=="LP Exp RP"){
         return translate_Exp(nodes[1],place);
@@ -195,15 +195,16 @@ string translate_Exp(node* Exp, string place){
             //The children now becomes `ID LP Exp RP`
             string tp = NEW_PLACE;
             return concat_ir(
-                translate_Exp(nodes[2],tp),
+                translate_Exp(nodes[2],&tp),
                 "WRITE "+tp
             );
         }else{
-            if(place==""){
+            if(place==nullptr){
                 /*no need to store the result in .spl source code,
                   but we need to store the result in a useless place,
                   in order to use IR: "x := CALL f", since there is no IR like "CALL f" */
-                place = NEW_PLACE;
+                place = new string;
+                *place = NEW_PLACE;
             }
             vector<string> arg_list = {};
             string code1 = translate_Args(nodes[2],arg_list);
@@ -211,20 +212,21 @@ string translate_Exp(node* Exp, string place){
             for(int i=arg_list.size()-1;i>=0;i--){
                 code2 += "ARG "+arg_list[i]+"\n";
             }
-            return code1+"\n"+code2+place+" := CALL "+function;
+            return code1+"\n"+code2+*place+" := CALL "+function;
         }
     }else if(children=="ID LP RP"){
         string function = nodes[0]->value;
         if(function=="read"){
-            return "READ "+place;
+            return "READ "+*place;
         }else{
-            if(place==""){
+            if(place==nullptr){
                 /*no need to store the result in .spl source code,
                   but we need to store the result in a useless place,
                   in order to use IR: "x := CALL f", since there is no IR like "CALL f" */
-                place = NEW_PLACE;
+                place = new string;
+                *place = NEW_PLACE;
             }
-            return place+" := CALL "+function;
+            return *place+" := CALL "+function;
         }
     }else if(children=="Exp LB Exp RB"){
         node* Exp1 = Exp;
@@ -244,7 +246,7 @@ string translate_Exp(node* Exp, string place){
         ir += _offset+" := #0\n";
         for(int k=0;expression(Exp1)=="Exp LB Exp RB";k++){
             string tp = NEW_PLACE;
-            ir += translate_Exp(nodes[2],tp)+"\n";
+            ir += translate_Exp(nodes[2],&tp)+"\n";
             ir += tp+" := "+tp+" * #"+to_string(sizes[k])+"\n";
             ir += _offset+" := "+_offset+" + "+tp+"\n";
             Exp1 = Exp1->children[0];
@@ -254,7 +256,7 @@ string translate_Exp(node* Exp, string place){
         string address = NEW_PLACE;
         ir += _offset+" := "+_offset+" * #4\n";
         ir += address+" := &"+array_name+" + "+_offset+"\n";
-        if(place==""){
+        if(place==nullptr){
             /*no need to store the result, return the array entry's address,
               Exp appears on left of "=", need to assign the array entry with another value
               for example: a[1][2]=4 */
@@ -264,7 +266,7 @@ string translate_Exp(node* Exp, string place){
               Exp appears on right of "=", the array entry's value needs to be assigned to another variable
               for example: b=a[3][6];
             */
-            return ir+place+" := *"+address;
+            return ir+*place+" := *"+address;
         }
     }else if(children=="Exp DOT ID"){
         return ""; //never, because there are no structures (Assumption 6)
@@ -272,10 +274,10 @@ string translate_Exp(node* Exp, string place){
         string lb1 = NEW_LABEL;
         string lb2 = NEW_LABEL;
         return concat_ir(
-            place+" := #0",
+            *place+" := #0",
             translate_cond_Exp(Exp,lb1,lb2),
             "LABEL "+lb1+" :",
-            place+" := #1",
+            *place+" := #1",
             "LABEL "+lb2+" :"
         );
     }
@@ -311,7 +313,7 @@ string translate_Dec(node* Dec){
     }else if(children=="VarDec ASSIGN Exp"){
         //here, there must be VarDec: ID
         string var_name = nodes[0]->children[0]->value;
-        return translate_Exp(nodes[2], var_name);
+        return translate_Exp(nodes[2], &var_name);
     }else{return "";} //never
 }
 
@@ -351,11 +353,11 @@ string translate_Stmt(node* Stmt){
     if(children=="Exp SEMI"){
         /*in this case, there is no need to store the Exp result,
           so `place` is useless in Exp translation*/
-        return translate_Exp(nodes[0],"");
+        return translate_Exp(nodes[0],nullptr);
     }else if(children=="RETURN Exp SEMI"){
         string tp = NEW_PLACE;
         return concat_ir(
-            translate_Exp(nodes[1],tp),
+            translate_Exp(nodes[1],&tp),
             "RETURN "+tp
         );
     }else if(children=="IF LP Exp RP Stmt"){
@@ -401,7 +403,7 @@ string translate_Stmt(node* Stmt){
         string ir3 = translate_cond_Exp(nodes[3],lb2,lb3);
         string ir4 = "LABEL "+lb2+" :";
         string ir5 = translate_Stmt(nodes[7]);
-        string ir6 = translate_Exp(nodes[5],""); //no need to store the result
+        string ir6 = translate_Exp(nodes[5],nullptr); //no need to store the result
         string ir7 = "GOTO "+lb1;
         string ir8 = "LABEL "+lb3+" :";
         return concat_ir(ir1,ir2,ir3,ir4,ir5,ir6,ir7,ir8);
@@ -427,7 +429,7 @@ string translate_Stmt(node* Stmt){
         string ir2 = translate_cond_Exp(nodes[3],lb2,lb3);
         string ir3 = "LABEL "+lb2+" :";
         string ir4 = translate_Stmt(nodes[7]);
-        string ir5 = translate_Exp(nodes[5],""); //no need to store the result
+        string ir5 = translate_Exp(nodes[5],nullptr); //no need to store the result
         string ir6 = "GOTO "+lb1;
         string ir7 = "LABEL "+lb3+" :";
         return concat_ir(ir1,ir2,ir3,ir4,ir5,ir6,ir7);

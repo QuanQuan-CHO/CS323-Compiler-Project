@@ -10,3 +10,8 @@ irsim.log
 lexer
 splc
 *.myout
+
+# pyinstaller in phase4
+splc.spec
+build/
+__pycache__/

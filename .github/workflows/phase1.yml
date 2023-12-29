@@ -1,0 +1,24 @@
+name: test splc
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'phase1/**'
+jobs:
+  test-splc:
+    name: test splc
+    runs-on: ubuntu-22.04
+    env:
+      TZ: Asia/Shanghai
+    steps:
+      - name: 1. Git checkout...
+        uses: actions/checkout@v3
+
+      - name: 2. Install link library for Flex & Bison
+        run: sudo apt install libfl-dev libbison-dev
+
+      - name: 3. Compile splc and run test cases
+        working-directory: phase1
+        run: make test

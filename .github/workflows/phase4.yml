@@ -1,11 +1,11 @@
-name: phase2
+name: phase4
 on:
   workflow_dispatch:
   push:
     branches:
       - main
     paths:
-      - 'phase2/**'
+      - 'phase4/**'
 jobs:
   test-splc:
     name: test splc
@@ -16,9 +16,9 @@ jobs:
       - name: 1. Git checkout...
         uses: actions/checkout@v3
 
-      - name: 2. Install link library for Flex & Bison
-        run: sudo apt install libfl-dev libbison-dev
+      - name: 2. Install Pyinstaller
+        run: pip install pyinstaller
 
-      - name: 3. Compile splc and run test cases
-        working-directory: phase2
-        run: make test
+      - name: 3. Compile splc
+        working-directory: phase4
+        run: make splc

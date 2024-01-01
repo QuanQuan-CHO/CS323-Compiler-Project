@@ -4,19 +4,20 @@ import sys
 from queue import Queue
 
 num_registers = 32
-save_reg = 9
+save_reg = 11
 register_table = [None] * num_registers
 stack = []
 queue = Queue()
 argmap = {}
-
-pre=""".data
+data="""
+.data
 array: .space 400
 _prmpt: .asciiz "Enter an integer: "
 _eol: .asciiz "\\n"
 .globl main
-.text
-read:
+.text"""
+
+pre="""read:
   li $v0, 4
   move $s6, $a0
   la $a0, _prmpt
@@ -53,10 +54,9 @@ num_var=0
 #分配+查询reg
 def reg(var: str) -> str:
     global num_var
-    if var in register_table:
-        return f'${register_table.index(var) + save_reg}'
-    elif var in stack:
-        return f'{(stack.index(var)+num_var) << 2}($sp)'
+    res = find_Reg(var)
+    if res:
+        return res
     # # 尝试分配一个未被使用的寄存器
     # for index, reg in enumerate(register_table):
     #     if not reg:
@@ -64,11 +64,15 @@ def reg(var: str) -> str:
     #         return f'${index + save_reg}'
     # 如果没有可用寄存器，将变量存储到栈上
     stack.append(var)
-    print('addi $sp $sp -4')
-    num_var+=1
-    return f'{(stack.index(var)) << 2}($sp)'
+    return f'{stack.index(var)<<2}($sp)'
 
-
+def find_Reg(var: str):
+    if var in register_table:
+        return f'${register_table.index(var) + save_reg}'
+    elif var in stack:
+        return f'{stack.index(var) << 2}($sp)'
+    else:
+        return None
 # Translate TAC to assembly code
 # 在遇到arg的时候存入queue中，之后对照param lw sw 过去
 def translate(tac: str):
@@ -115,13 +119,16 @@ def translate(tac: str):
         for p in argmap[f]:
             arg = reg(queue.get())
             para = reg(p)
-            fi_command.append(f'lw ${save_reg} {arg}')
-            fi_command.append(f'sw ${save_reg} {para}')
+            fi_command.append(f'lw ${save_reg}, {arg}')
+            fi_command.append(f'sw ${save_reg}, {para}')
         fi_command.append(f'jal {f}')
-        fi_command.append(f'move {reg(x)}, $v0')
+        command.append(f'move {reg(x)}, $v0')
     if re.fullmatch(f'RETURN {id}', tac):  # RETURN x
         x = tac.split('RETURN ')[1]
         command.append(f'move $v0, {reg(x)}')
+        fi_command.append('lw $ra,0($10)')
+        fi_command.append('addi $9,$9,4')
+        fi_command.append('add $10,$9,$sp')
         command.append(f'jr $ra')
     if re.fullmatch(f'IF {id} < {id} GOTO {id}', tac):  # IF x < y GOTO z
         _, x, y, z = re.split('IF | < | GOTO ', tac)
@@ -144,6 +151,10 @@ def translate(tac: str):
     if re.fullmatch(f'FUNCTION {id} :', tac):  # IF x == y GOTO z
         _, n, _ = re.split('FUNCTION | :', tac)
         fi_command.append(f'{n} :')
+        fi_command.append('addi $9,$9,-4')
+        fi_command.append('add $10,$9,$sp')
+        fi_command.append('sw $ra,0($10)')
+
     if re.fullmatch(f'LABEL {id} :', tac):  # IF x == y GOTO z
         _, n, _ = re.split('LABEL | :', tac)
         command.append(f'{n}:')
@@ -155,23 +166,26 @@ def translate(tac: str):
         queue.put(n)
     if re.fullmatch(f'WRITE {id}', tac):  # IF x == y GOTO z
         _, n = re.split('WRITE | ', tac)
-        fi_command.append(f'lw $8 {reg(n)}')
-        fi_command.append(f'jal wirte')
+        fi_command.append(f'lw $8, {reg(n)}')
+        fi_command.append(f'jal write')
 
     if re.fullmatch(f'READ {id}', tac):  # IF x == y GOTO z
         _, n = re.split('READ | ', tac)
         fi_command.append(f'jal read')
-        fi_command.append(f'sw $8 {reg(n)}')
+        fi_command.append(f'sw $8,{reg(n)}')
+
     for index, c in enumerate(command):
-        print(c)
         co = c.replace(',', '')
         regs = [s for s in co.split()[1:] if '$' in s]
+
         for ind, r in enumerate(regs):
-            fi_command.append(f'lw ${ind + save_reg} {r}')
-            c = c.replace(r, f'${ind + save_reg}')
+            if '$sp' in r:
+                fi_command.append(f'lw ${ind + save_reg},{r}')
+                c = c.replace(r, f'${ind + save_reg}')
         fi_command.append(c)
         for ind, r in enumerate(regs):
-            fi_command.append(f'sw ${ind + save_reg} {r}')
+            if '$sp' in r:
+                fi_command.append(f'sw ${ind + save_reg},{r}')
     return fi_command
 
 
@@ -179,7 +193,11 @@ if len(sys.argv) < 2:
     print("Usage: splc <ir_path>")
     sys.exit(1)
 
+
+print(data)
+print('j main')
 print(pre)
+
 with open(sys.argv[1], 'r') as ir:
     for tac in ir.read().splitlines():
         res=translate(tac)

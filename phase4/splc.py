@@ -4,12 +4,11 @@ import sys
 from queue import Queue
 
 num_registers = 32
-save_reg = 6
+save_reg = 9
 register_table = [None] * num_registers
 stack = []
 queue = Queue()
 argmap = {}
-ra=0
 
 pre=""".data
 array: .space 400
@@ -22,7 +21,7 @@ read:
   move $s6, $a0
   la $a0, _prmpt
   syscall
-  move $a0, $s6
+  move $a0, $8
   li $v0, 5
   syscall
   jr $ra
@@ -30,7 +29,7 @@ write:
   li $v0, 1
   syscall
   li $v0, 4
-  move $s6, $a0
+  move $8, $a0
   la $a0, _eol
   syscall
   jr $ra"""
@@ -49,14 +48,15 @@ def read_file(file_path):
 
 
 read_file(sys.argv[1])
-
+num_var=0
 # the register allocation algorithm
 #分配+查询reg
 def reg(var: str) -> str:
+    global num_var
     if var in register_table:
         return f'${register_table.index(var) + save_reg}'
     elif var in stack:
-        return f'{(stack.index(var) + save_reg) << 2}($sp)'
+        return f'{(stack.index(var)+num_var) << 2}($sp)'
     # # 尝试分配一个未被使用的寄存器
     # for index, reg in enumerate(register_table):
     #     if not reg:
@@ -64,7 +64,9 @@ def reg(var: str) -> str:
     #         return f'${index + save_reg}'
     # 如果没有可用寄存器，将变量存储到栈上
     stack.append(var)
-    return f'{(len(stack) - 1) << 2}($sp)'
+    print('addi $sp $sp -4')
+    num_var+=1
+    return f'{(stack.index(var)) << 2}($sp)'
 
 
 # Translate TAC to assembly code
@@ -141,7 +143,7 @@ def translate(tac: str):
         command.append(f'beq {reg(x)}, {reg(y)}, {z}')
     if re.fullmatch(f'FUNCTION {id} :', tac):  # IF x == y GOTO z
         _, n, _ = re.split('FUNCTION | :', tac)
-        command.append(f'{n} :')
+        fi_command.append(f'{n} :')
     if re.fullmatch(f'LABEL {id} :', tac):  # IF x == y GOTO z
         _, n, _ = re.split('LABEL | :', tac)
         command.append(f'{n}:')
@@ -153,11 +155,15 @@ def translate(tac: str):
         queue.put(n)
     if re.fullmatch(f'WRITE {id}', tac):  # IF x == y GOTO z
         _, n = re.split('WRITE | ', tac)
-        command.append(f'jal wirte')
+        fi_command.append(f'lw $8 {reg(n)}')
+        fi_command.append(f'jal wirte')
+
     if re.fullmatch(f'READ {id}', tac):  # IF x == y GOTO z
         _, n = re.split('READ | ', tac)
-        command.append(f'jal read')
+        fi_command.append(f'jal read')
+        fi_command.append(f'sw $8 {reg(n)}')
     for index, c in enumerate(command):
+        print(c)
         co = c.replace(',', '')
         regs = [s for s in co.split()[1:] if '$' in s]
         for ind, r in enumerate(regs):

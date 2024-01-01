@@ -1,82 +1,183 @@
 #!/usr/bin/python3
 import re
 import sys
+from queue import Queue
 
+num_registers = 32
+save_reg = 6
+register_table = [None] * num_registers
+stack = []
+queue = Queue()
+argmap = {}
+ra=0
+
+pre=""".data
+array: .space 400
+_prmpt: .asciiz "Enter an integer: "
+_eol: .asciiz "\\n"
+.globl main
+.text
+read:
+  li $v0, 4
+  move $s6, $a0
+  la $a0, _prmpt
+  syscall
+  move $a0, $s6
+  li $v0, 5
+  syscall
+  jr $ra
+write:
+  li $v0, 1
+  syscall
+  li $v0, 4
+  move $s6, $a0
+  la $a0, _eol
+  syscall
+  jr $ra"""
+
+
+def read_file(file_path):
+    current_paragraph = []
+    with open(file_path, 'r') as file:
+        for line in file:
+            if (line.startswith("LABEL") or line.startswith("FUNCTION")) and ":" in line:
+                current_paragraph = []
+                argmap[line.split()[1]] = current_paragraph
+            if 'PARAM' in line:
+                current_paragraph.append(line.split()[1])
+    return argmap
+
+
+read_file(sys.argv[1])
 
 # the register allocation algorithm
+#分配+查询reg
 def reg(var: str) -> str:
-    return var
+    if var in register_table:
+        return f'${register_table.index(var) + save_reg}'
+    elif var in stack:
+        return f'{(stack.index(var) + save_reg) << 2}($sp)'
+    # # 尝试分配一个未被使用的寄存器
+    # for index, reg in enumerate(register_table):
+    #     if not reg:
+    #         register_table[index] = var
+    #         return f'${index + save_reg}'
+    # 如果没有可用寄存器，将变量存储到栈上
+    stack.append(var)
+    return f'{(len(stack) - 1) << 2}($sp)'
 
 
 # Translate TAC to assembly code
-def translate(tac: str) -> str:
+# 在遇到arg的时候存入queue中，之后对照param lw sw 过去
+def translate(tac: str):
     id = '[^\\d#*]\\w*'
     num = '\\d+'
+    command = []
+    fi_command = []
     if re.fullmatch(f'{id} := #{num}', tac):  # x := #k
         x, k = tac.split(' := #')
-        return f'li {reg(x)}, {k}'
+        command.append(f'li {reg(x)}, {k}')
     if re.fullmatch(f'{id} := {id}', tac):  # x := y
         x, y = tac.split(' := ')
-        return f'move {reg(x)}, {reg(y)}'
+        command.append(f'move {reg(x)}, {reg(y)}')
     if re.fullmatch(f'{id} := {id} \\+ #{num}', tac):  # x := y + #k
         x, y, k = re.split(' := | \\+ #', tac)
-        return f'addi {reg(x)}, {reg(y)}, {k}'
+        command.append(f'addi {reg(x)}, {reg(y)}, {k}')
     if re.fullmatch(f'{id} := {id} \\+ {id}', tac):  # x := y + z
         x, y, z = re.split(' := | \\+ ', tac)
-        return f'add {reg(x)}, {reg(y)}, {reg(z)}'
+        command.append(f'add {reg(x)}, {reg(y)}, {reg(z)}')
     if re.fullmatch(f'{id} := {id} - #{num}', tac):  # x := y - #k
         x, y, k = re.split(' := | - #', tac)
-        return f'addi {reg(x)}, {reg(y)}, -{k}'
+        command.append(f'addi {reg(x)}, {reg(y)}, -{k}')
     if re.fullmatch(f'{id} := {id} - {id}', tac):  # x := y - z
         x, y, z = re.split(' := | - ', tac)
-        return f'sub {reg(x)}, {reg(y)}, {reg(z)}'
+        command.append(f'sub {reg(x)}, {reg(y)}, {reg(z)}')
     if re.fullmatch(f'{id} := {id} \\* {id}', tac):  # x := y * z
         x, y, z = re.split(' := | \\* ', tac)
-        return f'mul {reg(x)}, {reg(y)}, {reg(z)}'
+        command.append(f'mul {reg(x)}, {reg(y)}, {reg(z)}')
     if re.fullmatch(f'{id} := {id} / {id}', tac):  # x := y / z
         x, y, z = re.split(' := | / ', tac)
-        return f'div {reg(y)}, {reg(z)}\n' \
-               f'mflo {reg(x)}'
+        command.append(f'div {reg(y)}, {reg(z)}')
+        command.append(f'mflo {reg(x)}')
     if re.fullmatch(f'{id} := \\*{id}', tac):  # x := *y
         x, y = tac.split(' := *')
-        return f'lw {reg(x)}, 0({reg(y)})'
+        command.append(f'lw {reg(x)}, 0({reg(y)})')
     if re.fullmatch(f'\\*{id} := {id}', tac):  # *x := y
         _, x, y = re.split('\\*| := ', tac)
-        return f'sw {reg(y)}, 0({reg(x)})'
+        command.append(f'sw {reg(y)}, 0({reg(x)})')
     if re.fullmatch(f'GOTO {id}', tac):  # GOTO x
         x = tac.split('GOTO ')[1]
-        return f'j {x}'
+        command.append(f'j {x}')
     if re.fullmatch(f'{id} := CALL {id}', tac):  # x := CALL f
         x, f = tac.split(' := CALL ')
-        return f'jal {f}\n' \
-               f'move {reg(x)}, $v0'
+        for p in argmap[f]:
+            arg = reg(queue.get())
+            para = reg(p)
+            fi_command.append(f'lw ${save_reg} {arg}')
+            fi_command.append(f'sw ${save_reg} {para}')
+        fi_command.append(f'jal {f}')
+        fi_command.append(f'move {reg(x)}, $v0')
     if re.fullmatch(f'RETURN {id}', tac):  # RETURN x
         x = tac.split('RETURN ')[1]
-        return f'move $v0, {reg(x)}\n' \
-               f'jr $ra'
+        command.append(f'move $v0, {reg(x)}')
+        command.append(f'jr $ra')
     if re.fullmatch(f'IF {id} < {id} GOTO {id}', tac):  # IF x < y GOTO z
         _, x, y, z = re.split('IF | < | GOTO ', tac)
-        return f'blt {reg(x)}, {reg(y)}, {z}'
+        command.append(f'blt {reg(x)}, {reg(y)}, {z}')
     if re.fullmatch(f'IF {id} <= {id} GOTO {id}', tac):  # IF x <= y GOTO z
         _, x, y, z = re.split('IF | <= | GOTO ', tac)
-        return f'ble {reg(x)}, {reg(y)}, {z}'
+        command.append(f'ble {reg(x)}, {reg(y)}, {z}')
     if re.fullmatch(f'IF {id} > {id} GOTO {id}', tac):  # IF x > y GOTO z
         _, x, y, z = re.split('IF | > | GOTO ', tac)
-        return f'bgt {reg(x)}, {reg(y)}, {z}'
+        command.append(f'bgt {reg(x)}, {reg(y)}, {z}')
     if re.fullmatch(f'IF {id} >= {id} GOTO {id}', tac):  # IF x >= y GOTO z
         _, x, y, z = re.split('IF | >= | GOTO ', tac)
-        return f'bge {reg(x)}, {reg(y)}, {z}'
+        command.append(f'bge {reg(x)}, {reg(y)}, {z}')
     if re.fullmatch(f'IF {id} != {id} GOTO {id}', tac):  # IF x != y GOTO z
         _, x, y, z = re.split('IF | != | GOTO ', tac)
-        return f'bne {reg(x)}, {reg(y)}, {z}'
+        command.append(f'bne {reg(x)}, {reg(y)}, {z}')
     if re.fullmatch(f'IF {id} == {id} GOTO {id}', tac):  # IF x == y GOTO z
         _, x, y, z = re.split('IF | == | GOTO ', tac)
-        return f'beq {reg(x)}, {reg(y)}, {z}'
+        command.append(f'beq {reg(x)}, {reg(y)}, {z}')
+    if re.fullmatch(f'FUNCTION {id} :', tac):  # IF x == y GOTO z
+        _, n, _ = re.split('FUNCTION | :', tac)
+        command.append(f'{n} :')
+    if re.fullmatch(f'LABEL {id} :', tac):  # IF x == y GOTO z
+        _, n, _ = re.split('LABEL | :', tac)
+        command.append(f'{n}:')
+    # if re.fullmatch(f'PARAM {id}', tac):  # IF x == y GOTO z
+    #     _, n = re.split('PARAM | ', tac)
+    #     command.append(f'{n}')
+    if re.fullmatch(f'ARG {id}', tac):  # IF x == y GOTO z
+        _, n = re.split('ARG | ', tac)
+        queue.put(n)
+    if re.fullmatch(f'WRITE {id}', tac):  # IF x == y GOTO z
+        _, n = re.split('WRITE | ', tac)
+        command.append(f'jal wirte')
+    if re.fullmatch(f'READ {id}', tac):  # IF x == y GOTO z
+        _, n = re.split('READ | ', tac)
+        command.append(f'jal read')
+    for index, c in enumerate(command):
+        co = c.replace(',', '')
+        regs = [s for s in co.split()[1:] if '$' in s]
+        for ind, r in enumerate(regs):
+            fi_command.append(f'lw ${ind + save_reg} {r}')
+            c = c.replace(r, f'${ind + save_reg}')
+        fi_command.append(c)
+        for ind, r in enumerate(regs):
+            fi_command.append(f'sw ${ind + save_reg} {r}')
+    return fi_command
 
 
 if len(sys.argv) < 2:
     print("Usage: splc <ir_path>")
     sys.exit(1)
+
+print(pre)
 with open(sys.argv[1], 'r') as ir:
     for tac in ir.read().splitlines():
-        print(translate(tac))
+        res=translate(tac)
+        if res:
+            print("\n".join(res))
+
+

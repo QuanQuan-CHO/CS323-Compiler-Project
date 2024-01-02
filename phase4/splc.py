@@ -204,9 +204,7 @@ print(pre)
 with open(sys.argv[1], 'r') as ir:
     for tac in ir.read().splitlines():
         res=translate(tac)
-        if not res:
-            print(f'no translate: {tac}')
-        else:
+        if res:
             print("\n".join(res))
 print('end:')
 

@@ -80,41 +80,41 @@ def translate(tac: str):
     num = '\\d+'
     command = []
     fi_command = []
-    if re.fullmatch(f'{id} := #{num}', tac):  # x := #k
+    if re.fullmatch(r'(\w+)\s*:=\s*#(\w+)', tac):  # x := #k
         x, k = tac.split(' := #')
         command.append(f'li {reg(x)}, {k}')
-    if re.fullmatch(f'{id} := {id}', tac):  # x := y
+    if re.fullmatch(r'(\w+)\s*:=\s*(\w+)', tac):  # x := y
         x, y = tac.split(' := ')
         command.append(f'move {reg(x)}, {reg(y)}')
-    if re.fullmatch(f'{id} := {id} \\+ #{num}', tac):  # x := y + #k
+    if re.fullmatch(r'(\w+)\s*:=\s*(\w+)\s*\+\s*#(\w+)', tac):  # x := y + #k
         x, y, k = re.split(' := | \\+ #', tac)
         command.append(f'addi {reg(x)}, {reg(y)}, {k}')
-    if re.fullmatch(f'{id} := {id} \\+ {id}', tac):  # x := y + z
+    if re.fullmatch(r'(\w+)\s*:=\s*(\w+)\s*\+\s*(\w+)', tac):  # x := y + z
         x, y, z = re.split(' := | \\+ ', tac)
         command.append(f'add {reg(x)}, {reg(y)}, {reg(z)}')
-    if re.fullmatch(f'{id} := {id} - #{num}', tac):  # x := y - #k
+    if re.fullmatch(r'(\w+)\s*:=\s*(\w+)\s*-\s*#(\w+)', tac):  # x := y - #k
         x, y, k = re.split(' := | - #', tac)
         command.append(f'addi {reg(x)}, {reg(y)}, -{k}')
-    if re.fullmatch(f'{id} := {id} - {id}', tac):  # x := y - z
+    if re.fullmatch(r'(\w+)\s*:=\s*(\w+)\s*-\s*(\w+)', tac):  # x := y - z
         x, y, z = re.split(' := | - ', tac)
         command.append(f'sub {reg(x)}, {reg(y)}, {reg(z)}')
-    if re.fullmatch(f'{id} := {id} \\* {id}', tac):  # x := y * z
+    if re.fullmatch(r'(\w+)\s*:=\s*(\w+)\s*\*\s*(\w+)', tac):  # x := y * z
         x, y, z = re.split(' := | \\* ', tac)
         command.append(f'mul {reg(x)}, {reg(y)}, {reg(z)}')
-    if re.fullmatch(f'{id} := {id} / {id}', tac):  # x := y / z
+    if re.fullmatch(r'(\w+)\s*:=\s*(\w+)\s*/\s*(\w+)', tac):  # x := y / z
         x, y, z = re.split(' := | / ', tac)
         command.append(f'div {reg(y)}, {reg(z)}')
         command.append(f'mflo {reg(x)}')
-    if re.fullmatch(f'{id} := \\*{id}', tac):  # x := *y
+    if re.fullmatch(r'(\w+)\s*:=\s*\*(\w+)', tac):  # x := *y
         x, y = tac.split(' := *')
         command.append(f'lw {reg(x)}, 0({reg(y)})')
-    if re.fullmatch(f'\\*{id} := {id}', tac):  # *x := y
+    if re.fullmatch(r'\*(\w+)\s*:=\s*(\w+)', tac):  # *x := y
         _, x, y = re.split('\\*| := ', tac)
         command.append(f'sw {reg(y)}, 0({reg(x)})')
-    if re.fullmatch(f'GOTO {id}', tac):  # GOTO x
+    if re.fullmatch(r'GOTO\s+(\w+)', tac):  # GOTO x
         x = tac.split('GOTO ')[1]
         command.append(f'j {x}')
-    if re.fullmatch(f'{id} := CALL {id}', tac):  # x := CALL f
+    if re.fullmatch(r'(\w+)\s*:=\s*CALL\s+(\w+)', tac):  # x := CALL f
         x, f = tac.split(' := CALL ')
         for p in argmap[f]:
             arg = reg(queue.get())
@@ -123,29 +123,29 @@ def translate(tac: str):
             fi_command.append(f'sw ${save_reg}, {para}')
         fi_command.append(f'jal {f}')
         command.append(f'move {reg(x)}, $v0')
-    if re.fullmatch(f'RETURN {id}', tac):  # RETURN x
-        x = tac.split('RETURN ')[1]
+    if re.fullmatch('RETURN\s+#?(\w+)', tac):  # RETURN x
+        _,x= re.split('RETURN #?| ', tac)
         command.append(f'move $v0, {reg(x)}')
         fi_command.append('lw $ra,0($10)')
         fi_command.append('addi $9,$9,4')
         fi_command.append('add $10,$9,$sp')
         command.append(f'jr $ra')
-    if re.fullmatch(f'IF {id} < {id} GOTO {id}', tac):  # IF x < y GOTO z
+    if re.fullmatch(r'IF\s+(\w+)\s*<\s*#?(\w+)\s*GOTO\s+(\w+)', tac):  # IF x < y GOTO z
         _, x, y, z = re.split('IF | < | GOTO ', tac)
         command.append(f'blt {reg(x)}, {reg(y)}, {z}')
-    if re.fullmatch(f'IF {id} <= {id} GOTO {id}', tac):  # IF x <= y GOTO z
+    if re.fullmatch(r'IF\s+(\w+)\s*<=\s*#?(\w+)\s*GOTO\s+(\w+)', tac):  # IF x <= y GOTO z
         _, x, y, z = re.split('IF | <= | GOTO ', tac)
         command.append(f'ble {reg(x)}, {reg(y)}, {z}')
-    if re.fullmatch(f'IF {id} > {id} GOTO {id}', tac):  # IF x > y GOTO z
+    if re.fullmatch(r'IF\s+(\w+)\s*>\s*#?(\w+)\s*GOTO\s+(\w+)', tac):  # IF x > y GOTO z
         _, x, y, z = re.split('IF | > | GOTO ', tac)
         command.append(f'bgt {reg(x)}, {reg(y)}, {z}')
-    if re.fullmatch(f'IF {id} >= {id} GOTO {id}', tac):  # IF x >= y GOTO z
+    if re.fullmatch(r'IF\s+(\w+)\s*>=\s*#?(\w+)\s*GOTO\s+(\w+)', tac):  # IF x >= y GOTO z
         _, x, y, z = re.split('IF | >= | GOTO ', tac)
         command.append(f'bge {reg(x)}, {reg(y)}, {z}')
-    if re.fullmatch(f'IF {id} != {id} GOTO {id}', tac):  # IF x != y GOTO z
+    if re.fullmatch(r'IF\s+(\w+)\s*!=\s*#?(\w+)\s*GOTO\s+(\w+)', tac):  # IF x != y GOTO z
         _, x, y, z = re.split('IF | != | GOTO ', tac)
         command.append(f'bne {reg(x)}, {reg(y)}, {z}')
-    if re.fullmatch(f'IF {id} == {id} GOTO {id}', tac):  # IF x == y GOTO z
+    if re.fullmatch(r'IF\s+(\w+)\s*==\s*#?(\w+)\s*GOTO\s+(\w+)', tac):  # IF x == y GOTO z
         _, x, y, z = re.split('IF | == | GOTO ', tac)
         command.append(f'beq {reg(x)}, {reg(y)}, {z}')
     if re.fullmatch(f'FUNCTION {id} :', tac):  # IF x == y GOTO z
@@ -172,7 +172,7 @@ def translate(tac: str):
     if re.fullmatch(f'READ {id}', tac):  # IF x == y GOTO z
         _, n = re.split('READ | ', tac)
         fi_command.append(f'jal read')
-        fi_command.append(f'sw $5,{reg(n)}')
+        fi_command.append(f'sw $2,{reg(n)}')
 
     for index, c in enumerate(command):
         co = c.replace(',', '')
@@ -186,6 +186,7 @@ def translate(tac: str):
         for ind, r in enumerate(regs):
             if '$sp' in r:
                 fi_command.append(f'sw ${ind + save_reg},{r}')
+
     return fi_command
 
 
@@ -195,6 +196,7 @@ if len(sys.argv) < 2:
 
 
 print(data)
+print('li $sp 2048')
 print('j main')
 print('j end')
 print(pre)
@@ -202,7 +204,9 @@ print(pre)
 with open(sys.argv[1], 'r') as ir:
     for tac in ir.read().splitlines():
         res=translate(tac)
-        if res:
+        if not res:
+            print(f'no translate: {tac}')
+        else:
             print("\n".join(res))
 print('end:')
 

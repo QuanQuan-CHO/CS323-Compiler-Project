@@ -11,6 +11,8 @@ lexer
 splc
 *.myout
 
+# phase4
+*.s
 # pyinstaller in phase4
 splc.spec
 build/

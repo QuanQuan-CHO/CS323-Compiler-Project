@@ -8,15 +8,18 @@ All Rights Reserved.
 See the file README for a full copyright notice.
 Loaded: /usr/lib/spim/exceptions.s
 """
+input_prompt = 'Enter an integer:'
 
 for i in range(3):
     id = f'test_4_r{i:02}'
     with open(f'{id}.test', 'r') as tests:
         subprocess.run(f'../bin/splc {id}.ir > {id}.s', shell=True)
         for test in tests.read().split('\n\n'):
-            input, expect_out = test.split('\n')
-            res = subprocess.run(f'echo {input} | spim -file {id}.s', shell=True, capture_output=True, text=True)
-            actual_out = res.stdout.replace(spim_header, '').strip()  # remove SPIM's header
+            input, expect_out = test.split('\n----------\n')
+            actual_out = (subprocess.run(f'echo {input} | spim -file {id}.s', shell=True, capture_output=True, text=True).stdout
+                                    .replace(spim_header, '') # remove SPIM's header
+                                    .replace(input_prompt,'') # remove input prompt
+                                    .strip())
             if actual_out != expect_out:
                 print(f'----------{id} failed----------')
                 print(f'[input] {input}')

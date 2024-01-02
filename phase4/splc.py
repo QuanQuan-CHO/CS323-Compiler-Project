@@ -166,13 +166,13 @@ def translate(tac: str):
         queue.put(n)
     if re.fullmatch(f'WRITE {id}', tac):  # IF x == y GOTO z
         _, n = re.split('WRITE | ', tac)
-        fi_command.append(f'lw $8, {reg(n)}')
+        fi_command.append(f'lw $4, {reg(n)}')
         fi_command.append(f'jal write')
 
     if re.fullmatch(f'READ {id}', tac):  # IF x == y GOTO z
         _, n = re.split('READ | ', tac)
         fi_command.append(f'jal read')
-        fi_command.append(f'sw $8,{reg(n)}')
+        fi_command.append(f'sw $5,{reg(n)}')
 
     for index, c in enumerate(command):
         co = c.replace(',', '')
@@ -196,6 +196,7 @@ if len(sys.argv) < 2:
 
 print(data)
 print('j main')
+print('j end')
 print(pre)
 
 with open(sys.argv[1], 'r') as ir:
@@ -203,5 +204,6 @@ with open(sys.argv[1], 'r') as ir:
         res=translate(tac)
         if res:
             print("\n".join(res))
+print('end:')
 
 

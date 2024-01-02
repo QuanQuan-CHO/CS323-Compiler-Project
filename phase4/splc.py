@@ -12,7 +12,7 @@ argmap = {}
 data="""
 .data
 array: .space 400
-_prmpt: .asciiz "Enter an integer: "
+_prmpt: .asciiz "Enter an integer:"
 _eol: .asciiz "\\n"
 .globl main
 .text"""

@@ -41,7 +41,7 @@ write:
 
 def read_file(file_path):
     current_paragraph = []
-    with open(file_path, 'r') as file:
+    with open(file_path+'.ir', 'r') as file:
         for line in file:
             if (line.startswith("LABEL") or line.startswith("FUNCTION")) and ":" in line:
                 current_paragraph = []
@@ -262,20 +262,23 @@ if len(sys.argv) < 2:
     print("Usage: splc <ir_path>")
     sys.exit(1)
 
-print(data)
-print('jal main')
-print('j end')
-print(pre)
 
-with open(sys.argv[1], 'r') as ir:
+with open(sys.argv[1] + '.s', 'w') as s:
+    s.write(data+"\n"+'jal main\nj end\n'+pre+"\n")
+
+with open(sys.argv[1]+'.ir', 'r') as ir:
     for tac in ir.read().splitlines():
         res = translate(tac)
         if not res:
             # print(f'no translate: {tac}')
             pass
         else:
-            print("\n".join(res))
-            print()
-print('end:')
+            with open(sys.argv[1]+'.s','a') as s:
+                s.write("\n".join(res))
+                s.write("\n")
+
+with open(sys.argv[1] + '.s', 'a') as s:
+    s.write('end:')
+
 
 # print(stack)

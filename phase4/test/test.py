@@ -11,7 +11,7 @@ Loaded: /usr/lib/spim/exceptions.s
 input_prompt = 'Enter an integer:'
 
 for i in range(3):
-    id = f'test_4_r{i:02}'
+    id = f'test_4_r0{i:0}'
     with open(f'{id}.test', 'r') as tests:
         subprocess.run(f'../bin/splc {id}.ir > {id}.s', shell=True)
         for test in tests.read().split('\n\n'):

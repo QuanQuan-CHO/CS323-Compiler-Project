@@ -5,7 +5,7 @@ from queue import Queue
 
 num_registers = 32
 save_reg = 11
-max_var_num = 300
+max_var_num = 500
 register_table = [None] * num_registers
 stack = ['empty']
 queue = Queue()

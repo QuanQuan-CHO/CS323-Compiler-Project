@@ -8,7 +8,7 @@ save_reg = 11
 max_var_num = 500
 register_table = [None] * num_registers
 stack = ['empty']
-queue = Queue()
+queue = []
 argmap = {}
 varmap = {}
 fun_save = []
@@ -175,7 +175,8 @@ def translate(tac: str):
 
         # 传参
         for p in argmap[f]:
-            arg = reg(queue.get())
+            # arg = reg(queue.get())
+            arg=reg(queue.pop())
             para = reg(p)
             from_heap2heap(arg, para, fi_command)
 
@@ -233,7 +234,8 @@ def translate(tac: str):
     #     command.append(f'{n}')
     if re.fullmatch(f'ARG {id}', tac):  # IF x == y GOTO z
         _, n = re.split('ARG | ', tac)
-        queue.put(n)
+        # queue.put(n)
+        queue.append(n)
     if re.fullmatch(f'WRITE {id}', tac):  # IF x == y GOTO z
         _, n = re.split('WRITE | ', tac)
         fi_command.append(f'lw $4, {reg(n)}')
@@ -275,7 +277,7 @@ with open(sys.argv[1]+'.ir', 'r') as ir:
         else:
             with open(sys.argv[1]+'.s','a') as s:
                 s.write("\n".join(res))
-                s.write("\n")
+                s.write("\n\n")
 
 with open(sys.argv[1] + '.s', 'a') as s:
     s.write('end:')

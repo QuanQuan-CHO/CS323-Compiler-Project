@@ -3,15 +3,23 @@ import re
 import sys
 from queue import Queue
 
+# 总共的reg数量
 num_registers = 32
+# 预存的reg数，用来转移和计算的为号码大于11的寄存器
 save_reg = 11
+# 无法通过±实现栈的存取，500及以上为栈中存变量的部分，0-499为调用函数时预留的栈空间，此处没有左移2，在函数中调用时有
 max_var_num = 500
 register_table = [None] * num_registers
+# 留一个0，避免变量或者函数调用占据（也可以去掉）
 stack = ['empty']
+# 存调用函数的参数
 queue = []
+# 存有label和function的对应变量，或可用于生命周期判断
 argmap = {}
+# 存有funciton中所有变量，用于调用时存入栈中
 varmap = {}
-fun_save = []
+
+# 为什么要把:后面的空格删掉（
 data = """
 .data
 array: .space 400
@@ -19,7 +27,7 @@ _prmpt: .asciiz "Enter an integer:"
 _eol: .asciiz "\\n"
 .globl main
 .text"""
-
+# 用来打印，读取，$8在预存的寄存器中，在调用之后会从$8转移到特定变量
 pre = """read:
   li $v0, 4
   move $s6, $a0
@@ -39,9 +47,10 @@ write:
   jr $ra"""
 
 
+# 先读一遍，把函数中要调用的参数收集好
 def read_file(file_path):
     current_paragraph = []
-    with open(file_path+'.ir', 'r') as file:
+    with open(file_path + '.ir', 'r') as file:
         for line in file:
             if (line.startswith("LABEL") or line.startswith("FUNCTION")) and ":" in line:
                 current_paragraph = []
@@ -60,6 +69,8 @@ def read_file(file_path):
 
 read_file(sys.argv[1])
 num_var = 0
+
+
 # print(varmap)
 
 
@@ -95,23 +106,28 @@ def find_Reg(var: str):
         return None
 
 
+# 把栈上的变量存到另一个栈上变量
 def from_heap2heap(wf, wt, fi_command):
     fi_command.append(f'lw ${save_reg}, {wf}')
     fi_command.append(f'sw ${save_reg}, {wt}')
 
 
+# 把寄存器的值存到栈上
+# 小于$sp原本值进行操作时，不会报错，但不会有效果（可能是我mars的特定效果？）
 def lw_stackfreg(fi_command, desreg, reg1=save_reg - 2, reg2=save_reg - 1):
     fi_command.append(f'lw {desreg},0(${reg2})')
     fi_command.append(f'addi ${reg1},${reg1},-4')
     fi_command.append(f'add ${reg2},${reg1},$sp')
 
 
+# 把在栈的值存到目标寄存器上
 def sw_stackfreg(fi_command, desreg, reg1=save_reg - 2, reg2=save_reg - 1):
     fi_command.append(f'addi ${reg1},${reg1},4')
     fi_command.append(f'add ${reg2},${reg1},$sp')
     fi_command.append(f'sw {desreg},0(${reg2})')
 
 
+# 把在栈的值存到栈上
 def lw_stack2stack(fi_command, des, reg1=save_reg - 2, reg2=save_reg - 1):
     fi_command.append(f'lw ${save_reg},0(${reg2})')
     fi_command.append(f'sw ${save_reg},{des}')
@@ -119,6 +135,7 @@ def lw_stack2stack(fi_command, des, reg1=save_reg - 2, reg2=save_reg - 1):
     fi_command.append(f'add ${reg2},${reg1},$sp')
 
 
+# 把在栈上的值存到在栈的变量里
 def sw_stack2stack(fi_command, fr, reg1=save_reg - 2, reg2=save_reg - 1):
     fi_command.append(f'addi ${reg1},${reg1},4')
     fi_command.append(f'add ${reg2},${reg1},$sp')
@@ -128,6 +145,8 @@ def sw_stack2stack(fi_command, fr, reg1=save_reg - 2, reg2=save_reg - 1):
 
 # Translate TAC to assembly code
 # 在遇到arg的时候存入queue中，之后对照param lw sw 过去
+# queue后来我发现输入参数是按照stack的输入输出，没改名，用法跟stack一致
+
 def translate(tac: str):
     id = '[^\\d#*]\\w*'
     command = []
@@ -176,7 +195,7 @@ def translate(tac: str):
         # 传参
         for p in argmap[f]:
             # arg = reg(queue.get())
-            arg=reg(queue.pop())
+            arg = reg(queue.pop())
             para = reg(p)
             from_heap2heap(arg, para, fi_command)
 
@@ -184,8 +203,9 @@ def translate(tac: str):
 
         # 此时返回的值存在栈上
 
-        # 直接将返回值从栈调出到v0
-        lw_stackfreg(fi_command,'$v0')
+        # 将返回值从栈调出到v0
+        lw_stackfreg(fi_command, '$v0')
+
         # 恢复
         for v in reversed(var_list):
             lw_stack2stack(fi_command, reg(v), )
@@ -264,23 +284,22 @@ if len(sys.argv) < 2:
     print("Usage: splc <ir_path>")
     sys.exit(1)
 
-
+# 最后的结果在对应.s文件中
 with open(sys.argv[1] + '.s', 'w') as s:
-    s.write(data+"\n"+'jal main\nj end\n'+pre+"\n")
+    s.write(data + "\n" + 'jal main\nj end\n' + pre + "\n")
 
-with open(sys.argv[1]+'.ir', 'r') as ir:
+with open(sys.argv[1] + '.ir', 'r') as ir:
     for tac in ir.read().splitlines():
         res = translate(tac)
         if not res:
             # print(f'no translate: {tac}')
             pass
         else:
-            with open(sys.argv[1]+'.s','a') as s:
+            with open(sys.argv[1] + '.s', 'a') as s:
                 s.write("\n".join(res))
                 s.write("\n\n")
 
 with open(sys.argv[1] + '.s', 'a') as s:
     s.write('end:')
-
 
 # print(stack)

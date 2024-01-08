@@ -19,6 +19,6 @@ jobs:
       - name: 2. Install Pyinstaller
         run: pip install pyinstaller
 
-      - name: 3. Compile splc
+      - name: 3. Test splc
         working-directory: phase4
-        run: make splc
+        run: make test

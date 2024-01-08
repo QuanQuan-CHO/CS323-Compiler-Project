@@ -10,10 +10,10 @@ Loaded: /usr/lib/spim/exceptions.s
 """
 input_prompt = 'Enter an integer:'
 
-for i in range(3):
+for i in range(4):
     id = f'test_4_r0{i:0}'
     with open(f'{id}.test', 'r') as tests:
-        subprocess.run(f'../bin/splc {id}.ir > {id}.s', shell=True)
+        subprocess.run(f'../bin/splc {id}.ir', shell=True)
         for test in tests.read().split('\n\n'):
             input, expect_out = test.split('\n----------\n')
             actual_out = (subprocess.run(f'echo {input} | spim -file {id}.s', shell=True, capture_output=True, text=True).stdout

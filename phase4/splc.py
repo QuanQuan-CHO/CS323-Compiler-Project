@@ -50,7 +50,7 @@ write:
 # 先读一遍，把函数中要调用的参数收集好
 def read_file(file_path):
     current_paragraph = []
-    with open(file_path + '.ir', 'r') as file:
+    with open(file_path, 'r') as file:
         for line in file:
             if (line.startswith("LABEL") or line.startswith("FUNCTION")) and ":" in line:
                 current_paragraph = []
@@ -285,21 +285,23 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 # 最后的结果在对应.s文件中
-with open(sys.argv[1] + '.s', 'w') as s:
-    s.write(data + "\n" + 'jal main\nj end\n' + pre + "\n")
+ir_path = sys.argv[1]
+assembly_path = ir_path.replace('.ir', '.s')
+with open(assembly_path, 'w') as asm:
+    asm.write(data + "\n" + 'jal main\nj end\n' + pre + "\n")
 
-with open(sys.argv[1] + '.ir', 'r') as ir:
+with open(ir_path, 'r') as ir:
     for tac in ir.read().splitlines():
         res = translate(tac)
         if not res:
             # print(f'no translate: {tac}')
             pass
         else:
-            with open(sys.argv[1] + '.s', 'a') as s:
+            with open(assembly_path, 'a') as s:
                 s.write("\n".join(res))
                 s.write("\n\n")
 
-with open(sys.argv[1] + '.s', 'a') as s:
+with open(assembly_path, 'a') as s:
     s.write('end:')
 
 # print(stack)

@@ -1,6 +1,7 @@
 # For automatic testing
 # This script should run in the `test/` directory
 import subprocess
+import os
 
 spim_header = """SPIM Version 8.0 of January 8, 2010
 Copyright 1990-2010, James R. Larus.
@@ -10,8 +11,9 @@ Loaded: /usr/lib/spim/exceptions.s
 """
 input_prompt = 'Enter an integer:'
 
-for i in range(4):
-    id = f'test_4_r0{i:0}'
+test_num = len([f for f in os.listdir('.') if f.endswith('.test')])
+for i in range(test_num):
+    id = f'test_4_r{i:02}'
     with open(f'{id}.test', 'r') as tests:
         subprocess.run(f'../bin/splc {id}.ir', shell=True)
         for test in tests.read().split('\n\n'):
@@ -26,4 +28,5 @@ for i in range(4):
                 print(f'[expect] {expect_out}')
                 print(f'[actual] {actual_out}')
                 exit(1)
+    print(f'{id} passed')
 print('All tests passed!')

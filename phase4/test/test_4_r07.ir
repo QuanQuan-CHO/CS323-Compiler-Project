@@ -1,0 +1,55 @@
+FUNCTION mod :
+PARAM x
+PARAM n
+$4 := x / n
+$3 := $4 * n
+$1 := x - $3
+RETURN $1
+
+FUNCTION isPerfectNumber :
+PARAM number
+sum := #0
+j := #1
+LABEL label1 :
+$9 := number / #2
+IF j <= $9 GOTO label2
+GOTO label3
+LABEL label2 :
+ARG j
+ARG number
+$12 := CALL mod
+IF $12 == #0 GOTO label4
+GOTO label5
+LABEL label4 :
+sum := sum + j
+LABEL label5 :
+j := j + #1
+GOTO label1
+LABEL label3 :
+IF sum == number GOTO label6
+GOTO label7
+LABEL label6 :
+RETURN #1
+GOTO label8
+LABEL label7 :
+RETURN #0
+LABEL label8 :
+
+FUNCTION main :
+count := #0
+i := #1
+LABEL label9 :
+IF i <= #100 GOTO label10
+GOTO label11
+LABEL label10 :
+ARG i
+$26 := CALL isPerfectNumber
+IF $26 == #1 GOTO label12
+GOTO label13
+LABEL label12 :
+WRITE i
+LABEL label13 :
+i := i + #1
+GOTO label9
+LABEL label11 :
+RETURN #0

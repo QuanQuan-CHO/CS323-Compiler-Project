@@ -1,0 +1,40 @@
+FUNCTION calculateTax :
+PARAM income
+tax := #0
+IF income <= #5000 GOTO label1
+GOTO label2
+LABEL label1 :
+RETURN #0
+GOTO label3
+LABEL label2 :
+IF income <= #10000 GOTO label4
+GOTO label5
+LABEL label4 :
+$6 := income - #5000
+tax := $6 / #20
+GOTO label6
+LABEL label5 :
+IF income <= #50000 GOTO label7
+GOTO label8
+LABEL label7 :
+$14 := income - #10000
+$13 := $14 / #10
+tax := #250 + $13
+GOTO label9
+LABEL label8 :
+$18 := #250 + #4000
+$22 := income - #50000
+$19 := $22 / #5
+tax := $18 + $19
+LABEL label9 :
+LABEL label6 :
+LABEL label3 :
+RETURN tax
+
+FUNCTION main :
+READ income
+ARG income
+$28 := CALL calculateTax
+real_income := income - $28
+WRITE real_income
+RETURN #0

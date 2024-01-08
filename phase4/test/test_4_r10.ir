@@ -1,0 +1,96 @@
+FUNCTION main :
+READ year
+READ month
+$3 := year / #100
+$2 := $3 * #100
+IF year == $2 GOTO label1
+GOTO label2
+LABEL label1 :
+$9 := year / #400
+$8 := $9 * #400
+IF year == $8 GOTO label4
+GOTO label5
+LABEL label4 :
+IF month == #2 GOTO label7
+GOTO label8
+LABEL label7 :
+WRITE #1
+GOTO label9
+LABEL label8 :
+$18 := month / #2
+$17 := $18 * #2
+IF month == $17 GOTO label10
+GOTO label11
+LABEL label10 :
+WRITE #2
+GOTO label12
+LABEL label11 :
+WRITE #3
+LABEL label12 :
+LABEL label9 :
+GOTO label6
+LABEL label5 :
+IF month == #2 GOTO label13
+GOTO label14
+LABEL label13 :
+WRITE #4
+GOTO label15
+LABEL label14 :
+$29 := month / #2
+$28 := $29 * #2
+IF month == $28 GOTO label16
+GOTO label17
+LABEL label16 :
+WRITE #5
+GOTO label18
+LABEL label17 :
+WRITE #6
+LABEL label18 :
+LABEL label15 :
+LABEL label6 :
+GOTO label3
+LABEL label2 :
+$37 := year / #4
+$36 := $37 * #4
+IF year == $36 GOTO label19
+GOTO label20
+LABEL label19 :
+IF month == #2 GOTO label22
+GOTO label23
+LABEL label22 :
+WRITE #7
+GOTO label24
+LABEL label23 :
+$46 := month / #2
+$45 := $46 * #2
+IF month == $45 GOTO label25
+GOTO label26
+LABEL label25 :
+WRITE #8
+GOTO label27
+LABEL label26 :
+WRITE #9
+LABEL label27 :
+LABEL label24 :
+GOTO label21
+LABEL label20 :
+IF month == #2 GOTO label28
+GOTO label29
+LABEL label28 :
+WRITE #10
+GOTO label30
+LABEL label29 :
+$57 := month / #2
+$56 := $57 * #2
+IF month == $56 GOTO label31
+GOTO label32
+LABEL label31 :
+WRITE #11
+GOTO label33
+LABEL label32 :
+WRITE #12
+LABEL label33 :
+LABEL label30 :
+LABEL label21 :
+LABEL label3 :
+RETURN #0

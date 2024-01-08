@@ -1,0 +1,18 @@
+FUNCTION main :
+final := #0
+a := #5
+$1 := a * a
+$2 := a + #2
+b := $1 * $2
+WRITE b
+$8 := b / a
+c := $8 + #1
+WRITE c
+$15 := a + b
+$16 := c * #3
+$13 := $15 - $16
+$21 := b / a
+$14 := $21 - #4
+final := $13 + $14
+WRITE final
+RETURN #0

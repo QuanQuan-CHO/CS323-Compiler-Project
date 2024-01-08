@@ -1,0 +1,48 @@
+FUNCTION mod :
+PARAM x
+PARAM n
+$4 := x / n
+$3 := $4 * n
+$1 := x - $3
+RETURN $1
+
+FUNCTION isPalindrome :
+PARAM num
+reversed := #0
+original := num
+digit := #0
+LABEL label1 :
+IF num != #0 GOTO label2
+GOTO label3
+LABEL label2 :
+ARG #10
+ARG num
+digit := CALL mod
+$12 := reversed * #10
+reversed := $12 + digit
+num := num / #10
+GOTO label1
+LABEL label3 :
+IF reversed == original GOTO label4
+GOTO label5
+LABEL label4 :
+RETURN #1
+GOTO label6
+LABEL label5 :
+RETURN #0
+LABEL label6 :
+
+FUNCTION main :
+READ number
+ARG number
+$22 := CALL isPalindrome
+IF $22 == #1 GOTO label7
+GOTO label8
+LABEL label7 :
+WRITE #1
+GOTO label9
+LABEL label8 :
+$26 := #0 - #1
+WRITE $26
+LABEL label9 :
+RETURN #0

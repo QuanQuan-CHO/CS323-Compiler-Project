@@ -147,50 +147,52 @@ def sw_stack2stack(fi_command, fr, reg1=save_reg - 2, reg2=save_reg - 1):
 # 在遇到arg的时候存入queue中，之后对照param lw sw 过去
 # queue后来我发现输入参数是按照stack的输入输出，没改名，用法跟stack一致
 
-def translate(tac: str):
+def translate(tac: str) -> str:
     id = '[^\\d#*]\\w*'
+    num = '#\\d+'
+    id_num = f'({id}|{num})'
     command = []
     fi_command = []
-    if re.fullmatch(r'(\w+)\s*:=\s*#(\w+)', tac):  # x := #k
+    if re.fullmatch(f'{id} := {num}', tac):  # x := #k
         x, k = tac.split(' := #')
         command.append(f'li {reg(x)}, {k}')
-    if re.fullmatch(r'(\w+)\s*:=\s*(\w+)', tac):  # x := y
+    if re.fullmatch(f'{id} := {id}', tac):  # x := y
         x, y = tac.split(' := ')
         command.append(f'move {reg(x)}, {reg(y)}')
-    if re.fullmatch(r'(\w+)\s*:=\s*(\w+)\s*\+\s*#(\w+)', tac):  # x := y + #k
-        x, y, k = re.split(' := | \\+ #', tac)
+    if re.fullmatch(fr'{id} := {id_num} \+ {num}', tac):  # x := y + #k
+        x, y, k = re.split(r' := | \+ #', tac)
         command.append(f'addi {reg(x)}, {reg(y)}, {k}')
-    if re.fullmatch(r'(\w+)\s*:=\s*(\w+)\s*\+\s*(\w+)', tac):  # x := y + z
-        x, y, z = re.split(' := | \\+ ', tac)
+    if re.fullmatch(fr'{id} := {id_num} \+ {id}', tac):  # x := y + z
+        x, y, z = re.split(r' := | \+ ', tac)
         command.append(f'add {reg(x)}, {reg(y)}, {reg(z)}')
-    if re.fullmatch(r'(\w+)\s*:=\s*(\w+)\s*-\s*#(\w+)', tac):  # x := y - #k
+    if re.fullmatch(f'{id} := {id_num} - {num}', tac):  # x := y - #k
         x, y, k = re.split(' := | - #', tac)
         command.append(f'addi {reg(x)}, {reg(y)}, -{k}')
-    if re.fullmatch(r'(\w+)\s*:=\s*#?(\w+)\s*-\s*(\w+)', tac):  # x := y - z
+    if re.fullmatch(f'{id} := {id_num} - {id}', tac):  # x := y - z
         x, y, z = re.split(' := #?| - ', tac)
         command.append(f'sub {reg(x)}, {reg(y)}, {reg(z)}')
-    if re.fullmatch(r'(\w+)\s*:=\s*(\w+)\s*\*\s*(\w+)', tac):  # x := y * z
-        x, y, z = re.split(' := | \\* ', tac)
+    if re.fullmatch(fr'{id} := {id_num} \* {id_num}', tac):  # x := y * z
+        x, y, z = re.split(r' := | \* ', tac)
         command.append(f'mul {reg(x)}, {reg(y)}, {reg(z)}')
-    if re.fullmatch(r'(\w+)\s*:=\s*(\w+)\s*/\s*(\w+)', tac):  # x := y / z
+    if re.fullmatch(f'{id} := {id_num} / {id_num}', tac):  # x := y / z
         x, y, z = re.split(' := | / ', tac)
         command.append(f'div {reg(y)}, {reg(z)}')
         command.append(f'mflo {reg(x)}')
-    if re.fullmatch(r'(\w+)\s*:=\s*\*(\w+)', tac):  # x := *y
+    if re.fullmatch(fr'{id} := \*{id_num}', tac):  # x := *y
         x, y = tac.split(' := *')
         command.append(f'lw {reg(x)}, 0({reg(y)})')
-    if re.fullmatch(r'\*(\w+)\s*:=\s*(\w+)', tac):  # *x := y
-        _, x, y = re.split('\\*| := ', tac)
+    if re.fullmatch(fr'\*{id_num} := {id_num}', tac):  # *x := y
+        _, x, y = re.split(r'\*| := ', tac)
         command.append(f'sw {reg(y)}, 0({reg(x)})')
-    if re.fullmatch(r'GOTO\s+(\w+)', tac):  # GOTO x
+    if re.fullmatch(f'GOTO {id}', tac):  # GOTO x
         x = tac.split('GOTO ')[1]
         command.append(f'j {x}')
-    if re.fullmatch(r'(\w+)\s*:=\s*CALL\s+(\w+)', tac):  # x := CALL f
+    if re.fullmatch(f'{id} := CALL {id}', tac):  # x := CALL f
         x, f = tac.split(' := CALL ')
         var_list = list(varmap[f])
         # 存档
         for v in var_list:
-            sw_stack2stack(fi_command, reg(v), )
+            sw_stack2stack(fi_command, reg(v))
 
         # 传参
         for p in argmap[f]:
@@ -208,10 +210,10 @@ def translate(tac: str):
 
         # 恢复
         for v in reversed(var_list):
-            lw_stack2stack(fi_command, reg(v), )
+            lw_stack2stack(fi_command, reg(v))
 
         command.append(f'move {reg(x)}, $v0')
-    if re.fullmatch('RETURN\s+#?(\w+)', tac):  # RETURN x
+    if re.fullmatch(f'RETURN {id_num}', tac):  # RETURN x
         _, x = re.split('RETURN #?| ', tac)
         # command.append(f'move $v0, {reg(x)}')
 
@@ -223,47 +225,47 @@ def translate(tac: str):
         else:
             sw_stack2stack(fi_command, reg(x))
         command.append(f'jr $ra')
-    if re.fullmatch(r'IF\s+(\w+)\s*<\s*#?(\w+)\s*GOTO\s+(\w+)', tac):  # IF x < y GOTO z
+    if re.fullmatch(f'IF {id_num} < {id_num} GOTO {id}', tac):  # IF x < y GOTO z
         _, x, y, z = re.split('IF | < #?| GOTO ', tac)
         command.append(f'blt {reg(x)}, {reg(y)}, {z}')
-    if re.fullmatch(r'IF\s+(\w+)\s*<=\s*#?(\w+)\s*GOTO\s+(\w+)', tac):  # IF x <= y GOTO z
+    if re.fullmatch(f'IF {id_num} <= {id_num} GOTO {id}', tac):  # IF x <= y GOTO z
         _, x, y, z = re.split('IF | <= #?| GOTO ', tac)
         command.append(f'ble {reg(x)}, {reg(y)}, {z}')
-    if re.fullmatch(r'IF\s+(\w+)\s*>\s*#?(\w+)\s*GOTO\s+(\w+)', tac):  # IF x > y GOTO z
+    if re.fullmatch(f'IF {id_num} > {id_num} GOTO {id}', tac):  # IF x > y GOTO z
         _, x, y, z = re.split('IF | > #?| GOTO ', tac)
         command.append(f'bgt {reg(x)}, {reg(y)}, {z}')
-    if re.fullmatch(r'IF\s+(\w+)\s*>=\s*#?(\w+)\s*GOTO\s+(\w+)', tac):  # IF x >= y GOTO z
+    if re.fullmatch(f'IF {id_num} >= {id_num} GOTO {id}', tac):  # IF x >= y GOTO z
         _, x, y, z = re.split('IF | >= #?| GOTO ', tac)
         command.append(f'bge {reg(x)}, {reg(y)}, {z}')
-    if re.fullmatch(r'IF\s+(\w+)\s*!=\s*#?(\w+)\s*GOTO\s+(\w+)', tac):  # IF x != y GOTO z
+    if re.fullmatch(f'IF {id_num} != {id_num}+ GOTO {id}', tac):  # IF x != y GOTO z
         _, x, y, z = re.split('IF | != #?| GOTO ', tac)
         command.append(f'bne {reg(x)}, {reg(y)}, {z}')
-    if re.fullmatch(r'IF\s+(\w+)\s*==\s*#?(\w+)\s*GOTO\s+(\w+)', tac):  # IF x == y GOTO z
+    if re.fullmatch(f'IF {id_num} == {id_num} GOTO {id}', tac):  # IF x == y GOTO z
         _, x, y, z = re.split('IF | == #?| GOTO ', tac)
         command.append(f'beq {reg(x)}, {reg(y)}, {z}')
-    if re.fullmatch(f'FUNCTION {id} :', tac):  # IF x == y GOTO z
-        _, n, _ = re.split('FUNCTION | :', tac)
-        fi_command.append(f'{n} :')
+    if re.fullmatch(f'FUNCTION {id} :', tac):  # FUNCTION f :
+        _, f, _ = re.split('FUNCTION | :', tac)
+        fi_command.append(f'{f} :')
         sw_stackfreg(fi_command, '$ra')
-
-    if re.fullmatch(f'LABEL {id} :', tac):  # IF x == y GOTO z
-        _, n, _ = re.split('LABEL | :', tac)
-        command.append(f'{n}:')
-    # if re.fullmatch(f'PARAM {id}', tac):  # IF x == y GOTO z
+    if re.fullmatch(f'LABEL {id} :', tac):  # LABEL l :
+        _, l, _ = re.split('LABEL | :', tac)
+        command.append(f'{l}:')
+    # if re.fullmatch(f'PARAM {id}', tac):  # PARAM x
     #     _, n = re.split('PARAM | ', tac)
     #     command.append(f'{n}')
-    if re.fullmatch(f'ARG {id}', tac):  # IF x == y GOTO z
-        _, n = re.split('ARG | ', tac)
+    if re.fullmatch(f'ARG {id_num}', tac):  # ARG x
+        _, x = re.split('ARG | ', tac)
+        # FIXME: ARG #10
         # queue.put(n)
-        queue.append(n)
-    if re.fullmatch(f'WRITE {id}', tac):  # IF x == y GOTO z
-        _, n = re.split('WRITE | ', tac)
-        fi_command.append(f'lw $4, {reg(n)}')
+        queue.append(x)
+    if re.fullmatch(f'WRITE {id_num}', tac):  # WRITE x
+        _, x = re.split('WRITE | ', tac)
+        fi_command.append(f'lw $4, {reg(x)}')
         fi_command.append(f'jal write')
-    if re.fullmatch(f'READ {id}', tac):  # IF x == y GOTO z
-        _, n = re.split('READ | ', tac)
+    if re.fullmatch(f'READ {id}', tac):  # READ x
+        _, x = re.split('READ | ', tac)
         fi_command.append(f'jal read')
-        fi_command.append(f'sw $2,{reg(n)}')
+        fi_command.append(f'sw $2,{reg(x)}')
 
     for index, c in enumerate(command):
         co = c.replace(',', '')

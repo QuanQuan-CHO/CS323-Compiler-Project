@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import re
 import sys
-from queue import Queue
+import queue
 
 # 总共的reg数量
 num_registers = 32
@@ -14,12 +14,11 @@ register_table = [None] * num_registers
 stack = ['empty']
 # 存调用函数的参数
 queue = []
-# 存有label和function的对应变量，或可用于生命周期判断
-argmap = {}
-# 存有funciton中所有变量，用于调用时存入栈中
-varmap = {}
+# 存有label和function的对应变量，或可用于生命周期判断, {id->[v1,v2,...]}
+argmap: "dict[str, list[str]]" = {}
+# 存有funciton中所有变量，用于调用时存入栈中, {id->[v1,v2,...]}
+varmap: "dict[str, list[str]]" = {}
 
-# 为什么要把:后面的空格删掉（
 data = """
 .data
 array: .space 400
@@ -29,33 +28,33 @@ _eol: .asciiz "\\n"
 .text"""
 # 用来打印，读取，$8在预存的寄存器中，在调用之后会从$8转移到特定变量
 pre = """read:
-  li $v0, 4
-  move $s6, $a0
-  la $a0, _prmpt
-  syscall
-  move $a0, $8
-  li $v0, 5
-  syscall
-  jr $ra
+    li $v0, 4
+    move $s6, $a0
+    la $a0, _prmpt
+    syscall
+    move $a0, $8
+    li $v0, 5
+    syscall
+    jr $ra
 write:
-  li $v0, 1
-  syscall
-  li $v0, 4
-  move $8, $a0
-  la $a0, _eol
-  syscall
-  jr $ra"""
+    li $v0, 1
+    syscall
+    li $v0, 4
+    move $8, $a0
+    la $a0, _eol
+    syscall
+    jr $ra"""
 
 
 # 先读一遍，把函数中要调用的参数收集好
-def read_file(file_path):
+def read_file(ir_path):
     current_paragraph = []
-    with open(file_path, 'r') as file:
+    with open(ir_path, 'r') as file:
         for line in file:
-            if (line.startswith("LABEL") or line.startswith("FUNCTION")) and ":" in line:
+            if line.startswith("LABEL") or line.startswith("FUNCTION"):
                 current_paragraph = []
                 argmap[line.split()[1]] = current_paragraph
-            if (line.startswith("FUNCTION")) and ":" in line:
+            if line.startswith("FUNCTION"):
                 current_var = set()
                 varmap[line.split()[1]] = current_var
             if 'PARAM' in line:
@@ -71,9 +70,6 @@ read_file(sys.argv[1])
 num_var = 0
 
 
-# print(varmap)
-
-
 # the register allocation algorithm
 # 分配+查询reg
 def reg(var: str) -> str:
@@ -83,21 +79,22 @@ def reg(var: str) -> str:
         int(var)
         return var
     except:
-        res = find_Reg(var)
-        if res:
-            return res
+        reg = find_reg(var)
+        if reg:
+            return reg
 
         # # 尝试分配一个未被使用的寄存器
         # for index, reg in enumerate(register_table):
         #     if not reg:
         #         register_table[index] = var
         #         return f'${index + save_reg}'
+
         # 如果没有可用寄存器，将变量存储到栈上
         stack.append(var)
         return f'{stack.index(var) + max_var_num << 2}($sp)'
 
 
-def find_Reg(var: str):
+def find_reg(var: str):
     if var in register_table:
         return f'${register_table.index(var) + save_reg}'
     elif var in stack:
@@ -290,7 +287,10 @@ if len(sys.argv) < 2:
 ir_path = sys.argv[1]
 assembly_path = ir_path.replace('.ir', '.s')
 with open(assembly_path, 'w') as asm:
-    asm.write(data + "\n" + 'jal main\nj end\n' + pre + "\n")
+    asm.write(f'{data}\n'
+              f'jal main\n'
+              f'j end\n'
+              f'{pre}\n')
 
 with open(ir_path, 'r') as ir:
     for tac in ir.read().splitlines():
@@ -299,11 +299,9 @@ with open(ir_path, 'r') as ir:
             # print(f'no translate: {tac}')
             pass
         else:
-            with open(assembly_path, 'a') as s:
-                s.write("\n".join(res))
-                s.write("\n\n")
+            with open(assembly_path, 'a') as asm:
+                asm.write("\n".join(res))
+                asm.write("\n\n")
 
-with open(assembly_path, 'a') as s:
-    s.write('end:')
-
-# print(stack)
+with open(assembly_path, 'a') as asm:
+    asm.write('end:')

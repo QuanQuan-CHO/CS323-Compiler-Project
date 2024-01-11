@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 import re
 import sys
-import queue
 
 # 总共的reg数量
 num_registers = 32
@@ -12,15 +11,9 @@ max_var_num = 500
 register_table = [None] * num_registers
 # 留一个0，避免变量或者函数调用占据（也可以去掉）
 stack = ['empty']
-# 存调用函数的参数
-queue = []
-# 存有label和function的对应变量，或可用于生命周期判断, {id->[v1,v2,...]}
-argmap: "dict[str, list[str]]" = {}
-# 存有funciton中所有变量，用于调用时存入栈中, {id->[v1,v2,...]}
-varmap: "dict[str, list[str]]" = {}
 
-data = """
-.data
+
+data = """.data
 array: .space 400
 _prmpt: .asciiz "Enter an integer:"
 _eol: .asciiz "\\n"
@@ -46,27 +39,22 @@ write:
     jr $ra"""
 
 
+function_params: "dict[str, list[str]]" = {}  # {id->[v1,v2,...]}
 # 先读一遍，把函数中要调用的参数收集好
-def read_file(ir_path):
-    current_paragraph = []
-    with open(ir_path, 'r') as file:
-        for line in file:
-            if line.startswith("LABEL") or line.startswith("FUNCTION"):
-                current_paragraph = []
-                argmap[line.split()[1]] = current_paragraph
-            if line.startswith("FUNCTION"):
-                current_var = set()
-                varmap[line.split()[1]] = current_var
-            if 'PARAM' in line:
-                current_paragraph.append(line.split()[1])
-            vars = line.split()
-            for v in vars:
-                if re.fullmatch(r'[vt]\d+', v):
-                    current_var.add(v)
-    return argmap
+def collect_params(ir_path) -> None:
+    with open(ir_path, 'r') as ir:
+        params = []
+        for tac in ir.read().splitlines():
+            if 'FUNCTION' in tac:
+                params = []
+                func = tac.split()[1]
+                function_params[func] = params
+            elif 'PARAM' in tac:
+                param = tac.split()[1]
+                params.append(param)
 
 
-read_file(sys.argv[1])
+collect_params(sys.argv[1])
 num_var = 0
 
 
@@ -140,16 +128,21 @@ def sw_stack2stack(fi_command, fr, reg1=save_reg - 2, reg2=save_reg - 1):
     fi_command.append(f'sw ${save_reg},0(${reg2})')
 
 
+arg_stack = []  # store the `ARG x` in order, need to be popped before invoking subfunction
+active_vars = set()  # the active variables in current function, need to be stored to memory before invoking subfunction
 # Translate TAC to assembly code
-# 在遇到arg的时候存入queue中，之后对照param lw sw 过去
-# queue后来我发现输入参数是按照stack的输入输出，没改名，用法跟stack一致
-
-def translate(tac: str) -> str:
+def translate(tac: str) -> "list[str]":
+    global active_vars
     id = '[^\\d#*]\\w*'
     num = '#\\d+'
     id_num = f'({id}|{num})'
     command = []
     fi_command = []
+
+    if re.fullmatch(f'{id} := .+', tac):  # x := ...
+        x, _ = tac.split(' := ')
+        active_vars.add(x)
+
     if re.fullmatch(f'{id} := {num}', tac):  # x := #k
         x, k = tac.split(' := #')
         command.append(f'li {reg(x)}, {k}')
@@ -186,27 +179,25 @@ def translate(tac: str) -> str:
         command.append(f'j {x}')
     if re.fullmatch(f'{id} := CALL {id}', tac):  # x := CALL f
         x, f = tac.split(' := CALL ')
-        var_list = list(varmap[f])
-        # 存档
-        for v in var_list:
+        active_var_list = list(active_vars)
+
+        # 1.store current active variables to memory
+        for v in active_var_list:
             sw_stack2stack(fi_command, reg(v))
 
-        # 传参
-        for p in argmap[f]:
-            # arg = reg(queue.get())
-            arg = reg(queue.pop())
-            para = reg(p)
-            from_heap2heap(arg, para, fi_command)
-
+        # 2.传参
+        for p in function_params[f]:
+            arg = arg_stack.pop()
+            from_heap2heap(reg(arg), reg(p), fi_command)
         fi_command.append(f'jal {f}')
 
         # 此时返回的值存在栈上
 
-        # 将返回值从栈调出到v0
+        # 3.将返回值从栈调出到v0
         lw_stackfreg(fi_command, '$v0')
 
-        # 恢复
-        for v in reversed(var_list):
+        # 4.恢复
+        for v in reversed(active_var_list):
             lw_stack2stack(fi_command, reg(v))
 
         command.append(f'move {reg(x)}, $v0')
@@ -241,26 +232,27 @@ def translate(tac: str) -> str:
         _, x, y, z = re.split('IF | == #?| GOTO ', tac)
         command.append(f'beq {reg(x)}, {reg(y)}, {z}')
     if re.fullmatch(f'FUNCTION {id} :', tac):  # FUNCTION f :
-        _, f, _ = re.split('FUNCTION | :', tac)
-        fi_command.append(f'{f} :')
+        f = tac.split(' ')[1]
+        active_vars = set()  # start new function's active variables
+        fi_command.append(f'{f}:')
         sw_stackfreg(fi_command, '$ra')
     if re.fullmatch(f'LABEL {id} :', tac):  # LABEL l :
-        _, l, _ = re.split('LABEL | :', tac)
+        l = tac.split(' ')[1]
         command.append(f'{l}:')
-    # if re.fullmatch(f'PARAM {id}', tac):  # PARAM x
-    #     _, n = re.split('PARAM | ', tac)
-    #     command.append(f'{n}')
+    if re.fullmatch(f'PARAM {id}', tac):  # PARAM x
+        x = tac.split(' ')[1]
+        active_vars.add(x)
     if re.fullmatch(f'ARG {id_num}', tac):  # ARG x
-        _, x = re.split('ARG | ', tac)
+        _, x = re.split('ARG #?| ', tac)
         # FIXME: ARG #10
-        # queue.put(n)
-        queue.append(x)
+        arg_stack.append(x)
     if re.fullmatch(f'WRITE {id_num}', tac):  # WRITE x
-        _, x = re.split('WRITE | ', tac)
+        _, x = re.split('WRITE #?| ', tac)
         fi_command.append(f'lw $4, {reg(x)}')
         fi_command.append(f'jal write')
     if re.fullmatch(f'READ {id}', tac):  # READ x
-        _, x = re.split('READ | ', tac)
+        x = tac.split(' ')[1]
+        active_vars.add(x)
         fi_command.append(f'jal read')
         fi_command.append(f'sw $2,{reg(x)}')
 
@@ -301,7 +293,7 @@ with open(ir_path, 'r') as ir:
         else:
             with open(assembly_path, 'a') as asm:
                 asm.write("\n".join(res))
-                asm.write("\n\n")
+                asm.write("\n")
 
 with open(assembly_path, 'a') as asm:
     asm.write('end:')

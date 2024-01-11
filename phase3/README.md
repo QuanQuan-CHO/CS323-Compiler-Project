@@ -6,6 +6,7 @@
 
 **12111611 Ruixiang Jiang**
 
+*Score: 100/100*
 
 
 ## Design

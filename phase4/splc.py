@@ -61,9 +61,12 @@ num_var = 0
 # the register allocation algorithm
 # 分配+查询reg
 def reg(var: str) -> str:
-    if var == '0':
-        return '$0'
-    else:
+    try:
+        if var == '0':
+            return '$0'
+        int(var)
+        return var
+    except:
         reg = find_reg(var)
         if reg:
             return reg
@@ -77,6 +80,7 @@ def reg(var: str) -> str:
         # 如果没有可用寄存器，将变量存储到栈上
         stack.append(var)
         return f'{stack.index(var) + max_var_num << 2}($sp)'
+
 
 
 def find_reg(var: str):

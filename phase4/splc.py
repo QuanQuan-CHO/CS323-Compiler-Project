@@ -143,7 +143,6 @@ def translate(tac: str) -> "list[str]":
     if re.fullmatch(f'{id} := .+', tac):  # x := ...
         x, _ = tac.split(' := ')
         active_vars.add(x)
-
     if re.fullmatch(f'{id} := {num}', tac):  # x := #k
         x, k = tac.split(' := #')
         command.append(f'li {reg(x)}, {k}')

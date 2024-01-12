@@ -163,11 +163,16 @@ def translate(tac: str) -> "list[str]":
         x, y, z = re.split(' := #?| - ', tac)
         command.append(f'sub {reg(x)}, {reg(y)}, {reg(z)}')
     if re.fullmatch(fr'{id} := {id_num} \* {id_num}', tac):  # x := y * z
-        x, y, z = re.split(r' := | \* ', tac)
+        x, y, z = re.split(r' := | \* #?', tac)
         command.append(f'mul {reg(x)}, {reg(y)}, {reg(z)}')
     if re.fullmatch(f'{id} := {id_num} / {id_num}', tac):  # x := y / z
-        x, y, z = re.split(' := | / ', tac)
-        command.append(f'div {reg(y)}, {reg(z)}')
+        x, y, z = re.split(' := | / #?', tac)
+        if z.isdigit():
+            fi_command.append(f'lw ${save_reg},{reg(y)}')
+            fi_command.append(f'li ${save_reg+1},{z}')
+            fi_command.append(f'div ${save_reg},${save_reg+1}')
+        else:
+            command.append(f'div {reg(y)}, {reg(z)}')
         command.append(f'mflo {reg(x)}')
     if re.fullmatch(fr'{id} := \*{id_num}', tac):  # x := *y
         x, y = tac.split(' := *')

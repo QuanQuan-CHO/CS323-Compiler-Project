@@ -3,11 +3,11 @@ import re
 import sys
 
 # 总共的reg数量
-num_registers = 32
+num_registers = 10
 # 预存的reg数，用来转移和计算的为号码大于11的寄存器
 save_reg = 11
-# 无法通过±实现栈的存取，500及以上为栈中存变量的部分，0-499为调用函数时预留的栈空间，此处没有左移2，在函数中调用时有
-max_var_num = 500
+# 无法通过±实现栈的存取，200及以上为栈中存变量的部分，0-199为调用函数时预留的栈空间，此处没有左移2，在函数中调用时有
+max_var_num = 200
 register_table = [None] * num_registers
 # 留一个0，避免变量或者函数调用占据（也可以去掉）
 stack = ['empty']
@@ -75,7 +75,7 @@ def reg(var: str) -> str:
         # for index, reg in enumerate(register_table):
         #     if not reg:
         #         register_table[index] = var
-        #         return f'${index + save_reg}'
+        #         return f'${index + save_reg +1 }'
 
         # 如果没有可用寄存器，将变量存储到栈上
         stack.append(var)
@@ -157,7 +157,7 @@ def translate(tac: str) -> "list[str]":
         x, y, z = re.split(r' := | \+ ', tac)
         command.append(f'add {reg(x)}, {reg(y)}, {reg(z)}')
     if re.fullmatch(f'{id} := {id_num} - {num}', tac):  # x := y - #k
-        x, y, k = re.split(' := | - #', tac)
+        x, y, k = re.split(' := #?| - #', tac)
         command.append(f'addi {reg(x)}, {reg(y)}, -{k}')
     if re.fullmatch(f'{id} := {id_num} - {id}', tac):  # x := y - z
         x, y, z = re.split(' := #?| - ', tac)
@@ -186,7 +186,6 @@ def translate(tac: str) -> "list[str]":
     if re.fullmatch(f'{id} := CALL {id}', tac):  # x := CALL f
         x, f = tac.split(' := CALL ')
         active_var_list = list(active_vars)
-
         # 1.store current active variables to memory
         for v in active_var_list:
             sw_stack2stack(fi_command, reg(v))

@@ -278,9 +278,11 @@ def translate(tac: str) -> "list[str]":
                 fi_command.append(f'lw ${ind + save_reg},{r}')
                 c = c.replace(r, f'${ind + save_reg}')
         fi_command.append(c)
-        for ind, r in enumerate(regs):
+        if ':=' in tac:
+            x, _ = tac.split(' := ')
+            r = reg(x)
             if '$sp' in r:
-                fi_command.append(f'sw ${ind + save_reg},{r}')
+                fi_command.append(f'sw ${save_reg},{r}')
     return fi_command
 
 

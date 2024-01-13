@@ -12,7 +12,6 @@ register_table = [None] * num_registers
 # 留一个0，避免变量或者函数调用占据（也可以去掉）
 stack = ['empty']
 
-
 data = """.data
 array: .space 400
 _prmpt: .asciiz "Enter an integer:"
@@ -38,8 +37,9 @@ write:
     syscall
     jr $ra"""
 
-
 function_params: "dict[str, list[str]]" = {}  # {id->[v1,v2,...]}
+
+
 # 先读一遍，把函数中要调用的参数收集好
 def collect_params(ir_path) -> None:
     with open(ir_path, 'r') as ir:
@@ -80,7 +80,6 @@ def reg(var: str) -> str:
         # 如果没有可用寄存器，将变量存储到栈上
         stack.append(var)
         return f'{stack.index(var) + max_var_num << 2}($sp)'
-
 
 
 def find_reg(var: str):
@@ -131,6 +130,8 @@ def sw_stack2stack(fi_command, fr, reg1=save_reg - 2, reg2=save_reg - 1):
 
 arg_stack = []  # store the `ARG x` in order, need to be popped before invoking subfunction
 active_vars = set()  # the active variables in current function, need to be stored to memory before invoking subfunction
+
+
 # Translate TAC to assembly code
 def translate(tac: str) -> "list[str]":
     global active_vars
@@ -150,26 +151,84 @@ def translate(tac: str) -> "list[str]":
         x, y = tac.split(' := ')
         command.append(f'move {reg(x)}, {reg(y)}')
     if re.fullmatch(fr'{id} := {id_num} \+ {num}', tac):  # x := y + #k
-        x, y, k = re.split(r' := | \+ #', tac)
-        command.append(f'addi {reg(x)}, {reg(y)}, {k}')
-    if re.fullmatch(fr'{id} := {id_num} \+ {id}', tac):  # x := y + z
+        x, y, k = re.split(r' := #?| \+ #', tac)
+        if y.isdigit():
+            resn = int(y) + int(k)
+            if resn > 32767:
+                fi_command.append(f'li ${save_reg + 2},0')
+                while resn > 32767:
+                    command.append(f'addi ${save_reg + 2}, ${save_reg + 2}, {32767}')
+                    resn = resn - 32767
+                command.append(f'addi ${save_reg + 2}, ${save_reg + 2}, {resn}')
+                command.append(f'move {reg(x)}, ${save_reg + 2}')
+            else:
+                command.append(f'li {reg(x)}, {resn}')
+        else:
+            n = int(k)
+            while n > 32767:
+                command.append(f'addi {reg(y)}, {reg(y)}, {32767}')
+                n = n - 32767
+            command.append(f'addi {reg(x)}, {reg(y)}, {n}')
+    elif re.fullmatch(fr'{id} := {num} \+ {id}', tac):  # x := #y + k
+        x, y, k = re.split(r' := #| \+ ', tac)
+        n = int(y)
+        while n > 32767:
+            command.append(f'addi {reg(k)}, {reg(k)}, {32767}')
+            n = n - 32767
+        command.append(f'addi {reg(x)}, {reg(k)}, {n}')
+    elif re.fullmatch(fr'{id} := {id_num} \+ {id}', tac):  # x := y + z
         x, y, z = re.split(r' := | \+ ', tac)
         command.append(f'add {reg(x)}, {reg(y)}, {reg(z)}')
     if re.fullmatch(f'{id} := {id_num} - {num}', tac):  # x := y - #k
         x, y, k = re.split(' := #?| - #', tac)
-        command.append(f'addi {reg(x)}, {reg(y)}, -{k}')
-    if re.fullmatch(f'{id} := {id_num} - {id}', tac):  # x := y - z
-        x, y, z = re.split(' := #?| - ', tac)
+        if reg(y).isdigit():
+            resn = int(y) - int(k)
+            if resn < -32767:
+                fi_command.append(f'li ${save_reg + 2},0')
+                while resn < -32767:
+                    command.append(f'addi ${save_reg + 2}, ${save_reg + 2}, {-32767}')
+                    resn = resn + 32767
+                command.append(f'addi ${save_reg + 2}, ${save_reg + 2}, {resn}')
+                command.append(f'move {reg(x)}, ${save_reg+2}')
+            else:
+                command.append(f'li {reg(x)}, {resn}')
+        else:
+            n = -int(k)
+            while n < -32767:
+                command.append(f'addi {reg(y)}, {reg(y)}, {-32767}')
+                n = n + 32767
+            command.append(f'addi {reg(x)}, {reg(y)}, {n}')
+    elif re.fullmatch(f'{id} := {num} - {id}', tac):  # x := #y - k
+        x, y, k = re.split(' := #| - ', tac)
+        n = int(y)
+        while n > 32767:
+            command.append(f'addi {reg(k)}, {reg(y)}, {32767}')
+            n = n - 32767
+        command.append(f'addi {reg(x)}, {reg(k)}, -{n}')
+        command.append(f'sub {reg(x)}, $0, {reg(x)}')
+    elif re.fullmatch(f'{id} := {id_num} - {id}', tac):  # x := y - z
+        x, y, z = re.split(' := | - ', tac)
         command.append(f'sub {reg(x)}, {reg(y)}, {reg(z)}')
     if re.fullmatch(fr'{id} := {id_num} \* {id_num}', tac):  # x := y * z
-        x, y, z = re.split(r' := | \* #?', tac)
-        command.append(f'mul {reg(x)}, {reg(y)}, {reg(z)}')
+        x, y, z = re.split(r' := #?| \* #?', tac)
+        if reg(y).isdigit():
+            if reg(z).isdigit():
+                command.append(f'li {reg(x)}, {int(y) * int(z)}')
+            else:
+                fi_command.append(f'li ${save_reg + 1}, {y}')
+                fi_command.append(f'lw ${save_reg + 2}, {reg(z)}')
+                command.append(f'mul {reg(x)}, ${save_reg + 1}, ${save_reg + 2}')
+        else:
+            command.append(f'mul {reg(x)}, {reg(y)}, {reg(z)}')
     if re.fullmatch(f'{id} := {id_num} / {id_num}', tac):  # x := y / z
-        x, y, z = re.split(' := | / #?', tac)
+        x, y, z = re.split(' := #?| / #?', tac)
         if z.isdigit():
-            fi_command.append(f'lw ${save_reg},{reg(y)}')
-            fi_command.append(f'li ${save_reg+1},{z}')
-            fi_command.append(f'div ${save_reg},${save_reg+1}')
+            if reg(y).isdigit():
+                command.append(f'li {reg(x)}, {int(y) // int(z)}')
+            else:
+                fi_command.append(f'lw ${save_reg},{reg(y)}')
+                fi_command.append(f'li ${save_reg + 1},{z}')
+                fi_command.append(f'div ${save_reg},${save_reg + 1}')
         else:
             command.append(f'div {reg(y)}, {reg(z)}')
         command.append(f'mflo {reg(x)}')
@@ -279,7 +338,7 @@ def translate(tac: str) -> "list[str]":
         fi_command.append(c)
         if ':=' in tac:
             x, _ = tac.split(' := ')
-            r = reg(x)
+            r = regs[0]
             if '$sp' in r:
                 fi_command.append(f'sw ${save_reg},{r}')
     return fi_command

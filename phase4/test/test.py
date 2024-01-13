@@ -18,9 +18,7 @@ for i in range(test_num):
         subprocess.run(f'../bin/splc {id}.ir', shell=True)
         for test in tests.read().split('\n\n'):
             input, expect_out = test.split('\n----------\n')
-            input=input.replace(' ','\\n')
-            if '\\n' in input:
-                input=input+'\\n'
+            input=input.replace(' ','\n')
             actual_out = (subprocess.run(f'echo "{input}" | spim -file {id}.s', shell=True, capture_output=True, text=True).stdout
                                     .replace(spim_header, '') # remove SPIM's header
                                     .replace(input_prompt,'') # remove input prompt

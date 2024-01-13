@@ -66,7 +66,9 @@ When we get TACs like `IF x [op] y GOTO label`, we **don't** need to add `x` and
 
 Finally, clear the set after getting a new function TAC `FUNCTION f :`
 
+### Some flexibility:
 
+If you need more than one register for the output of floating point numbers, you can adjust the special register by adjusting the number of pre-stored registers, and move the registers used for all operations back (The normally used register $11 can easily be changed to $12)
 
 
 
